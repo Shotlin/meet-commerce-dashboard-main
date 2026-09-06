@@ -1,0 +1,143 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-ink: #351226;
+  --color-brand-berry: #9D174D;
+  --color-brand-raspberry: #E31E64;
+  --color-sidebar: #881337;
+  --color-rose-50: #FFF5F8;
+  --color-rose-100: #FCE7EF;
+  --color-surface: #FFFFFF;
+  --color-border: #F1D7E1;
+
+  --color-status-success: #179B73;
+  --color-status-info: #2769D7;
+  --color-status-warning: #D98900;
+  --color-status-danger: #D63B4D;
+  --color-status-neutral: #667085;
+
+  --font-sans: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+
+  --radius-card: 12px;
+
+  /* shadcn/ui token set — the ported theme-builder + abandoned-carts +
+     customers UI (bakaloo-dashboard-reference's components/ui/*) is written
+     against these standard shadcn class names (bg-card, text-muted-foreground,
+     border-border, bg-popover, etc). Mapped to this app's own rose/maroon
+     brand rather than bakaloo's green palette, so ported components read as
+     native to this dashboard, not a visually foreign transplant. */
+  --color-background: #FFFFFF;
+  --color-foreground: var(--color-ink);
+  --color-card: #FFFFFF;
+  --color-card-foreground: var(--color-ink);
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-brand-berry);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: var(--color-rose-100);
+  --color-secondary-foreground: var(--color-brand-berry);
+  --color-muted: var(--color-rose-50);
+  --color-muted-foreground: var(--color-status-neutral);
+  --color-accent: var(--color-rose-100);
+  --color-accent-foreground: var(--color-brand-berry);
+  --color-destructive: var(--color-status-danger);
+  --color-destructive-foreground: #FFFFFF;
+  --color-input: var(--color-border);
+  --color-ring: var(--color-brand-raspberry);
+
+  /* Numbered brand scale (rose → maroon) — the ported UI uses bg-brand-50,
+     text-brand-500, border-brand-200, etc. throughout. */
+  --color-brand-100: #FCE7EF;
+  --color-brand-200: #F8C9DA;
+  --color-brand-300: #F09EC0;
+  --color-brand-400: #E56B9E;
+  --color-brand-500: #E31E64;
+  --color-brand-600: #C4185A;
+  --color-brand-700: #9D174D;
+  --color-brand-800: #7A1140;
+  --color-brand-900: #4A0A28;
+
+  /* Bare aliases of the existing status-* tokens — ported files use the
+     shadcn convention (text-success, text-danger) without the status- prefix. */
+  --color-success: var(--color-status-success);
+  --color-warning: var(--color-status-warning);
+  --color-danger: var(--color-status-danger);
+  --color-info: var(--color-status-info);
+
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-slide-right: slide-right 250ms ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: #FFFFFF;
+  }
+
+  /* Custom scrollbar matching design tokens */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FFF5F8;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #F1D7E1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9D174D;
+  }
+}
+
+/* Numeric and ID DM Mono class helper */
+.font-mono-num {
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+/* Shimmer pulse animation for skeletons */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #FFF5F8 25%, #FCE7EF 50%, #FFF5F8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Printable Shipping & Tamper Seal Label Styles */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #printable-label-stamp, #printable-label-stamp * {
+    visibility: visible !important;
+  }
+  #printable-label-stamp {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+  }
+}
