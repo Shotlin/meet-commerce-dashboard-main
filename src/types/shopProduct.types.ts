@@ -22,6 +22,7 @@ export interface ShopProduct {
   price: number | string | null;
   sale_price: number | string | null;
   cost_price: number | string | null;
+  wholesale_price: number | string | null;
   stock_quantity: number;
   low_stock_threshold: number;
   max_order_qty: number;
@@ -59,6 +60,7 @@ export interface CreateShopProductPayload {
   price?: number | null;
   sale_price?: number | null;
   cost_price?: number | null;
+  wholesale_price?: number | null;
   stock_quantity?: number;
   low_stock_threshold?: number;
   max_order_qty?: number;
@@ -70,6 +72,7 @@ export interface UpdateShopProductPayload {
   price?: number | null;
   sale_price?: number | null;
   cost_price?: number | null;
+  wholesale_price?: number | null;
   low_stock_threshold?: number;
   max_order_qty?: number;
   is_available?: boolean;

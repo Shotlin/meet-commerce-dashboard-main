@@ -12,6 +12,7 @@ export interface AdminProduct {
   price: number
   sale_price: number | null
   cost_price?: number | null
+  wholesale_price?: number | null
   stock_quantity: number
   unit: string
   thumbnail_url: string | null
@@ -65,6 +66,7 @@ export interface ProductPayload {
   price: number
   salePrice?: number
   costPrice?: number
+  wholesalePrice?: number
   categoryId?: string | null
   stock?: number
   unit?: string

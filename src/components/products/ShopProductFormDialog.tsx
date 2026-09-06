@@ -33,6 +33,7 @@ interface OverrideFormState {
   price: string
   salePrice: string
   costPrice: string
+  wholesalePrice: string
   stockQuantity: number
   lowStockThreshold: number
   maxOrderQty: number
@@ -46,6 +47,7 @@ function buildInitialOverrides(shopProduct?: ShopProduct | null): OverrideFormSt
       price: "",
       salePrice: "",
       costPrice: "",
+      wholesalePrice: "",
       stockQuantity: 0,
       lowStockThreshold: 5,
       maxOrderQty: 50,
@@ -57,6 +59,7 @@ function buildInitialOverrides(shopProduct?: ShopProduct | null): OverrideFormSt
     price: shopProduct.price != null ? String(shopProduct.price) : "",
     salePrice: shopProduct.sale_price != null ? String(shopProduct.sale_price) : "",
     costPrice: shopProduct.cost_price != null ? String(shopProduct.cost_price) : "",
+    wholesalePrice: shopProduct.wholesale_price != null ? String(shopProduct.wholesale_price) : "",
     stockQuantity: shopProduct.stock_quantity,
     lowStockThreshold: shopProduct.low_stock_threshold,
     maxOrderQty: shopProduct.max_order_qty,
@@ -102,6 +105,7 @@ export function ShopProductFormDialog({
       price: form.price.trim() === "" ? null : parseFloat(form.price),
       sale_price: form.salePrice.trim() === "" ? null : parseFloat(form.salePrice),
       cost_price: form.costPrice.trim() === "" ? null : parseFloat(form.costPrice),
+      wholesale_price: form.wholesalePrice.trim() === "" ? null : parseFloat(form.wholesalePrice),
       stock_quantity: form.stockQuantity,
       low_stock_threshold: form.lowStockThreshold,
       max_order_qty: form.maxOrderQty,
@@ -227,6 +231,20 @@ export function ShopProductFormDialog({
                   step="0.01"
                   value={form.costPrice}
                   onChange={(e) => patch({ costPrice: e.target.value })}
+                  placeholder="Inherit"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label>Wholesale Price / B2B (₹)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.wholesalePrice}
+                  onChange={(e) => patch({ wholesalePrice: e.target.value })}
                   placeholder="Inherit"
                 />
               </div>

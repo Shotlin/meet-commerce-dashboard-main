@@ -65,6 +65,7 @@ function buildInitialForm(
       price: 0,
       salePrice: undefined,
       costPrice: undefined,
+      wholesalePrice: undefined,
       categoryId: undefined,
       stock: 0,
       unit: "kg",
@@ -106,6 +107,7 @@ function buildInitialForm(
     price: product.price,
     salePrice: product.sale_price ?? undefined,
     costPrice: product.cost_price ?? undefined,
+    wholesalePrice: product.wholesale_price ?? undefined,
     categoryId: product.category_id ?? undefined,
     stock: product.stock_quantity,
     unit: product.unit,
@@ -329,6 +331,21 @@ export function ProductFormDialog({
                     value={form.stock ?? 0}
                     onChange={(e) => patch({ stock: parseInt(e.target.value, 10) || 0 })}
                     required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="p-wholesale-price">Wholesale Price / B2B (₹)</Label>
+                  <Input
+                    id="p-wholesale-price"
+                    type="number"
+                    min={0}
+                    value={form.wholesalePrice ?? ""}
+                    onChange={(e) =>
+                      patch({ wholesalePrice: e.target.value ? parseFloat(e.target.value) : undefined })
+                    }
+                    placeholder="Leave blank to use retail price"
                   />
                 </div>
               </div>
