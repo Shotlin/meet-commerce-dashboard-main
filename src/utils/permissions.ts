@@ -47,6 +47,10 @@ export function isRouteAllowed(routePath: string, role: UserRole): boolean {
   if (segments[0] === 'products' && segments[1] === 'families' && segments.length === 3) {
     return allowedRoutes.includes('/products/families');
   }
+  // /shops/:id (store detail/edit) — same dynamic-child pattern as above.
+  if (segments[0] === 'shops' && segments.length === 2) {
+    return allowedRoutes.includes('/shops');
+  }
   return false;
 }
 
