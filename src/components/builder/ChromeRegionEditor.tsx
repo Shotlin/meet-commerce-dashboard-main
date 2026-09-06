@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ThemeColorPicker } from "@/components/themes/ThemeColorPicker"
+import { ThemeImageUploader } from "@/components/themes/ThemeImageUploader"
 import { useUpdateTheme } from "@/hooks/useThemes"
 import type {
   Theme,
@@ -33,19 +34,22 @@ function deepClone<T>(value: T): T {
 function defaultThemeSections(): ThemeSections {
   // Mirror server-side defaults; safe additive shape so missing fields fall back.
   return {
-    topBar: { backgroundColor: "#88D4FE", textColor: "#111827" },
+    topBar: { backgroundColor: "#88D4FE", textColor: "#111827", colorEnabled: true },
     storeSelector: { backgroundColor: "#88D4FE", activeChipColor: "#B1EAFF" },
     categoryTabs: {
       visible: true,
       textColor: "#111827",
       indicatorColor: "#111827",
+      colorEnabled: true,
     },
     searchZone: {
       backgroundColor: "#FFFFFF",
       waveColor: "#88D4FE",
       searchHints: [],
       promoBoxImageUrl: null,
+      colorEnabled: true,
     },
+    headerBackground: { imageUrl: null },
     bannerAnimation: {
       lottieUrl: null,
       backgroundGradient: ["#E8F5E9", "#C8E6C9"],
@@ -87,6 +91,7 @@ function withSectionDefaults(
     feeStrip: sections?.feeStrip ?? defaults.feeStrip,
     seasonalMosaic: sections?.seasonalMosaic ?? defaults.seasonalMosaic,
     bankOffers: sections?.bankOffers ?? defaults.bankOffers,
+    headerBackground: sections?.headerBackground ?? defaults.headerBackground,
   }
 }
 
@@ -245,6 +250,23 @@ function RegionFields({
     case "top_bar":
       return (
         <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <Label className="text-sm font-medium text-slate-900">
+              Show background color
+            </Label>
+            <Switch
+              checked={sections.topBar.colorEnabled ?? true}
+              onCheckedChange={(colorEnabled) =>
+                patchSections({
+                  topBar: { ...sections.topBar, colorEnabled },
+                })
+              }
+            />
+          </div>
+          <p className="text-xs text-slate-400">
+            Turn off to make this row transparent — use with a Header
+            Background image so it shows through instead of a solid color.
+          </p>
           <ThemeColorPicker
             label="Top bar background"
             value={sections.topBar.backgroundColor}
@@ -268,6 +290,23 @@ function RegionFields({
     case "search_bar":
       return (
         <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <Label className="text-sm font-medium text-slate-900">
+              Show background color
+            </Label>
+            <Switch
+              checked={sections.searchZone.colorEnabled ?? true}
+              onCheckedChange={(colorEnabled) =>
+                patchSections({
+                  searchZone: { ...sections.searchZone, colorEnabled },
+                })
+              }
+            />
+          </div>
+          <p className="text-xs text-slate-400">
+            Turn off to make this row transparent — use with a Header
+            Background image so it shows through instead of a solid color.
+          </p>
           <ThemeColorPicker
             label="Search zone background"
             value={sections.searchZone.backgroundColor}
@@ -307,6 +346,23 @@ function RegionFields({
               }
             />
           </div>
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <Label className="text-sm font-medium text-slate-900">
+              Show background color
+            </Label>
+            <Switch
+              checked={sections.categoryTabs.colorEnabled ?? true}
+              onCheckedChange={(colorEnabled) =>
+                patchSections({
+                  categoryTabs: { ...sections.categoryTabs, colorEnabled },
+                })
+              }
+            />
+          </div>
+          <p className="text-xs text-slate-400">
+            Turn off to make this row transparent — use with a Header
+            Background image so it shows through instead of a solid color.
+          </p>
           <ThemeColorPicker
             label="Category tabs background"
             value={
@@ -379,6 +435,29 @@ function RegionFields({
             The store strip is hidden in the current mobile experience but its
             colors still apply to the preview chrome.
           </p>
+        </div>
+      )
+    case "header_background":
+      return (
+        <div className="space-y-4">
+          <p className="text-sm text-slate-700">
+            One image painted behind the Top Bar, Search Bar and Category
+            Tabs combined — as if they were all cut out of the same picture.
+            To actually see it (instead of it being hidden behind the solid
+            colors), turn off "Show background color" in each of those three
+            regions.
+          </p>
+          <ThemeImageUploader
+            label="Header background image"
+            value={sections.headerBackground?.imageUrl ?? null}
+            onChange={(url) =>
+              patchSections({
+                headerBackground: { imageUrl: url },
+              })
+            }
+            hint="Recommended: 1080 × 900px (portrait, ~1.2:1). The image fills the combined block edge-to-edge and crops to fit (BoxFit.cover) — cropping trims from the bottom first, so keep any text/logo in the upper two-thirds. The exact on-screen height varies slightly by phone (status bar height differs), which is why some safety margin at the bottom matters more than the top."
+            previewFit="contain"
+          />
         </div>
       )
     case "bottom_nav":

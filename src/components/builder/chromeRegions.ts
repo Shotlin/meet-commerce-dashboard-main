@@ -15,6 +15,7 @@ export type ChromeRegion =
   | "category_tabs"
   | "bottom_nav"
   | "store_chips"
+  | "header_background"
 
 export interface ChromeRegionMeta {
   region: ChromeRegion
@@ -47,6 +48,12 @@ export const CHROME_REGION_META: Record<ChromeRegion, ChromeRegionMeta> = {
     region: "store_chips",
     label: "Store Chips",
     description: "Top store selector chip strip.",
+  },
+  header_background: {
+    region: "header_background",
+    label: "Header Background",
+    description:
+      "One shared image behind the Top Bar + Search Bar + Category Tabs combined.",
   },
 }
 

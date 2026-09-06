@@ -293,8 +293,10 @@ export function FixedHeaderPreview({
   // Now each region reads from themeData directly.
 
   // Top bar: uses topBar.backgroundColor (set via "Top Bar" region editor)
-  const topBarBg =
-    themeData?.sections.topBar.backgroundColor ?? config.gradient[0]
+  const topBarColorEnabled = themeData?.sections.topBar.colorEnabled ?? true
+  const topBarBg = topBarColorEnabled
+    ? themeData?.sections.topBar.backgroundColor ?? config.gradient[0]
+    : "transparent"
   const topBarTextColor =
     themeData?.sections.topBar.textColor ?? config.text
 
@@ -305,14 +307,26 @@ export function FixedHeaderPreview({
     themeData?.sections.storeSelector.activeChipColor ?? config.chipActive
 
   // Search zone: uses searchZone.backgroundColor (set via "Search Bar" region editor)
-  const searchZoneBg =
+  const searchZoneColorEnabled =
+    themeData?.sections.searchZone.colorEnabled ?? true
+  const searchZoneBg = searchZoneColorEnabled
+    ? themeData?.sections.searchZone.backgroundColor ?? config.gradient[2]
+    : "transparent"
+  // Kept as a real color (ignoring the toggle) for widgets that fall back to
+  // it — e.g. category tabs with no independent background of their own —
+  // so "transparent" doesn't propagate somewhere it wasn't asked for.
+  const searchZoneRealBg =
     themeData?.sections.searchZone.backgroundColor ?? config.gradient[2]
 
   // Category tabs: uses own backgroundColor if set, else falls back to searchZoneBg
   const categoryTabsTheme = themeData?.sections.categoryTabs
   const showCategoryTabs = categoryTabsTheme?.visible ?? true
-  const categoryTabsBg =
-    categoryTabsTheme?.backgroundColor ?? searchZoneBg
+  const categoryTabsColorEnabled = categoryTabsTheme?.colorEnabled ?? true
+  const categoryTabsBg = categoryTabsColorEnabled
+    ? categoryTabsTheme?.backgroundColor ?? searchZoneRealBg
+    : "transparent"
+
+  const headerBackgroundImageUrl = themeData?.sections.headerBackground?.imageUrl ?? null
 
   const interactive = Boolean(onRegionClick)
 
@@ -365,7 +379,59 @@ export function FixedHeaderPreview({
   })()
 
   return (
-    <div style={{ color: topBarTextColor }}>
+    <div style={{ color: topBarTextColor, position: "relative" }}>
+      {/* ── Shared background image behind the combined top bar +
+          search bar + category tabs block. Sized to this wrapper via
+          absolute inset:0 — the wrapper's own height comes from its
+          normal-flow children below, same as the mobile Stack. ── */}
+      {headerBackgroundImageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={headerBackgroundImageUrl}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "top",
+            // Negative, not 0/auto — a positioned element at stack level 0
+            // paints AFTER (on top of) static in-flow content per CSS
+            // stacking order, which would cover the top bar/search/tabs
+            // divs entirely. Negative puts it behind them instead, so it
+            // only shows through wherever those divs are transparent.
+            zIndex: -1,
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      {interactive && (
+        <button
+          type="button"
+          onClick={handleRegionClick("header_background")}
+          style={{
+            position: "absolute",
+            top: 4,
+            right: 4,
+            zIndex: 2,
+            fontSize: 10,
+            fontWeight: 600,
+            padding: "3px 8px",
+            borderRadius: 999,
+            border: "1px solid rgba(15,23,42,0.12)",
+            background: "rgba(255,255,255,0.9)",
+            color: "#334155",
+            cursor: "pointer",
+            outline:
+              selectedRegion === "header_background"
+                ? "2px solid var(--store-accent, #3B82F6)"
+                : "none",
+          }}
+        >
+          Header Background
+        </button>
+      )}
       {/* ── Top bar (status + delivery header) ─────────────────── */}
       <div
         style={{

@@ -94,6 +94,8 @@ export interface UpdateThemeTabPayload {
 export interface TopBarTheme {
   backgroundColor: string;
   textColor: string;
+  /** When false, backgroundColor is not painted (transparent) so headerBackground.imageUrl shows through. Defaults to true. */
+  colorEnabled?: boolean;
 }
 
 export interface StoreSelectorTheme {
@@ -106,6 +108,8 @@ export interface CategoryTabsTheme {
   textColor: string;
   indicatorColor: string;
   backgroundColor?: string;
+  /** When false, no background color is painted (transparent) so headerBackground.imageUrl shows through. Defaults to true. */
+  colorEnabled?: boolean;
 }
 
 export interface SearchZoneTheme {
@@ -113,6 +117,15 @@ export interface SearchZoneTheme {
   waveColor: string;
   searchHints: string[];
   promoBoxImageUrl: string | null;
+  /** When false, backgroundColor is not painted (transparent) so headerBackground.imageUrl shows through. Defaults to true. */
+  colorEnabled?: boolean;
+}
+
+/** One shared image behind the combined Top Bar + Search Zone + Category
+ * Tabs block. Pair with colorEnabled: false on those three sections so
+ * their solid colors don't cover it. */
+export interface HeaderBackgroundTheme {
+  imageUrl: string | null;
 }
 
 export interface BannerAnimationTheme {
@@ -164,6 +177,7 @@ export interface ThemeSections {
   feeStrip: FeeStripTheme;
   seasonalMosaic: SeasonalMosaicTheme;
   bankOffers: BankOffersTheme;
+  headerBackground?: HeaderBackgroundTheme;
 }
 
 export interface ThemeData {
