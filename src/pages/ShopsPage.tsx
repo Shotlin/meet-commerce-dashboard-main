@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Badge } from '../components/common/Badge';
+import { Button } from '../components/common/Button';
 import { Table, Column } from '../components/common/Table';
-import { ShopDetailDrawer } from '../components/domain/ShopDetailDrawer';
+import { AddStoreModal } from '../components/domain/AddStoreModal';
 import { queryKeys } from '../services/queryKeys';
 import { shopManagementService, Shop } from '../services/shopManagementService';
-import { Store } from 'lucide-react';
+import { Plus, Store } from 'lucide-react';
 
 export const ShopsPage: React.FC = () => {
-  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
+  const navigate = useNavigate();
+  const [addOpen, setAddOpen] = useState(false);
 
   const { data: shops = [], isLoading, error } = useQuery({
     queryKey: queryKeys.shops.list(),
@@ -31,15 +34,16 @@ export const ShopsPage: React.FC = () => {
         title="Shops, Warehouses & Staff Scope"
         subtitle="Physical FC location management, staff shift assignments, coverage radius, and opening hours."
         badge={<Badge variant="brand" icon={<Store className="w-3.5 h-3.5" />}>{shops.length} Active FC Hubs</Badge>}
+        actions={<Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setAddOpen(true)}>Add Store</Button>}
       />
 
       {error ? (
         <p className="text-xs text-status-danger p-3">{(error as Error).message}</p>
       ) : (
-        <Table columns={columns} data={shops} keyExtractor={(r) => r.id} isLoading={isLoading} onRowClick={(r) => setSelectedShop(r)} emptyText="No shops found." />
+        <Table columns={columns} data={shops} keyExtractor={(r) => r.id} isLoading={isLoading} onRowClick={(r) => navigate(`/shops/${r.id}`)} emptyText="No shops found." />
       )}
 
-      <ShopDetailDrawer shop={selectedShop} onClose={() => setSelectedShop(null)} />
+      <AddStoreModal isOpen={addOpen} onClose={() => setAddOpen(false)} onCreated={(shop) => { setAddOpen(false); navigate(`/shops/${shop.id}`); }} />
     </div>
   );
 };

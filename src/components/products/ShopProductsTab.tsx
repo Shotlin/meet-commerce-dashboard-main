@@ -25,8 +25,18 @@ import { useDebounce } from "@/hooks/useDebounce"
 import { formatINR } from "@/lib/utils"
 import type { ShopProduct } from "@/types/shopProduct.types"
 
-export function ShopProductsTab() {
-  const { activeShopId, activeShop } = useShopScope()
+interface ShopProductsTabProps {
+  /** Override the globally-active shop (Shop Switcher) — used when this tab
+   * is embedded in a specific store's detail page, where the admin should
+   * manage that store's products regardless of what's active in the header. */
+  shopId?: string
+  shopName?: string
+}
+
+export function ShopProductsTab({ shopId: shopIdOverride, shopName: shopNameOverride }: ShopProductsTabProps = {}) {
+  const { activeShopId: contextShopId, activeShop } = useShopScope()
+  const activeShopId = shopIdOverride ?? contextShopId
+  const activeShopName = shopNameOverride ?? activeShop?.name
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -61,7 +71,7 @@ export function ShopProductsTab() {
   }
 
   const handleDelete = (sp: ShopProduct) => {
-    if (confirm(`Remove "${sp.product.name}" from ${activeShop?.name ?? "this shop"}?`)) {
+    if (confirm(`Remove "${sp.product.name}" from ${activeShopName ?? "this shop"}?`)) {
       deleteShopProduct.mutate(sp.id)
     }
   }

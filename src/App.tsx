@@ -48,6 +48,7 @@ import AbandonedCartsPage from './pages/AbandonedCartsPage';
 import { PlatformPage } from './pages/PlatformPage';
 import { MerchandisingPage } from './pages/MerchandisingPage';
 import { ShopsPage } from './pages/ShopsPage';
+import { StoreDetailPage } from './pages/StoreDetailPage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import MapsSettingsPage from './pages/MapsSettingsPage';
 import { LoginPage } from './pages/LoginPage';
@@ -104,6 +105,7 @@ export const App: React.FC = () => {
                 <Route path="platform" element={<PlatformPage />} />
                 <Route path="merchandising" element={<MerchandisingPage />} />
                 <Route path="shops" element={<ShopsPage />} />
+                <Route path="shops/:id" element={<StoreDetailPage />} />
                 <Route path="configuration" element={<ConfigurationPage />} />
                 <Route path="configuration/maps" element={<MapsSettingsPage />} />
               </Route>

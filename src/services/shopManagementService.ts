@@ -5,15 +5,88 @@ export interface Shop {
   name: string;
   slug: string;
   branch_code: string;
+  description: string | null;
+  logo_url: string | null;
+  banner_url: string | null;
+  phone: string | null;
+  email: string | null;
+  address_line1: string;
+  address_line2: string | null;
   city: string;
   state: string;
   pincode: string;
+  lat: string | number;
+  lng: string | number;
+  serviceable_pincodes: string[];
+  delivery_radius_km: string | number;
+  pincode_only: boolean;
   is_active: boolean;
   is_verified: boolean;
+  operating_hours: Record<string, { open: string; close: string; closed?: boolean }>;
   commission_rate: string | number;
+  bank_account_number: string | null;
+  bank_ifsc: string | null;
+  bank_name: string | null;
+  bank_holder_name: string | null;
+  gst_number: string | null;
+  pan_number: string | null;
   total_orders: number;
   total_revenue: string | number;
+  deleted_at: string | null;
   created_at: string;
+  updated_at: string;
+}
+
+// Body shape accepted by POST /api/v1/shops (see backend shops.schema.js
+// createShopSchema) — only the fields the dashboard actually collects.
+export interface ShopCreateInput {
+  name: string;
+  description?: string;
+  logo_url?: string;
+  banner_url?: string;
+  phone?: string;
+  email?: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  lat: number;
+  lng: number;
+  serviceable_pincodes?: string[];
+  delivery_radius_km?: number;
+  pincode_only?: boolean;
+  operating_hours?: Record<string, { open: string; close: string; closed?: boolean }>;
+  commission_rate?: number;
+  bank_account_number?: string;
+  bank_ifsc?: string;
+  bank_name?: string;
+  bank_holder_name?: string;
+  gst_number?: string;
+  pan_number?: string;
+}
+
+export type ShopUpdateInput = Partial<ShopCreateInput> & { is_active?: boolean; is_verified?: boolean };
+
+// Two shapes accepted by POST /api/v1/shops/:shopId/staff (see backend
+// shop-staff.schema.js) — attach an existing user, or provision a new one.
+export type ShopStaffCreateInput =
+  | { user_id: string; role: ShopStaff['role']; permissions?: string[]; is_active?: boolean }
+  | {
+      email: string;
+      name: string;
+      phone?: string;
+      role: ShopStaff['role'];
+      permissions?: string[];
+      is_active?: boolean;
+      generate_temp_password?: boolean;
+      password?: string;
+    };
+
+export interface ShopStaffUpdateInput {
+  role?: ShopStaff['role'];
+  permissions?: string[];
+  is_active?: boolean;
 }
 
 export interface ShopStaff {
@@ -77,10 +150,69 @@ export const shopManagementService = {
     throw new Error('Failed to fetch shops');
   },
 
+  async getShop(id: string): Promise<Shop> {
+    const res = await apiClient.get<{ shop: Shop } | Shop>(`/api/v1/shops/${id}`);
+    if (res.success && res.data) {
+      return 'shop' in (res.data as any) ? (res.data as any).shop : (res.data as Shop);
+    }
+    throw new Error('Failed to fetch shop');
+  },
+
+  async createShop(input: ShopCreateInput): Promise<Shop> {
+    const res = await apiClient.post<{ shop: Shop } | Shop>('/api/v1/shops', input);
+    if (res.success && res.data) {
+      return 'shop' in (res.data as any) ? (res.data as any).shop : (res.data as Shop);
+    }
+    throw new Error(res.message || 'Failed to create shop');
+  },
+
+  async updateShop(id: string, input: ShopUpdateInput): Promise<Shop> {
+    const res = await apiClient.patch<{ shop: Shop } | Shop>(`/api/v1/shops/${id}`, input);
+    if (res.success && res.data) {
+      return 'shop' in (res.data as any) ? (res.data as any).shop : (res.data as Shop);
+    }
+    throw new Error(res.message || 'Failed to update shop');
+  },
+
+  async deleteShop(id: string): Promise<void> {
+    const res = await apiClient.delete(`/api/v1/shops/${id}`);
+    if (!res.success) throw new Error(res.message || 'Failed to delete shop');
+  },
+
   async getStaff(shopId: string): Promise<ShopStaff[]> {
     const res = await apiClient.get<{ staff: ShopStaff[] }>(`/api/v1/shops/${shopId}/staff`);
     if (res.success && res.data) return res.data.staff;
     throw new Error('Failed to fetch shop staff');
+  },
+
+  async createStaff(shopId: string, input: ShopStaffCreateInput): Promise<ShopStaff & { temp_password?: string }> {
+    const res = await apiClient.post<{ staff: ShopStaff & { temp_password?: string } } | (ShopStaff & { temp_password?: string })>(
+      `/api/v1/shops/${shopId}/staff`,
+      input
+    );
+    if (res.success && res.data) {
+      return 'staff' in (res.data as any) ? (res.data as any).staff : (res.data as any);
+    }
+    throw new Error(res.message || 'Failed to add staff member');
+  },
+
+  async updateStaff(shopId: string, staffId: string, input: ShopStaffUpdateInput): Promise<ShopStaff> {
+    const res = await apiClient.patch<{ staff: ShopStaff } | ShopStaff>(`/api/v1/shops/${shopId}/staff/${staffId}`, input);
+    if (res.success && res.data) {
+      return 'staff' in (res.data as any) ? (res.data as any).staff : (res.data as ShopStaff);
+    }
+    throw new Error(res.message || 'Failed to update staff member');
+  },
+
+  async deleteStaff(shopId: string, staffId: string): Promise<void> {
+    const res = await apiClient.delete(`/api/v1/shops/${shopId}/staff/${staffId}`);
+    if (!res.success) throw new Error(res.message || 'Failed to remove staff member');
+  },
+
+  async resetStaffPassword(shopId: string, staffId: string): Promise<{ temp_password: string }> {
+    const res = await apiClient.post<{ temp_password: string }>(`/api/v1/shops/${shopId}/staff/${staffId}/reset-password`);
+    if (res.success && res.data) return res.data;
+    throw new Error(res.message || 'Failed to reset password');
   },
 
   async getFinancials(shopId: string): Promise<ShopFinancialPeriod[]> {
