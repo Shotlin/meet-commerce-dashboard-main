@@ -35,6 +35,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { useShopScope } from "@/context/ShopScopeContext"
 import { useThemeTabs } from "@/hooks/useThemeTabs"
 import {
   useCancelSchedule,
@@ -101,9 +102,12 @@ function EditThemePageContent() {
   const cancelScheduleMutation = useCancelSchedule()
   const rollbackMutation = useRollbackVersion()
 
+  const { shops } = useShopScope()
+
   const [name, setName] = useState("")
   const [storeKey, setStoreKey] = useState<ThemeStoreKey>("zepto")
   const [tabId, setTabId] = useState<string | null>(null)
+  const [shopId, setShopId] = useState<string | null>(null)
   const [status, setStatus] = useState<ThemeStatus>("draft")
   const [abVariant, setAbVariant] = useState<ABVariant>("A")
   const [abSplitPercent, setAbSplitPercent] = useState(100)
@@ -116,6 +120,7 @@ function EditThemePageContent() {
     setName(theme.name)
     setStoreKey(theme.store_key ?? "zepto")
     setTabId(theme.tab_id)
+    setShopId(theme.shop_id)
     setStatus(theme.status)
     setAbVariant(theme.ab_variant)
     setAbSplitPercent(theme.ab_split_percent)
@@ -147,6 +152,7 @@ function EditThemePageContent() {
     if (!themeId) return
     const payload: UpdateThemePayload = {
       name: name.trim(),
+      shop_id: shopId,
       tab_id: tabId,
       status,
       scheduled_at: scheduledAt,
@@ -323,6 +329,33 @@ function EditThemePageContent() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label>Physical Shop</Label>
+              <Select
+                value={shopId ?? "global"}
+                onValueChange={(value) => {
+                  setShopId(value === "global" ? null : value)
+                  markDirty()
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Platform Default" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Platform Default (all customers)</SelectItem>
+                  {shops.map((shop) => (
+                    <SelectItem key={shop.id} value={shop.id}>
+                      {shop.name} — {shop.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Which store's customers see this theme when active — separate
+                from the vertical/tab store above.
+              </p>
             </div>
 
             {selectedTab && (

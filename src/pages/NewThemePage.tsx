@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { ArrowLeft, Layers3, Loader2, Sparkles } from "lucide-react"
+import { ArrowLeft, Layers3, Loader2, Sparkles, Store } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { DEFAULT_THEME_DATA, cloneThemeData } from "@/components/themes/ThemeEditorForm"
+import { useShopScope } from "@/context/ShopScopeContext"
 import { useThemeTabs } from "@/hooks/useThemeTabs"
 import { useCreateTheme } from "@/hooks/useThemes"
 import type { ABVariant, ThemeStoreKey, ThemeTab } from "@/types/theme.types"
@@ -36,10 +37,12 @@ export default function NewThemePage() {
   const navigate = useNavigate()
   const createThemeMutation = useCreateTheme()
   const { data: themeTabs = [], isLoading: isLoadingTabs } = useThemeTabs()
+  const { shops } = useShopScope()
 
   const [name, setName] = useState("")
   const [storeKey, setStoreKey] = useState<ThemeStoreKey>("zepto")
   const [tabId, setTabId] = useState<string | null>(null)
+  const [shopId, setShopId] = useState<string | null>(null)
   const [abVariant, setAbVariant] = useState<ABVariant>("A")
   const [abSplitPercent, setAbSplitPercent] = useState(100)
 
@@ -66,6 +69,7 @@ export default function NewThemePage() {
       {
         name: name.trim(),
         theme_data: defaultThemeData,
+        shop_id: shopId,
         tab_id: tabId,
         status: "draft",
         ab_variant: abVariant,
@@ -116,6 +120,44 @@ export default function NewThemePage() {
                 placeholder="e.g. Summer 2026, Diwali Special"
                 autoFocus
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/70 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                <Store className="h-4 w-4" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Physical Shop</CardTitle>
+                <CardDescription className="text-xs">
+                  Which store's customers see this theme — leave as Platform
+                  Default to apply it everywhere else
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label>Shop</Label>
+              <Select
+                value={shopId ?? "global"}
+                onValueChange={(value) => setShopId(value === "global" ? null : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Platform Default" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="global">Platform Default (all customers)</SelectItem>
+                  {shops.map((shop) => (
+                    <SelectItem key={shop.id} value={shop.id}>
+                      {shop.name} — {shop.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

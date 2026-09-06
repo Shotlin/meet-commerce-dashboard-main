@@ -223,6 +223,10 @@ export interface Theme {
   name: string;
   is_active: boolean;
   theme_data: ThemeData;
+  // Which physical store this theme belongs to — null means the platform
+  // default (shown to anonymous customers and anyone with no shop allocation).
+  shop_id: string | null;
+  shop_name: string | null;
   tab_id: string | null;
   tab_key: string | null;
   tab_label: string | null;
@@ -245,6 +249,7 @@ export interface Theme {
 export interface CreateThemePayload {
   name: string;
   theme_data: ThemeData;
+  shop_id?: string | null;
   tab_id?: string | null;
   tab_key?: string;
   tab_label?: string;
@@ -258,6 +263,7 @@ export interface CreateThemePayload {
 export interface UpdateThemePayload {
   name?: string;
   theme_data?: ThemeData;
+  shop_id?: string | null;
   tab_id?: string | null;
   tab_key?: string;
   tab_label?: string;

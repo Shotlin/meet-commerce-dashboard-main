@@ -17,6 +17,7 @@ import {
 import { EmptyState } from "@/components/shared/EmptyState"
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { useShopScope } from "@/context/ShopScopeContext"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -161,6 +162,7 @@ function ThemeListContent() {
   const navigate = useNavigate()
   const { data: themes, isLoading } = useThemes()
   const { data: themeTabs } = useThemeTabs({ status: "active" })
+  const { shops } = useShopScope()
   const activateThemeMutation = useActivateTheme()
   const createThemeMutation = useCreateTheme()
   const updateThemeMutation = useUpdateTheme()
@@ -176,6 +178,7 @@ function ThemeListContent() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [storeFilter, setStoreFilter] = useState<"all" | ThemeStoreKey>("all")
   const [tabFilter, setTabFilter] = useState("all")
+  const [shopFilter, setShopFilter] = useState("all")
 
   const tabOptions = useMemo(() => {
     const visibleTabs = (themeTabs ?? [])
@@ -201,6 +204,13 @@ function ThemeListContent() {
         if (storeFilter !== "all" && theme.store_key !== storeFilter) return false
         if (statusFilter !== "all" && theme.status !== statusFilter) return false
         if (tabFilter !== "all" && theme.tab_id !== tabFilter) return false
+        if (shopFilter === "global" && theme.shop_id !== null) return false
+        if (
+          shopFilter !== "all" &&
+          shopFilter !== "global" &&
+          theme.shop_id !== shopFilter
+        )
+          return false
         return true
       })
       .sort((a, b) => {
@@ -222,7 +232,10 @@ function ThemeListContent() {
   }, [storeFilter, statusFilter, tabFilter, themes])
 
   const hasFilters =
-    statusFilter !== "all" || tabFilter !== "all" || storeFilter !== "all"
+    statusFilter !== "all" ||
+    tabFilter !== "all" ||
+    storeFilter !== "all" ||
+    shopFilter !== "all"
 
   const handleActivate = (theme: Theme) => {
     if (theme.is_active) return
@@ -258,6 +271,7 @@ function ThemeListContent() {
       {
         name: `${theme.name} Variant B`,
         theme_data: theme.theme_data,
+        shop_id: theme.shop_id,
         tab_id: theme.tab_id ?? undefined,
         status: "draft",
         ab_variant: "B",
@@ -290,6 +304,7 @@ function ThemeListContent() {
     setStatusFilter("all")
     setStoreFilter("all")
     setTabFilter("all")
+    setShopFilter("all")
   }
 
   const handleStoreFilterChange = (value: "all" | ThemeStoreKey) => {
@@ -486,20 +501,40 @@ function ThemeListContent() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Theme Tab</Label>
-                  <Select value={tabFilter} onValueChange={setTabFilter}>
-                    <SelectTrigger className="w-full sm:w-[320px]">
-                      <SelectValue placeholder="All tabs" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tabOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="space-y-2">
+                    <Label>Theme Tab</Label>
+                    <Select value={tabFilter} onValueChange={setTabFilter}>
+                      <SelectTrigger className="w-full sm:w-[320px]">
+                        <SelectValue placeholder="All tabs" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tabOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Physical Shop</Label>
+                    <Select value={shopFilter} onValueChange={setShopFilter}>
+                      <SelectTrigger className="w-full sm:w-[240px]">
+                        <SelectValue placeholder="All shops" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All shops</SelectItem>
+                        <SelectItem value="global">Platform Default</SelectItem>
+                        {shops.map((shop) => (
+                          <SelectItem key={shop.id} value={shop.id}>
+                            {shop.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {filteredThemes.length === 0 ? (
@@ -518,6 +553,7 @@ function ThemeListContent() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Name</TableHead>
+                            <TableHead>Shop</TableHead>
                             <TableHead>Store</TableHead>
                             <TableHead>Tab</TableHead>
                             <TableHead>Status</TableHead>
@@ -552,6 +588,15 @@ function ThemeListContent() {
                                     Updated {formatDateTime(theme.updated_at)}
                                   </p>
                                 </div>
+                              </TableCell>
+                              <TableCell>
+                                {theme.shop_id ? (
+                                  <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                                    {theme.shop_name ?? "Shop"}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline">Platform Default</Badge>
+                                )}
                               </TableCell>
                               <TableCell>
                                 {theme.store_key ? (
@@ -635,6 +680,13 @@ function ThemeListContent() {
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2">
+                              {theme.shop_id ? (
+                                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                                  {theme.shop_name ?? "Shop"}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">Platform Default</Badge>
+                              )}
                               {theme.store_key ? (
                                 <Badge variant="secondary" className="capitalize">
                                   {storeLabelMap[theme.store_key]}
