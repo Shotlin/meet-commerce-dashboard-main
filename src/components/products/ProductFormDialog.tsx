@@ -343,7 +343,7 @@ export function ProductFormDialog({
                     min={0}
                     value={form.wholesalePrice ?? ""}
                     onChange={(e) =>
-                      patch({ wholesalePrice: e.target.value ? parseFloat(e.target.value) : undefined })
+                      patch({ wholesalePrice: e.target.value ? parseFloat(e.target.value) : null })
                     }
                     placeholder="Leave blank to use retail price"
                   />

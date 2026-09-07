@@ -66,7 +66,7 @@ export interface ProductPayload {
   price: number
   salePrice?: number
   costPrice?: number
-  wholesalePrice?: number
+  wholesalePrice?: number | null
   categoryId?: string | null
   stock?: number
   unit?: string
