@@ -12,9 +12,8 @@ interface ProductConfigEditorProps {
   sectionType?: SectionType
 }
 
-// 4-up grids are not supported on mobile — keep this in lock-step with the
-// columns.clamp(2, 3) in the Flutter app's _buildCategoryProductGrid.
-const COLUMN_OPTIONS = [2, 3] as const
+// Premium Fresh supports one or two columns; classic styles support two or three.
+const COLUMN_OPTIONS = [1, 2, 3] as const
 
 /**
  * Product card visual styles offered to admins. Values are the canonical
@@ -22,10 +21,11 @@ const COLUMN_OPTIONS = [2, 3] as const
  * read verbatim by the Flutter app (`productCardVariantFromString`). Keep these
  * in lock-step with the Flutter `ProductCardVariant` enum.
  *
- * Default is QUICK_COMMERCE_COMPACT — sections saved without this key (older
- * themes) fall back to it on the app side too.
+ * Premium Fresh is the default for product grid and carousel sections.
+ * Explicit compact and legacy styles remain available.
  */
 const PRODUCT_CARD_STYLES = [
+  { value: "PREMIUM_FRESH", label: "Premium Fresh", description: "Large edge-to-edge photos, crimson add controls, clean product details and image slides." },
   {
     value: "QUICK_COMMERCE_COMPACT",
     label: "Quick Commerce (Compact)",
@@ -38,7 +38,7 @@ const PRODUCT_CARD_STYLES = [
   },
 ] as const
 
-const DEFAULT_PRODUCT_CARD_STYLE = "QUICK_COMMERCE_COMPACT"
+const DEFAULT_PRODUCT_CARD_STYLE = "PREMIUM_FRESH"
 
 export default function ProductConfigEditor({
   config,
@@ -46,7 +46,7 @@ export default function ProductConfigEditor({
   sectionType,
 }: ProductConfigEditorProps) {
   const title = typeof config.title === "string" ? config.title : "Products"
-  const columns = typeof config.columns === "number" ? config.columns : 3
+  const columns = typeof config.columns === "number" ? Math.min(config.columns, config.product_card_style && config.product_card_style !== "PREMIUM_FRESH" ? 3 : 2) : 1
   const cardShape =
     typeof config.card_shape === "string" ? config.card_shape : "rounded"
   const autoScroll = Boolean(config.auto_scroll)
@@ -55,7 +55,7 @@ export default function ProductConfigEditor({
       ? config.product_card_style
       : DEFAULT_PRODUCT_CARD_STYLE
   const showColumns = sectionType === "category_product_grid"
-  const showAutoScroll = sectionType === "product_carousel"
+  const showAutoScroll = sectionType === "product_carousel" && productCardStyle !== "PREMIUM_FRESH"
 
   const patchConfig = (patch: Partial<Record<string, unknown>>) => {
     onChange({
@@ -76,11 +76,18 @@ export default function ProductConfigEditor({
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="product-editor-subtitle">Subtitle</Label>
+        <Input id="product-editor-subtitle" value={typeof config.subtitle === "string" ? config.subtitle : ""}
+          onChange={(event) => patchConfig({ subtitle: event.target.value })}
+          placeholder="Here's what everyone's eating!" />
+        <p className="text-xs text-slate-500">Add photos one by one in Products → Edit product → Images. Their saved order becomes the card’s photo slides. Product description, weight, highlights (pieces and serves), price and delivery time come from the catalog.</p>
+      </div>
       {showColumns ? (
         <div className="space-y-3">
           <div className="text-sm font-medium text-slate-900">Columns</div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {COLUMN_OPTIONS.map((option) => {
+            {COLUMN_OPTIONS.filter((option) => productCardStyle === "PREMIUM_FRESH" ? option <= 2 : option >= 2).map((option) => {
               const isActive = option === columns
               return (
                 <button
@@ -103,10 +110,10 @@ export default function ProductConfigEditor({
         </div>
       ) : null}
 
-      <CardShapePicker
+      {productCardStyle !== "PREMIUM_FRESH" ? <CardShapePicker
         value={cardShape}
         onChange={(value) => patchConfig({ card_shape: value })}
-      />
+      /> : null}
 
       <div className="space-y-3">
         <div>
@@ -125,7 +132,7 @@ export default function ProductConfigEditor({
                 key={option.value}
                 type="button"
                 onClick={() =>
-                  patchConfig({ product_card_style: option.value })
+                  patchConfig({ product_card_style: option.value, ...(option.value === "PREMIUM_FRESH" ? { columns: 1 } : { columns: Math.max(2, columns) }) })
                 }
                 className={cn(
                   "rounded-2xl border px-4 py-3 text-left transition-all duration-200",
@@ -151,8 +158,7 @@ export default function ProductConfigEditor({
           })}
         </div>
         <p className="text-[11px] text-slate-400">
-          Default is Quick Commerce (Compact). Existing sections without a style
-          keep this default.
+          Premium Fresh matches the large-photo reference. Choose one column for full-width cards or two for a grid.
         </p>
       </div>
 

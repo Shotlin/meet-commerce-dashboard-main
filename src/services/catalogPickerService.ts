@@ -23,6 +23,11 @@ export interface ProductOption {
   thumbnail_url: string | null;
   price: number | string;
   sale_price: number | string | null;
+  images?: string[];
+  description?: string | null;
+  net_quantity?: string | null;
+  highlights?: Record<string, unknown> | null;
+  display_delivery_minutes?: number | null;
 }
 
 export const catalogPickerService = {

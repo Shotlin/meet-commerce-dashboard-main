@@ -3,6 +3,7 @@
 import { memo } from "react"
 import { cn } from "../../../lib/utils"
 import type { Product, PreviewProps } from "./index"
+import PremiumProductPreview from "./PremiumProductPreview"
 import styles from "../MobilePreviewFrame.module.css"
 
 function ProductGridPreview({
@@ -12,6 +13,9 @@ function ProductGridPreview({
   products,
 }: PreviewProps) {
   const config = section.config as Record<string, unknown>
+  if (!config.product_card_style || config.product_card_style === "PREMIUM_FRESH") {
+    return <PremiumProductPreview section={section} isSelected={isSelected} onClick={onClick} products={products} />
+  }
   const columns =
     typeof config.columns === "number" ? Math.min(Math.max(config.columns, 2), 4) : 3
   const title =
@@ -49,7 +53,8 @@ function ProductGridPreview({
       {/* Product grid */}
       <div
         style={{
-          display: "grid",
+          display: section.section_type === "product_carousel" ? "flex" : "grid",
+          overflowX: "auto",
           gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
           gap: 10,
           padding: "10px 14px 8px",
@@ -76,6 +81,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   return (
     <div
       style={{
+        flex: "0 0 132px",
         borderRadius: 14,
         border: "1px solid #f0f0f0",
         background: "#ffffff",
@@ -206,6 +212,7 @@ function PlaceholderCard({ index }: { index: number }) {
   return (
     <div
       style={{
+        flex: "0 0 132px",
         borderRadius: 14,
         border: "1px solid #f0f0f0",
         background: "#ffffff",

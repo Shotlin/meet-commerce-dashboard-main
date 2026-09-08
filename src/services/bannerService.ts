@@ -16,6 +16,7 @@ export interface Banner {
   startDate: string | null;
   endDate: string | null;
   triggerType: BannerTriggerType;
+  shopId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +31,7 @@ export interface BannerInput {
   startDate?: string | null;
   endDate?: string | null;
   triggerType?: BannerTriggerType;
+  shopId?: string | null;
 }
 
 // Adapter — admin banner rows come back snake_case with a couple of
@@ -46,6 +48,7 @@ const adaptBanner = (b: any): Banner => ({
   startDate: b.start_date,
   endDate: b.end_date,
   triggerType: b.trigger_type,
+  shopId: b.shop_id ?? null,
   createdAt: b.created_at,
   updatedAt: b.updated_at,
 });

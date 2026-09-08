@@ -26,6 +26,10 @@ export interface Product {
   price: number | string
   sale_price: number | string | null
   thumbnail_url: string | null
+  description?: string | null
+  display_delivery_minutes?: number | null
+  net_quantity?: string | null
+  highlights?: Record<string, unknown> | null
   net_weight?: string | null
   images?: string[]
 }
@@ -50,7 +54,7 @@ export const previewRegistry: Record<SectionType, FC<PreviewProps>> = {
   seasonal_mosaic: MosaicPreview,
   round_category_icons: CategoryIconsPreview,
   category_product_grid: ProductGridPreview,
-  product_carousel: CarouselPreview,
+  product_carousel: ProductGridPreview,
   trending_products: TrendingPreview,
   promo_carousel: CarouselPreview,
   bank_offers: FeeStripPreview,

@@ -45,6 +45,8 @@ function CarouselPreview({
         ? activeBanners
         : []
 
+  const ratioParts = typeof config.aspect_ratio === "string" ? config.aspect_ratio.split(":").map(Number) : []
+  const aspectRatio = ratioParts.length === 2 && ratioParts[0] > 0 && ratioParts[1] > 0 ? ratioParts[0] / ratioParts[1] : 16 / 8.8
   const isPromo = section.section_type === "promo_carousel"
   const hasImages = allImages.length > 0
 
@@ -67,7 +69,7 @@ function CarouselPreview({
               style={{
                 borderRadius,
                 overflow: "hidden",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+
                 position: "relative",
               }}
             >
@@ -76,31 +78,12 @@ function CarouselPreview({
                 alt={isPromo ? "Promo Banner" : "Carousel"}
                 style={{
                   width: "100%",
-                  height: isPromo ? 160 : 140,
+                  aspectRatio,
                   objectFit: "cover",
                   display: "block",
                 }}
               />
-              {/* Source badge */}
-              {isPromo && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    background: bannerSource === "custom" ? "rgba(139,92,246,0.85)" : "rgba(30,120,255,0.85)",
-                    color: "#fff",
-                    fontSize: 9,
-                    fontWeight: 700,
-                    padding: "2px 7px",
-                    borderRadius: 999,
-                    letterSpacing: "0.04em",
-                    backdropFilter: "blur(4px)",
-                  }}
-                >
-                  {bannerSource === "custom" ? "CUSTOM" : "SYSTEM"}
-                </div>
-              )}
+
             </div>
 
             {/* Pagination dots */}
@@ -120,7 +103,7 @@ function CarouselPreview({
                       width: index === 0 ? 16 : 6,
                       height: 6,
                       borderRadius: 999,
-                      background: index === 0 ? "#e67e22" : "#d5d5d5",
+                      background: index === 0 ? "#141414" : "#d5d5d5",
                       transition: "width 0.18s ease",
                     }}
                   />
@@ -133,7 +116,7 @@ function CarouselPreview({
           <div>
             <div
               style={{
-                height: isPromo ? 160 : 140,
+                aspectRatio,
                 borderRadius,
                 background: "linear-gradient(135deg, #e2e8f0, #f1f5f9, #e2e8f0)",
                 display: "grid",
@@ -174,7 +157,7 @@ function CarouselPreview({
                     width: index === 0 ? 16 : 6,
                     height: 6,
                     borderRadius: 999,
-                    background: index === 0 ? "#e67e22" : "#d5d5d5",
+                    background: index === 0 ? "#141414" : "#d5d5d5",
                   }}
                 />
               ))}

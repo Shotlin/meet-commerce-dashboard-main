@@ -50,7 +50,11 @@ export const SECTION_STYLE_PRESETS: Partial<
       patch: { gradient: ["#0B0B14", "#27272A"], height: 240 },
     },
   ],
+  promo_carousel: [
+    { id: "premium-banner", label: "Premium Wide Image Slides", patch: { banner_source: "custom", aspect_ratio: "5:1", border_radius: 14, auto_scroll: true } },
+  ],
   product_carousel: [
+    { id: "premium-fresh", label: "Premium Fresh", patch: { product_card_style: "PREMIUM_FRESH", title: "Our current hits", subtitle: "Here’s what everyone’s eating!" } },
     {
       id: "minimal-cards",
       label: "Minimal Cards",
@@ -73,6 +77,8 @@ export const SECTION_STYLE_PRESETS: Partial<
     },
   ],
   category_product_grid: [
+    { id: "premium-large", label: "Large Photo Cards", patch: { product_card_style: "PREMIUM_FRESH", columns: 1 } },
+    { id: "premium-grid", label: "Premium Photo Grid", patch: { product_card_style: "PREMIUM_FRESH", columns: 2 } },
     {
       id: "grid-2",
       label: "2-up Grid",

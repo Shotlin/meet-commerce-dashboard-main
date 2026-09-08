@@ -16,7 +16,14 @@ export interface PreviewData {
   isLoading: boolean;
 }
 
-export function usePreviewData(): PreviewData {
+export function usePreviewData(productIds: string[] = []): PreviewData {
+  const ids = [...new Set(productIds)].sort()
+  const selectedProductsQuery = useQuery({
+    queryKey: ["products", "preview-selected", ids],
+    queryFn: () => catalogPickerService.getProductsByIds(ids),
+    enabled: ids.length > 0,
+    staleTime: 60_000,
+  })
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
     queryFn: () => catalogPickerService.listCategories(),
@@ -31,7 +38,7 @@ export function usePreviewData(): PreviewData {
 
   return {
     categories: categoriesQuery.data ?? [],
-    products: productsQuery.data?.products ?? [],
+    products: [...new Map([...(productsQuery.data?.products ?? []), ...(selectedProductsQuery.data ?? [])].map(product => [product.id, product])).values()],
     isLoading: categoriesQuery.isLoading || productsQuery.isLoading,
   };
 }
@@ -47,16 +54,15 @@ export function resolveProductsForSection(
 
   // Manual product IDs
   if (binding.product_ids?.length) {
-    const ids = new Set(binding.product_ids);
-    const matched = allProducts.filter((p) => ids.has(p.id));
-    if (matched.length) return matched.slice(0, limit);
+    const byId = new Map(allProducts.map(product => [product.id, product]));
+    return binding.product_ids.flatMap(id => byId.has(id) ? [byId.get(id)!] : []).slice(0, limit);
   }
 
   // Category-scoped
   if (binding.category_ids?.length) {
     const ids = new Set(binding.category_ids);
     const scoped = allProducts.filter((p) => p.category_id && ids.has(p.category_id));
-    if (scoped.length) return scoped.slice(0, limit);
+    return scoped.slice(0, limit);
   }
 
   return allProducts.slice(0, limit);

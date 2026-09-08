@@ -100,7 +100,7 @@ export function MobilePreviewFrame({
     height: PHONE_HEIGHT * scale,
   })
 
-  const { categories, products } = usePreviewData()
+  const { categories, products } = usePreviewData(sections.flatMap(section => section.merch_binding?.product_ids ?? []))
   const { activeStoreKey, storeConfig } = useStoreContext()
 
   const deferredSections = useDeferredValue(sections)
