@@ -36,8 +36,8 @@ export async function deleteTheme(id: string): Promise<void> {
   return legacyThemeService.remove(id);
 }
 
-export async function getTabThemes(): Promise<Theme[]> {
-  return legacyThemeService.getTabThemes();
+export async function getTabThemes(storeKey?: string): Promise<Theme[]> {
+  return legacyThemeService.getTabThemes(storeKey);
 }
 
 export async function scheduleTheme(id: string, payload: ScheduleThemePayload): Promise<Theme> {

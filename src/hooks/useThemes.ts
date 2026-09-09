@@ -87,10 +87,10 @@ export function useDeleteTheme() {
   })
 }
 
-export function useTabThemes() {
+export function useTabThemes(storeKey?: string) {
   return useQuery({
-    queryKey: ["themes", "tabs"],
-    queryFn: getTabThemes,
+    queryKey: ["themes", "tabs", storeKey ?? "all"],
+    queryFn: () => getTabThemes(storeKey),
     staleTime: 30_000,
   })
 }

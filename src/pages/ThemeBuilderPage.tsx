@@ -69,6 +69,7 @@ import {
 import { useTabThemes } from "@/hooks/useThemes"
 import { useArchiveThemeTab, useCreateThemeTab, useThemeTabs, useUpdateThemeTab, useUpdateThemeTabIcon } from "@/hooks/useThemeTabs"
 import { useStoreContext } from "@/contexts/StoreContext"
+import { useShopScope } from "@/context/ShopScopeContext"
 import { getSections, getSectionVersions } from "@/services/sections.service"
 import type {
   MerchBinding,
@@ -245,11 +246,12 @@ function ThemeBuilderPageContent() {
   )
 
   const { activeStoreKey, setActiveStoreKey, storeConfig } = useStoreContext()
+  const { activeShopId } = useShopScope()
   const { data: themeTabs = [], isLoading: isLoadingTabs } = useThemeTabs({
     store_key: activeStoreKey,
     status: "active",
   })
-  const { data: tabThemes = [] } = useTabThemes()
+  const { data: tabThemes = [] } = useTabThemes(activeStoreKey)
 
   const [activeTabId, setActiveTabId] = useState<string | null>(null)
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
@@ -293,8 +295,8 @@ function ThemeBuilderPageContent() {
     }
   }, [activeStoreKey])
 
-  const sectionsQuery = useSections(activeTabId)
-  const versionsQuery = useSectionVersions(activeTabId)
+  const sectionsQuery = useSections(activeTabId, activeShopId)
+  const versionsQuery = useSectionVersions(activeTabId, activeShopId)
 
   const addSectionMutation = useAddSection()
   const deleteSectionMutation = useDeleteSection()
@@ -314,15 +316,33 @@ function ThemeBuilderPageContent() {
       ? themeTabs.find((tab) => tab.key === requestedTabKey) ?? null
       : null)
 
+  // A tab key such as "all" or "eggs" exists in several storefronts. Keep
+  // every builder read and update inside the selected visual store, then let a
+  // physical shop override win over the global design for that store.
+  const scopedTabThemes = useMemo(
+    () => tabThemes.filter((theme) => theme.store_key === activeStoreKey),
+    [tabThemes, activeStoreKey]
+  )
+
+  const themeForTab = (tab: ThemeTab | null): Theme | null => {
+    if (!tab) return null
+    const matching = scopedTabThemes.filter(
+      (theme) =>
+        theme.status === "active" &&
+        (theme.tab_id === tab.id || theme.tab_key === tab.key)
+    )
+    return (
+      matching.find((theme) => theme.shop_id === activeShopId) ??
+      matching.find((theme) => theme.shop_id == null) ??
+      null
+    )
+  }
+
+  const activeTheme: Theme | null = themeForTab(activeTab)
+
   const activeThemeData: ThemeData | null =
-    tabThemes.find(
-      (theme) => theme.tab_id === activeTab?.id && theme.status === "active"
-    )?.theme_data ??
-    tabThemes.find(
-      (theme) => theme.tab_key === activeTab?.key && theme.status === "active"
-    )?.theme_data ??
-    tabThemes.find((theme) => theme.tab_key === "all" && theme.status === "active")
-      ?.theme_data ??
+    activeTheme?.theme_data ??
+    themeForTab(themeTabs.find((tab) => tab.key === "all") ?? null)?.theme_data ??
     null
 
   const [chromeRegionPreviewOverride, setChromeRegionPreviewOverride] =
@@ -336,14 +356,6 @@ function ThemeBuilderPageContent() {
 
   const previewThemeData = chromeRegionPreviewOverride ?? activeThemeData
 
-  const activeTheme: Theme | null =
-    tabThemes.find(
-      (theme) => theme.tab_id === activeTab?.id && theme.status === "active"
-    ) ??
-    tabThemes.find(
-      (theme) => theme.tab_key === activeTab?.key && theme.status === "active"
-    ) ??
-    null
 
   const selectedSection =
     localSections.find((section) => section.id === selectedSectionId) ?? null

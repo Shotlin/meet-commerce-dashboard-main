@@ -52,8 +52,9 @@ export const legacyThemeService = {
     if (!res.success) throw new Error(`Failed to delete theme ${id}`);
   },
 
-  async getTabThemes(): Promise<Theme[]> {
-    const res = await apiClient.get<Theme[]>('/api/v1/admin/themes/tabs');
+  async getTabThemes(storeKey?: string): Promise<Theme[]> {
+    const res = await apiClient.get<Theme[]>('/api/v1/admin/themes/tabs',
+      storeKey ? { store_key: storeKey } : undefined);
     if (res.success && Array.isArray(res.data)) return res.data;
     throw new Error('Failed to fetch tab themes');
   },

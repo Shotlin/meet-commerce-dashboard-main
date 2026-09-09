@@ -22,18 +22,18 @@ import type {
   UpdateSectionPayload,
 } from "@/types/theme.types"
 
-export function useSections(tabId: string | null) {
+export function useSections(tabId: string | null, shopId: string | null = null) {
   return useQuery({
-    queryKey: ["sections", tabId],
+    queryKey: ["sections", tabId, shopId ?? "global"],
     queryFn: () => getSections(tabId!),
     enabled: !!tabId,
     staleTime: 30_000,
   })
 }
 
-export function useSectionVersions(tabId: string | null) {
+export function useSectionVersions(tabId: string | null, shopId: string | null = null) {
   return useQuery({
-    queryKey: ["sections", tabId, "versions"],
+    queryKey: ["sections", tabId, shopId ?? "global", "versions"],
     queryFn: () => getSectionVersions(tabId!),
     enabled: !!tabId,
     staleTime: 30_000,
