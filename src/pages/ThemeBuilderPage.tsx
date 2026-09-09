@@ -70,6 +70,7 @@ import { useTabThemes } from "@/hooks/useThemes"
 import { useArchiveThemeTab, useCreateThemeTab, useThemeTabs, useUpdateThemeTab, useUpdateThemeTabIcon } from "@/hooks/useThemeTabs"
 import { useStoreContext } from "@/contexts/StoreContext"
 import { useShopScope } from "@/context/ShopScopeContext"
+import { ShopSwitcher } from "@/components/layout/ShopSwitcher"
 import { getSections, getSectionVersions } from "@/services/sections.service"
 import type {
   MerchBinding,
@@ -246,7 +247,7 @@ function ThemeBuilderPageContent() {
   )
 
   const { activeStoreKey, setActiveStoreKey, storeConfig } = useStoreContext()
-  const { activeShopId } = useShopScope()
+  const { activeShopId, activeShop } = useShopScope()
   const { data: themeTabs = [], isLoading: isLoadingTabs } = useThemeTabs({
     store_key: activeStoreKey,
     status: "active",
@@ -1270,7 +1271,18 @@ function ThemeBuilderPageContent() {
               </Button>
             </div>
             {!leftPanelCollapsed && (
-              <div className="mt-2">
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-rose-50/70 px-2.5 py-2">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-500">
+                      Theme scope
+                    </p>
+                    <p className="truncate text-xs font-semibold text-slate-800">
+                      {activeShop ? activeShop.name : "Choose a physical shop"}
+                    </p>
+                  </div>
+                  <ShopSwitcher />
+                </div>
                 <TabNavbar
                   tabs={themeTabs}
                   activeTabId={activeTabId}
