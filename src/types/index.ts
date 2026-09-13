@@ -64,6 +64,7 @@ export interface Order {
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   deliveryAddress: string;
+  riderId?: string;
   riderName?: string;
   createdAt: string;
   warehouseLocation: string;

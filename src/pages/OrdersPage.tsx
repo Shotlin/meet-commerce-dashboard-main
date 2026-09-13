@@ -10,6 +10,7 @@ import { DetailDrawer } from '../components/layout/DetailDrawer';
 import { CuttingEvidencePlayer } from '../components/domain/CuttingEvidencePlayer';
 import { LotTraceTree } from '../components/domain/LotTraceTree';
 import { orderService } from '../services/orderService';
+import { deliveryService, AssignableRider } from '../services/deliveryService';
 import { Order, VideoModerationStatus } from '../types';
 import { ShoppingBag, Video, Eye } from 'lucide-react';
 
@@ -21,6 +22,9 @@ export const OrdersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(urlQuery);
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [riders, setRiders] = useState<AssignableRider[]>([]);
+  const [assigningRider, setAssigningRider] = useState(false);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Sync searchQuery from URL parameter
@@ -30,6 +34,7 @@ export const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
+    fetchRiders();
   }, []);
 
   const fetchOrders = async () => {
@@ -50,6 +55,31 @@ export const OrdersPage: React.FC = () => {
       setSearchParams({ q });
     } else {
       setSearchParams({});
+    }
+  };
+
+  const fetchRiders = async () => {
+    try {
+      setRiders(await deliveryService.getAssignableRiders());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAssignRider = async (riderId: string) => {
+    if (!selectedOrder || !riderId) return;
+    setAssigningRider(true);
+    setAssignmentError(null);
+    try {
+      await orderService.assignRider(selectedOrder.id, riderId);
+      const rider = riders.find((candidate) => candidate.id === riderId);
+      const updated = { ...selectedOrder, riderId, riderName: rider?.name || 'Assigned rider' };
+      setSelectedOrder(updated);
+      setOrders((current) => current.map((order) => order.id === updated.id ? updated : order));
+    } catch (err) {
+      setAssignmentError(err instanceof Error ? err.message : 'Unable to assign rider');
+    } finally {
+      setAssigningRider(false);
     }
   };
 
@@ -199,6 +229,37 @@ export const OrdersPage: React.FC = () => {
                 onModerated={handleModerated}
               />
             )}
+
+            <Card title="Rider assignment">
+              <p className="mb-3 text-xs text-status-neutral">
+                Assigning a rider sends the live order offer to their Meet Commerce Rider app.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <select
+                  className="min-w-0 flex-1 rounded-[10px] border border-border bg-white px-3 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30"
+                  value={selectedOrder.riderId || ''}
+                  disabled={assigningRider}
+                  onChange={(event) => handleAssignRider(event.target.value)}
+                >
+                  <option value="">Select an approved rider</option>
+                  {riders.map((rider) => (
+                    <option key={rider.id} value={rider.id}>
+                      {rider.name} · {rider.is_online ? 'Online' : 'Offline'}
+                      {rider.vehicle_type ? ` · ${rider.vehicle_type}` : ''}
+                    </option>
+                  ))}
+                </select>
+                {selectedOrder.riderName && (
+                  <Badge variant="brand">Assigned: {selectedOrder.riderName}</Badge>
+                )}
+              </div>
+              {assignmentError && (
+                <p className="mt-2 text-xs text-status-danger">{assignmentError}</p>
+              )}
+              {riders.length === 0 && (
+                <p className="mt-2 text-xs text-status-neutral">No approved riders are available.</p>
+              )}
+            </Card>
 
             {/* Line Items & Variable Weight Calculator */}
             <Card title="Variable-Weight Line Items Breakdown">

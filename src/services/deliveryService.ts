@@ -17,6 +17,15 @@ export interface LiveRider {
   delivery_status: 'ASSIGNED' | 'ACCEPTED' | 'PICKED_UP' | 'IN_TRANSIT' | null;
 }
 
+export interface AssignableRider {
+  id: string;
+  name: string;
+  phone: string;
+  is_approved: boolean;
+  is_online: boolean;
+  vehicle_type: string | null;
+}
+
 export const deliveryService = {
   async getLiveRiders(): Promise<LiveRider[]> {
     const res = await apiClient.get<LiveRider[]>('/api/v1/admin/riders/live-locations');
@@ -24,5 +33,15 @@ export const deliveryService = {
       return res.data;
     }
     throw new Error('Failed to fetch live rider locations from API');
+  },
+
+  async getAssignableRiders(): Promise<AssignableRider[]> {
+    const res = await apiClient.get<{ riders: AssignableRider[] }>('/api/v1/admin/riders', {
+      limit: 100,
+    });
+    if (res.success && Array.isArray(res.data?.riders)) {
+      return res.data.riders.filter((rider) => rider.is_approved);
+    }
+    throw new Error('Failed to fetch approved riders from API');
   },
 };

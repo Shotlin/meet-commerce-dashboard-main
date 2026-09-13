@@ -5,8 +5,8 @@ import { apiClient } from './apiClient';
 const adaptOrder = (b: any): Order => ({
   id: b.id || b._id || `ord-${Date.now()}`,
   orderNumber: b.orderNumber || b.order_number || b.id || 'MC-2026-0000',
-  customerName: b.customerName || b.user?.name || b.delivery_address?.name || b.user?.phone || 'Customer',
-  customerPhone: b.customerPhone || b.user?.phone || b.delivery_address?.phone || '+91 98000 00000',
+  customerName: b.customerName || b.customer_name || b.user?.name || b.delivery_address?.name || b.user?.phone || 'Customer',
+  customerPhone: b.customerPhone || b.customer_phone || b.user?.phone || b.delivery_address?.phone || '+91 98000 00000',
   totalAmount: Number(b.totalAmount ?? b.total_amount ?? b.total_payable ?? b.total ?? b.amount ?? 0),
   status:
     b.status === 'DELIVERED'
@@ -31,7 +31,8 @@ const adaptOrder = (b: any): Order => ({
       ? 'Failed'
       : 'Pending',
   deliveryAddress: b.deliveryAddress || b.delivery_address?.line1 || b.address?.address_line1 || 'Address On File',
-  riderName: b.riderName || b.rider?.name,
+  riderId: b.riderId || b.rider_id || b.rider?.id,
+  riderName: b.riderName || b.rider_name || b.rider?.name,
   createdAt: b.createdAt || b.created_at || new Date().toISOString(),
   warehouseLocation: b.warehouseLocation || b.shopName || 'HQ Central FC',
   cuttingEvidenceUrl: b.cuttingEvidenceUrl || b.video_evidence_url || '/assets/banner-01-premium-lamb.png',
@@ -60,15 +61,15 @@ const adaptOrder = (b: any): Order => ({
 
 export const orderService = {
   async getOrders(): Promise<Order[]> {
-    const response = await apiClient.get<any[]>('/api/v1/orders');
-    if (response.success && Array.isArray(response.data)) {
-      return response.data.map(adaptOrder);
+    const response = await apiClient.get<{ orders: any[] }>('/api/v1/admin/orders', { limit: 100 });
+    if (response.success && Array.isArray(response.data?.orders)) {
+      return response.data.orders.map(adaptOrder);
     }
     throw new Error('Failed to fetch orders from live backend API');
   },
 
   async getOrderById(id: string): Promise<Order | undefined> {
-    const response = await apiClient.get<any>(`/api/v1/orders/${id}`);
+    const response = await apiClient.get<any>(`/api/v1/admin/orders/${id}`);
     if (response.success && response.data) {
       return adaptOrder(response.data);
     }
@@ -76,7 +77,7 @@ export const orderService = {
   },
 
   async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
-    const response = await apiClient.patch<any>(`/api/v1/orders/${id}/status`, { status });
+    const response = await apiClient.put<any>(`/api/v1/admin/orders/${id}/status`, { status: status.toUpperCase().replace(/ /g, '_') });
     if (response.success && response.data) {
       return adaptOrder(response.data);
     }
@@ -89,5 +90,13 @@ export const orderService = {
       return adaptOrder(response.data);
     }
     throw new Error(`Failed to update video moderation for order ${id} on API`);
+  },
+
+  async assignRider(id: string, riderId: string): Promise<void> {
+    const response = await apiClient.put<{ orderId: string; riderId: string }>(
+      `/api/v1/admin/orders/${id}/assign-rider`,
+      { riderId },
+    );
+    if (!response.success) throw new Error(response.message || 'Unable to assign rider');
   },
 };
