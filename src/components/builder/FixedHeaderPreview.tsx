@@ -379,16 +379,7 @@ export function FixedHeaderPreview({
   })()
 
   return (
-    <div
-      style={{
-        color: topBarTextColor,
-        position: "relative",
-        // Keep the negative-z-index header image inside this chrome block.
-        // Without an isolated stacking context it can slip behind the phone
-        // preview surface instead of showing through transparent rows.
-        isolation: "isolate",
-      }}
-    >
+    <div style={{ color: topBarTextColor, position: "relative" }}>
       {/* ── Shared background image behind the combined top bar +
           search bar + category tabs block. Sized to this wrapper via
           absolute inset:0 — the wrapper's own height comes from its
@@ -613,16 +604,9 @@ export function FixedHeaderPreview({
             height: 50,
             padding: "0 14px",
             borderRadius: 12,
-            // The search-zone picker styles the actual search control as
-            // well as its surrounding row. When its colour is disabled the
-            // whole area stays transparent so a header image can show through.
-            background: searchZoneColorEnabled ? searchZoneBg : "transparent",
-            border: searchZoneColorEnabled
-              ? "1px solid rgba(234,231,240,1)"
-              : "1px solid rgba(255,255,255,0.72)",
-            boxShadow: searchZoneColorEnabled
-              ? "0 4px 14px rgba(42,26,71,0.06)"
-              : "none",
+            background: "#ffffff",
+            border: "1px solid rgba(234,231,240,1)",
+            boxShadow: "0 4px 14px rgba(42,26,71,0.06)",
           }}
         >
           <div
