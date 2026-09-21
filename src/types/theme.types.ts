@@ -126,6 +126,22 @@ export interface SearchZoneTheme {
  * their solid colors don't cover it. */
 export interface HeaderBackgroundTheme {
   imageUrl: string | null;
+  /**
+   * "Extend into mini promotional bar". When true the SAME image is treated
+   * as one tall asset: its top `topRegionHeight` px paint the Top Bar + Search
+   * Bar + Category Tabs block and its bottom `promoRegionHeight` px paint a
+   * mini promotional bar directly under the category tabs. Defaults to false
+   * (legacy behaviour: image behind the top block only).
+   */
+  extendToPromoBar?: boolean;
+  /** Canonical export width the heights below are expressed in (1080). */
+  recommendedWidth?: number;
+  /** A — export px of the image that map to the top block. */
+  topRegionHeight?: number;
+  /** B — export px of the image that map to the mini promotional bar. */
+  promoRegionHeight?: number;
+  /** Y = A + B — the recommended full upload height. */
+  totalHeight?: number;
 }
 
 export interface BannerAnimationTheme {

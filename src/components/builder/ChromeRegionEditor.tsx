@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ThemeColorPicker } from "@/components/themes/ThemeColorPicker"
-import { ThemeImageUploader } from "@/components/themes/ThemeImageUploader"
 import { useUpdateTheme } from "@/hooks/useThemes"
 import type {
   Theme,
@@ -13,6 +12,12 @@ import type {
   ThemeSections,
   UpdateThemePayload,
 } from "@/types/theme.types"
+import { HeaderBackgroundFields } from "./HeaderBackgroundFields"
+import {
+  getHeaderLayoutMetrics,
+  specFromMetrics,
+  withHeaderBackgroundSpec,
+} from "./headerBackgroundLayout"
 import {
   CHROME_REGION_META,
   getChromeRegionMeta,
@@ -49,7 +54,9 @@ function defaultThemeSections(): ThemeSections {
       promoBoxImageUrl: null,
       colorEnabled: true,
     },
-    headerBackground: { imageUrl: null },
+    // Explicit `false` (not just absent): the API merges a category theme over
+    // the "All" tab's, and only an explicit value overrides an inherited one.
+    headerBackground: { imageUrl: null, extendToPromoBar: false },
     bannerAnimation: {
       lottieUrl: null,
       backgroundGradient: ["#E8F5E9", "#C8E6C9"],
@@ -142,7 +149,22 @@ export default function ChromeRegionEditor({
 
   const handleApply = async () => {
     if (!theme || !isDirty) return
-    const payload: UpdateThemePayload = { theme_data: draft }
+    // When the header image is extended into the promo bar, persist the exact
+    // split as measured right now, so the mobile app maps the image with the
+    // same numbers the dashboard just showed.
+    const hb = draft.sections.headerBackground
+    const spec = specFromMetrics(getHeaderLayoutMetrics())
+    const themeData: ThemeData =
+      hb?.extendToPromoBar && spec
+        ? {
+            ...draft,
+            sections: {
+              ...draft.sections,
+              headerBackground: withHeaderBackgroundSpec(hb, spec, true),
+            },
+          }
+        : draft
+    const payload: UpdateThemePayload = { theme_data: themeData }
     await updateThemeMutation.mutateAsync({ id: theme.id, payload })
   }
 
@@ -439,26 +461,10 @@ function RegionFields({
       )
     case "header_background":
       return (
-        <div className="space-y-4">
-          <p className="text-sm text-slate-700">
-            One image painted behind the Top Bar, Search Bar and Category
-            Tabs combined — as if they were all cut out of the same picture.
-            To actually see it (instead of it being hidden behind the solid
-            colors), turn off "Show background color" in each of those three
-            regions.
-          </p>
-          <ThemeImageUploader
-            label="Header background image"
-            value={sections.headerBackground?.imageUrl ?? null}
-            onChange={(url) =>
-              patchSections({
-                headerBackground: { imageUrl: url },
-              })
-            }
-            hint="Recommended: 1080 × 900px (portrait, ~1.2:1). The image fills the combined block edge-to-edge and crops to fit (BoxFit.cover) — cropping trims from the bottom first, so keep any text/logo in the upper two-thirds. The exact on-screen height varies slightly by phone (status bar height differs), which is why some safety margin at the bottom matters more than the top."
-            previewFit="contain"
-          />
-        </div>
+        <HeaderBackgroundFields
+          sections={sections}
+          patchSections={patchSections}
+        />
       )
     case "bottom_nav":
       return (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import {
   ChevronDown,
   CircleUserRound,
@@ -10,6 +10,13 @@ import type { ThemeData, ThemeTab } from "@/types/theme.types"
 import { ALL_STORE_KEYS, STORE_CONFIGS } from "@/contexts/StoreContext"
 import type { ThemeStoreKey } from "@/types/theme.types"
 import type { ChromeRegion } from "./chromeRegions"
+import {
+  MINI_PROMO_BAR_HEIGHT_PX,
+  setHeaderLayoutMetrics,
+  specFromMetrics,
+  topRegionFraction,
+  useHeaderLayoutMetrics,
+} from "./headerBackgroundLayout"
 
 interface FixedHeaderPreviewProps {
   themeData: ThemeData | null
@@ -327,6 +334,40 @@ export function FixedHeaderPreview({
     : "transparent"
 
   const headerBackgroundImageUrl = themeData?.sections.headerBackground?.imageUrl ?? null
+  const extendIntoPromoBar =
+    themeData?.sections.headerBackground?.extendToPromoBar === true
+
+  // ── Measure the REAL top block (top bar + search + category tabs) ───────
+  // The phone frame is CSS-scaled (transform), so read the untransformed
+  // layout size: width via offsetWidth (unaffected by transforms) and the
+  // height by undoing the visual scale on the bounding rect. These live
+  // numbers drive the exact 1080-wide export sizes in the editor panel and
+  // the image mapping below.
+  const topBlockRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = topBlockRef.current
+    if (!el) return
+    const measure = () => {
+      const layoutWidth = el.offsetWidth
+      const rect = el.getBoundingClientRect()
+      if (!layoutWidth || !rect.width) return
+      const visualScale = rect.width / layoutWidth
+      setHeaderLayoutMetrics({
+        topRegionLayoutPx: Math.round((rect.height / visualScale) * 100) / 100,
+        layoutWidthPx: layoutWidth,
+      })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  const measuredSpec = specFromMetrics(useHeaderLayoutMetrics())
+  // Share of the single tall image that belongs to the top block: A / Y.
+  const topFraction =
+    extendIntoPromoBar && headerBackgroundImageUrl && measuredSpec
+      ? topRegionFraction(measuredSpec)
+      : null
 
   const interactive = Boolean(onRegionClick)
 
@@ -379,12 +420,43 @@ export function FixedHeaderPreview({
   })()
 
   return (
-    <div style={{ color: topBarTextColor, position: "relative" }}>
+    <div style={{ color: topBarTextColor }}>
+    <div ref={topBlockRef} style={{ position: "relative" }}>
       {/* ── Shared background image behind the combined top bar +
           search bar + category tabs block. Sized to this wrapper via
           absolute inset:0 — the wrapper's own height comes from its
-          normal-flow children below, same as the mobile Stack. ── */}
-      {headerBackgroundImageUrl && (
+          normal-flow children below, same as the mobile Stack. ──
+          Extended mode: the image is one tall asset. This block shows only
+          its TOP fraction (A / Y): the img is sized to (block height ÷
+          fraction) and top-anchored inside an overflow-hidden frame, so the
+          rows below A are left for the mini promotional bar. */}
+      {headerBackgroundImageUrl && topFraction !== null && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            zIndex: -1,
+            pointerEvents: "none",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={headerBackgroundImageUrl}
+            alt=""
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: `${100 / topFraction}%`,
+              objectFit: "cover",
+              objectPosition: "top",
+            }}
+          />
+        </div>
+      )}
+      {headerBackgroundImageUrl && topFraction === null && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={headerBackgroundImageUrl}
@@ -662,6 +734,90 @@ export function FixedHeaderPreview({
           onPreviewTabChange={onPreviewTabChange}
         />
       ) : null}
+
+      {interactive && extendIntoPromoBar && (
+        <span style={guideLabelStyle({ bottom: 6, right: 8 })}>Top shared region</span>
+      )}
+    </div>
+
+    {/* ── Mini promotional bar (only when "Extend into mini promotional bar"
+        is on). Directly under the category tabs; shows the BOTTOM fraction
+        (B / Y) of the same tall image, so the two regions read as one
+        continuous piece of artwork. ── */}
+    {extendIntoPromoBar && (
+      <div
+        data-region="header_background"
+        onClick={handleRegionClick("header_background")}
+        style={{
+          ...regionStyle("header_background"),
+          position: "relative",
+          height: MINI_PROMO_BAR_HEIGHT_PX,
+          overflow: "hidden",
+          background: headerBackgroundImageUrl
+            ? "transparent"
+            : "repeating-linear-gradient(135deg, rgba(148,163,184,0.16) 0 8px, rgba(148,163,184,0.06) 8px 16px)",
+        }}
+      >
+        {headerBackgroundImageUrl && topFraction !== null && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={headerBackgroundImageUrl}
+            alt=""
+            draggable={false}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              height: `${100 / (1 - topFraction)}%`,
+              objectFit: "cover",
+              objectPosition: "bottom",
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        {interactive && (
+          <>
+            {/* Seam guide — edit mode only. */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                borderTop: "1.5px dashed rgba(255,255,255,0.85)",
+                boxShadow: "0 -1px 0 rgba(15,23,42,0.35)",
+                pointerEvents: "none",
+              }}
+            />
+            <span style={guideLabelStyle({ top: "50%", left: "50%", translate: "-50% -50%" })}>
+              {headerBackgroundImageUrl
+                ? "Mini promo bar region"
+                : "Mini promo bar region — upload an image to fill it"}
+            </span>
+          </>
+        )}
+      </div>
+    )}
     </div>
   )
+}
+
+/** Faint pill used for the edit-mode "which part of the image is where" guides. */
+function guideLabelStyle(position: React.CSSProperties): React.CSSProperties {
+  return {
+    position: "absolute",
+    zIndex: 3,
+    pointerEvents: "none",
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+    padding: "2px 7px",
+    borderRadius: 999,
+    color: "#ffffff",
+    background: "rgba(15,23,42,0.55)",
+    whiteSpace: "nowrap",
+    ...position,
+  }
 }
