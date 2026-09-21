@@ -10,6 +10,7 @@ import { Tabs } from '../components/common/Tabs';
 import { LocationPicker } from '../components/domain/LocationPicker';
 import { ShopProductsTab } from '../components/products/ShopProductsTab';
 import { queryKeys } from '../services/queryKeys';
+import { describeInvalidPincodes, parsePincodeInput } from '../utils/pincodes';
 import {
   shopManagementService,
   Shop,
@@ -257,8 +258,16 @@ const ServiceAreaTab: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop.id, shop.updated_at]);
 
+  const [pincodeError, setPincodeError] = useState<string | null>(null);
+
   const handleSave = () => {
-    const serviceable_pincodes = pincodesText.split(',').map((p) => p.trim()).filter(Boolean);
+    // Clean the list (separators, whitespace, duplicates) and refuse PINs that
+    // can never match a customer, instead of storing them silently.
+    const { pincodes: serviceable_pincodes, invalid } = parsePincodeInput(pincodesText);
+    const error = describeInvalidPincodes(invalid);
+    setPincodeError(error);
+    if (error) return;
+    setPincodesText(serviceable_pincodes.join(', '));
     onSave({ delivery_radius_km: radius, pincode_only: pincodeOnly, serviceable_pincodes });
   };
 
@@ -283,7 +292,8 @@ const ServiceAreaTab: React.FC<{
         </div>
         <div className="col-span-2">
           <label className={labelClass}>Serviceable Pincodes (comma-separated)</label>
-          <input className={inputClass} value={pincodesText} placeholder="e.g. 700001, 700016, 700019" onChange={(e) => setPincodesText(e.target.value)} />
+          <input className={inputClass} value={pincodesText} placeholder="e.g. 700001, 700016, 700019" onChange={(e) => { setPincodesText(e.target.value); setPincodeError(null); }} />
+          {pincodeError && <p className="text-xs text-status-danger mt-1">{pincodeError}</p>}
         </div>
         <div className="col-span-2">
           <LocationPicker lat={num(shop.lat)} lng={num(shop.lng)} radiusKm={pincodeOnly ? undefined : radius} onChange={() => {}} />

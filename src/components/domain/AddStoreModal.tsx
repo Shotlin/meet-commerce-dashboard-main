@@ -6,6 +6,7 @@ import { LocationPicker } from './LocationPicker';
 import { queryKeys } from '../../services/queryKeys';
 import { shopManagementService, ShopCreateInput, Shop } from '../../services/shopManagementService';
 import { useShopScope } from '../../context/ShopScopeContext';
+import { describeInvalidPincodes, parsePincodeInput } from '../../utils/pincodes';
 
 const inputClass =
   'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
@@ -43,10 +44,12 @@ export const AddStoreModal: React.FC<AddStoreModalProps> = ({ isOpen, onClose, o
   const { refreshShops } = useShopScope();
   const [form, setForm] = useState<ShopCreateInput>(emptyForm);
   const [pincodesText, setPincodesText] = useState('');
+  const [pincodeError, setPincodeError] = useState<string | null>(null);
 
   const reset = () => {
     setForm(emptyForm);
     setPincodesText('');
+    setPincodeError(null);
   };
 
   const createMutation = useMutation({
@@ -75,10 +78,12 @@ export const AddStoreModal: React.FC<AddStoreModalProps> = ({ isOpen, onClose, o
     Number.isFinite(form.lng);
 
   const handleSave = () => {
-    const serviceable_pincodes = pincodesText
-      .split(',')
-      .map((p) => p.trim())
-      .filter(Boolean);
+    // Clean the list (separators, whitespace, duplicates) and refuse PINs that
+    // can never match a customer, instead of storing them silently.
+    const { pincodes: serviceable_pincodes, invalid } = parsePincodeInput(pincodesText);
+    const error = describeInvalidPincodes(invalid);
+    setPincodeError(error);
+    if (error) return;
     createMutation.mutate({ ...form, serviceable_pincodes });
   };
 
@@ -172,8 +177,9 @@ export const AddStoreModal: React.FC<AddStoreModalProps> = ({ isOpen, onClose, o
             className={inputClass}
             value={pincodesText}
             placeholder="e.g. 700001, 700016, 700019"
-            onChange={(e) => setPincodesText(e.target.value)}
+            onChange={(e) => { setPincodesText(e.target.value); setPincodeError(null); }}
           />
+          {pincodeError && <p className="text-xs text-status-danger mt-1">{pincodeError}</p>}
         </div>
 
         <div className="flex items-center gap-2 col-span-2">
