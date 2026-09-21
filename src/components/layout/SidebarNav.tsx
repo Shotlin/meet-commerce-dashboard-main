@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import {
   LayoutDashboard,
@@ -34,7 +34,8 @@ import {
   ShoppingCart,
   History,
   Bell,
-  Tags
+  Tags,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
@@ -57,7 +58,13 @@ interface NavGroup {
 }
 
 export const SidebarNav: React.FC = () => {
-  const { role, userName, userEmail, userPhone, userDesignation, updateProfile } = useAuth();
+  const { role, userName, userEmail, userPhone, userDesignation, updateProfile, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
   const { qcHeldCount, pendingOrdersCount, supportTicketsCount, exceptionCount } = useScope();
 
   // Profile Modal State
@@ -282,6 +289,18 @@ export const SidebarNav: React.FC = () => {
             {role}
           </Badge>
         </div>
+      </div>
+
+      {/* Sign out — outside the clickable profile card so it never opens the profile modal */}
+      <div className="px-3 pb-3 bg-black/20 shrink-0">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 rounded-[10px] border border-white/15 px-3 py-2 text-xs font-bold text-rose-100 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5 shrink-0" />
+          Sign out
+        </button>
       </div>
 
       {/* User Profile & Security Modal */}

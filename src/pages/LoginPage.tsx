@@ -1,29 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Flame, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
+import { SessionLoadingScreen } from '../components/auth/SessionScreens';
+import { SESSION_EXPIRED_MESSAGE } from '../services/apiClient';
+
+/** `from` comes from router state; only ever resume to an in-app path. */
+const safeResumePath = (from: unknown): string =>
+  typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !from.startsWith('/login') ? from : '/';
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, status, sessionEndReason } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // A session that just ended (expired/logout) can leave error toasts from
+  // in-flight requests behind; the login screen explains it instead.
+  useEffect(() => {
+    toast.dismiss();
+  }, []);
+
+  // Verifying a stored token: don't flash the form, and never show it to a
+  // user who is about to be let straight in.
+  if (status === 'checking') return <SessionLoadingScreen />;
+
+  if (status === 'authenticated') {
+    return <Navigate to={safeResumePath((location.state as { from?: string } | null)?.from)} replace />;
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
-    const ok = await login(email.trim(), password);
+    const result = await login(email.trim(), password);
     setIsSubmitting(false);
-    if (ok) {
-      const from = (location.state as { from?: string } | null)?.from || '/';
-      navigate(from, { replace: true });
-    } else {
-      setError('Invalid local admin credentials. Check the email and password, then try again.');
-    }
+    // On success the session flips to `authenticated` and the redirect above runs.
+    if (!result.ok) setError(result.message);
   };
 
   return (
@@ -79,6 +95,9 @@ export const LoginPage: React.FC = () => {
                 <input className="w-full bg-transparent py-3 text-sm outline-none" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Local password" required />
               </span>
             </label>
+            {sessionEndReason === 'expired' && !error && (
+              <p role="status" className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-800">{SESSION_EXPIRED_MESSAGE}</p>
+            )}
             {error && <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700">{error}</p>}
             <button className="w-full rounded-2xl bg-gradient-to-r from-brand-raspberry to-brand-berry px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-brand-berry/20 transition hover:brightness-105 disabled:cursor-wait disabled:opacity-60" type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Authenticating…' : 'Enter HQ console'}

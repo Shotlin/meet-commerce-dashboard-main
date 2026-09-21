@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../services/apiClient';
+import { sessionManager } from '../services/sessionManager';
 import { queryKeys } from '../services/queryKeys';
 
 interface SectionUpdatePayload {
@@ -23,7 +24,7 @@ export function useThemeLiveSync() {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('mc_access_token');
+    const token = sessionManager.getToken();
     if (!token) return;
 
     const socket = io(apiClient.getBaseUrl(), {

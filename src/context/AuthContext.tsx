@@ -1,9 +1,21 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
 import { UserRole } from '../types';
-import { apiClient } from '../services/apiClient';
+import {
+  sessionManager,
+  type SessionEndReason,
+  type SessionStatus,
+} from '../services/sessionManager';
+import { loginWithPassword, logout, restoreSession, retryRestore, type LoginResult } from '../services/authSession';
 
 interface AuthContextType {
+  status: SessionStatus;
+  /** True only once the backend has confirmed the session (never just "a token exists"). */
   isAuthenticated: boolean;
+  /** Set while unauthenticated: why the last session ended (drives the login notice). */
+  sessionEndReason: SessionEndReason | null;
+  /** Set while `status === 'unreachable'`. */
+  restoreError: string | null;
+  userId: string | null;
   role: UserRole;
   setRole: (role: UserRole) => void;
   userName: string;
@@ -11,78 +23,53 @@ interface AuthContextType {
   userPhone: string;
   userDesignation: string;
   isMfaActive: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (email: string, pass: string) => Promise<LoginResult>;
   logout: () => void;
+  retrySession: () => void;
   updateProfile: (name: string, email: string, phone?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Only used for the type when there is no session; never displayed. */
+const NO_SESSION_ROLE: UserRole = 'HQ Admin';
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => Boolean(localStorage.getItem('mc_access_token')));
-  const [role, setRoleState] = useState<UserRole>(() => {
-    return (localStorage.getItem('mc_role') as UserRole) || 'HQ Admin';
-  });
-  const [userName, setUserName] = useState<string>(() => localStorage.getItem('mc_user_name') || 'Aditya Sharma');
-  const [userEmail, setUserEmail] = useState<string>(() => localStorage.getItem('mc_user_email') || 'aditya.admin@meetcommerce.com');
-  const [userPhone, setUserPhone] = useState<string>(() => localStorage.getItem('mc_user_phone') || '7013352181');
-  const [userDesignation, setUserDesignation] = useState<string>('Lead Product Operations Manager');
-  const isMfaActive = true;
+  const snapshot = useSyncExternalStore(sessionManager.subscribe, sessionManager.getSnapshot);
 
-  const setRole = (newRole: UserRole) => {
-    setRoleState(newRole);
-    localStorage.setItem('mc_role', newRole);
-  };
+  // Startup: verify the stored token with the backend before trusting it.
+  useEffect(() => {
+    void restoreSession();
+  }, []);
 
-  const updateProfile = (name: string, email: string, phone?: string) => {
-    setUserName(name);
-    setUserEmail(email);
-    if (phone) setUserPhone(phone);
-    localStorage.setItem('mc_user_name', name);
-    localStorage.setItem('mc_user_email', email);
-    if (phone) localStorage.setItem('mc_user_phone', phone);
-  };
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const response = await apiClient.post<{ accessToken: string; user: any }>('/api/v1/admin/auth/login', {
-        email,
-        password,
-      });
-
-      if (response.success && response.data?.accessToken) {
-        localStorage.setItem('mc_access_token', response.data.accessToken);
-        const user = response.data.user;
-        const platformRole = user?.platform_role || user?.platformRole;
-        const dashboardRole: UserRole =
-          platformRole === 'HQ_FINANCE' ? 'Finance Lead' :
-          platformRole === 'HQ_MANAGER' ? 'Warehouse Manager' :
-          platformRole === 'HQ_SUPPORT' ? 'Governance Auditor' :
-          'HQ Admin';
-        setRole(dashboardRole);
-        if (user) {
-          updateProfile(user.full_name || user.name || 'Local Admin', user.email || email, user.phone || '');
-        }
-        setIsAuthenticated(true);
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.warn('[Auth Login] Backend login failed.', err);
-      return false;
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('mc_access_token');
-    setIsAuthenticated(false);
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, role, setRole, userName, userEmail, userPhone, userDesignation, isMfaActive, login, logout, updateProfile }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextType>(
+    () => ({
+      status: snapshot.status,
+      isAuthenticated: snapshot.status === 'authenticated',
+      sessionEndReason: snapshot.endReason,
+      restoreError: snapshot.restoreError,
+      userId: snapshot.user?.id ?? null,
+      role: snapshot.role ?? NO_SESSION_ROLE,
+      setRole: (role) => sessionManager.setRole(role),
+      userName: snapshot.user?.name ?? '',
+      userEmail: snapshot.user?.email ?? '',
+      userPhone: snapshot.user?.phone ?? '',
+      userDesignation: snapshot.user?.designation ?? '',
+      isMfaActive: true,
+      login: loginWithPassword,
+      logout,
+      retrySession: () => {
+        void retryRestore();
+      },
+      // Local to this session: the dashboard has no backend endpoint for editing
+      // a profile, so (as before) this only changes what is displayed.
+      updateProfile: (name, email, phone) =>
+        sessionManager.updateUser({ name, email, ...(phone ? { phone } : {}) }),
+    }),
+    [snapshot]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

@@ -2,6 +2,8 @@
 // upload subset only — bulkImportProducts/createManualOrder are unrelated
 // product/order features, out of scope for the theme builder port).
 import type { UploadedFile, UploadedImage } from '../types/upload.types';
+import { sessionManager } from './sessionManager';
+import { SESSION_EXPIRED_MESSAGE } from './apiClient';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4500').replace(/\/$/, '');
 
@@ -21,7 +23,7 @@ export function uploadViaXhr<T>(
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_BASE_URL}${path}`);
 
-    const token = localStorage.getItem('mc_access_token');
+    const token = sessionManager.getToken();
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
     if (onProgress) {
@@ -32,6 +34,12 @@ export function uploadViaXhr<T>(
     }
 
     xhr.onload = () => {
+      // Same global rule as apiClient: a rejected token ends the session once.
+      if (xhr.status === 401) {
+        sessionManager.reportUnauthorized(token);
+        reject(new Error(SESSION_EXPIRED_MESSAGE));
+        return;
+      }
       let body: any;
       try {
         body = JSON.parse(xhr.responseText);

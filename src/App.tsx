@@ -1,12 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { ScopeProvider } from './context/ScopeContext';
-import { ShopScopeProvider } from './context/ShopScopeContext';
-import { StoreProvider } from './contexts/StoreContext';
 import { Toaster } from 'sonner';
 import { MainLayout } from './components/layout/MainLayout';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { ProtectedRoute, RoleRoute } from './components/auth/ProtectedRoute';
 
 // Core Pages
 import { HQCommandCenter } from './pages/HQCommandCenter';
@@ -56,68 +53,66 @@ import { LoginPage } from './pages/LoginPage';
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ScopeProvider>
-        <ShopScopeProvider>
-        <StoreProvider>
         <Toaster position="top-right" richColors closeButton />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route element={<ProtectedRoute />}>
-                {/* Core Modules */}
-                <Route index element={<HQCommandCenter />} />
-                <Route path="orders" element={<OrdersPage />} />
-                <Route path="warehouse/receiving" element={<WarehouseQCPage />} />
-                <Route path="inventory" element={<InventoryPage />} />
-                <Route path="vendors" element={<VendorsPage />} />
-                <Route path="finance" element={<FinancePage />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
+            {/* Session gate → layout → role gate. Nothing (not even the sidebar)
+                renders unless the session is verified. */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route element={<RoleRoute />}>
+                  {/* Core Modules */}
+                  <Route index element={<HQCommandCenter />} />
+                  <Route path="orders" element={<OrdersPage />} />
+                  <Route path="warehouse/receiving" element={<WarehouseQCPage />} />
+                  <Route path="inventory" element={<InventoryPage />} />
+                  <Route path="vendors" element={<VendorsPage />} />
+                  <Route path="finance" element={<FinancePage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
 
-                {/* Full Route Architecture Modules */}
-                <Route path="catalogue" element={<ProductsPage />} />
-                <Route path="products/families" element={<ProductFamiliesPage />} />
-                <Route path="products/families/:id" element={<ProductFamilyDetailPage />} />
-                <Route path="categories" element={<CategoriesPage />} />
-                <Route path="fulfilment" element={<FulfilmentPage />} />
-                <Route path="delivery" element={<DeliveryPage />} />
-                <Route path="crm" element={<CRMPage />} />
-                <Route path="customer-activity" element={<CustomerActivityPage />} />
-                <Route path="first-time-offers" element={<FirstTimeOffersPage />} />
-                <Route path="customer-segments" element={<CustomerSegmentsPage />} />
-                <Route path="cart-milestones" element={<CartMilestonesPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
-                <Route path="support" element={<SupportPage />} />
-                <Route path="returns" element={<ReturnsPage />} />
-                <Route path="recalls" element={<RecallsPage />} />
-                <Route path="marketing" element={<MarketingPage />} />
-                <Route path="content" element={<ContentPage />} />
-                <Route path="themes" element={<ThemeLibraryPage />} />
-                <Route path="themes/new" element={<NewThemePage />} />
-                <Route path="themes/builder" element={<ThemeBuilderPage />} />
-                <Route path="themes/:id" element={<EditThemePage />} />
-                <Route path="theme-tabs" element={<ThemeTabsManagementPage />} />
-                <Route path="loyalty" element={<LoyaltyPage />} />
-                <Route path="traceability" element={<TraceabilityPage />} />
-                <Route path="governance" element={<GovernancePage />} />
-                <Route path="retention" element={<RetentionPage />} />
-                <Route path="abandoned-carts" element={<AbandonedCartsPage />} />
-                <Route path="platform" element={<PlatformPage />} />
-                <Route path="merchandising" element={<MerchandisingPage />} />
-                <Route path="shops" element={<ShopsPage />} />
-                <Route path="shops/:id" element={<StoreDetailPage />} />
-                <Route path="configuration" element={<ConfigurationPage />} />
-                <Route path="configuration/maps" element={<MapsSettingsPage />} />
+                  {/* Full Route Architecture Modules */}
+                  <Route path="catalogue" element={<ProductsPage />} />
+                  <Route path="products/families" element={<ProductFamiliesPage />} />
+                  <Route path="products/families/:id" element={<ProductFamilyDetailPage />} />
+                  <Route path="categories" element={<CategoriesPage />} />
+                  <Route path="fulfilment" element={<FulfilmentPage />} />
+                  <Route path="delivery" element={<DeliveryPage />} />
+                  <Route path="crm" element={<CRMPage />} />
+                  <Route path="customer-activity" element={<CustomerActivityPage />} />
+                  <Route path="first-time-offers" element={<FirstTimeOffersPage />} />
+                  <Route path="customer-segments" element={<CustomerSegmentsPage />} />
+                  <Route path="cart-milestones" element={<CartMilestonesPage />} />
+                  <Route path="notifications" element={<NotificationsPage />} />
+                  <Route path="support" element={<SupportPage />} />
+                  <Route path="returns" element={<ReturnsPage />} />
+                  <Route path="recalls" element={<RecallsPage />} />
+                  <Route path="marketing" element={<MarketingPage />} />
+                  <Route path="content" element={<ContentPage />} />
+                  <Route path="themes" element={<ThemeLibraryPage />} />
+                  <Route path="themes/new" element={<NewThemePage />} />
+                  <Route path="themes/builder" element={<ThemeBuilderPage />} />
+                  <Route path="themes/:id" element={<EditThemePage />} />
+                  <Route path="theme-tabs" element={<ThemeTabsManagementPage />} />
+                  <Route path="loyalty" element={<LoyaltyPage />} />
+                  <Route path="traceability" element={<TraceabilityPage />} />
+                  <Route path="governance" element={<GovernancePage />} />
+                  <Route path="retention" element={<RetentionPage />} />
+                  <Route path="abandoned-carts" element={<AbandonedCartsPage />} />
+                  <Route path="platform" element={<PlatformPage />} />
+                  <Route path="merchandising" element={<MerchandisingPage />} />
+                  <Route path="shops" element={<ShopsPage />} />
+                  <Route path="shops/:id" element={<StoreDetailPage />} />
+                  <Route path="configuration" element={<ConfigurationPage />} />
+                  <Route path="configuration/maps" element={<MapsSettingsPage />} />
+                </Route>
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
-
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
         </BrowserRouter>
-        </StoreProvider>
-        </ShopScopeProvider>
-      </ScopeProvider>
     </AuthProvider>
   );
 };
