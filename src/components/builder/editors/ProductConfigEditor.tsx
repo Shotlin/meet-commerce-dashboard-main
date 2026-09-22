@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import type { SectionType } from "@/types/theme.types"
 import AnimationPicker from "./AnimationPicker"
 import CardShapePicker from "./CardShapePicker"
+import SectionHeaderEditor from "./SectionHeaderEditor"
 
 interface ProductConfigEditorProps {
   config: Record<string, unknown>
@@ -56,6 +57,10 @@ export default function ProductConfigEditor({
       : DEFAULT_PRODUCT_CARD_STYLE
   const showColumns = sectionType === "category_product_grid"
   const showAutoScroll = sectionType === "product_carousel" && productCardStyle !== "PREMIUM_FRESH"
+  const supportsSectionHeader = sectionType === "product_carousel" || sectionType === "category_product_grid"
+  const sectionName = sectionType === "product_carousel"
+    ? "Premium Fresh — Product Slider"
+    : "Premium Fresh — Product Grid"
 
   const patchConfig = (patch: Partial<Record<string, unknown>>) => {
     onChange({
@@ -66,23 +71,26 @@ export default function ProductConfigEditor({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="product-editor-title">Title</Label>
-        <Input
-          id="product-editor-title"
-          value={title}
-          onChange={(event) => patchConfig({ title: event.target.value })}
-          placeholder="Products"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="product-editor-subtitle">Subtitle</Label>
-        <Input id="product-editor-subtitle" value={typeof config.subtitle === "string" ? config.subtitle : ""}
-          onChange={(event) => patchConfig({ subtitle: event.target.value })}
-          placeholder="Here's what everyone's eating!" />
-        <p className="text-xs text-slate-500">Add photos one by one in Products → Edit product → Images. Their saved order becomes the card’s photo slides. Product description, weight, highlights (pieces and serves), price and delivery time come from the catalog.</p>
-      </div>
+      {supportsSectionHeader ? (
+        <SectionHeaderEditor config={config} onChange={onChange} sectionName={sectionName} />
+      ) : <>
+        <div className="space-y-2">
+          <Label htmlFor="product-editor-title">Title</Label>
+          <Input
+            id="product-editor-title"
+            value={title}
+            onChange={(event) => patchConfig({ title: event.target.value })}
+            placeholder="Products"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="product-editor-subtitle">Subtitle</Label>
+          <Input id="product-editor-subtitle" value={typeof config.subtitle === "string" ? config.subtitle : ""}
+            onChange={(event) => patchConfig({ subtitle: event.target.value })}
+            placeholder="Here's what everyone's eating!" />
+          <p className="text-xs text-slate-500">Add photos one by one in Products → Edit product → Images. Their saved order becomes the card’s photo slides. Product description, weight, highlights (pieces and serves), price and delivery time come from the catalog.</p>
+        </div>
+      </>}
       {showColumns ? (
         <div className="space-y-3">
           <div className="text-sm font-medium text-slate-900">Columns</div>

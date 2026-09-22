@@ -5,6 +5,7 @@ import { cn } from "../../../lib/utils"
 import type { Product, PreviewProps } from "./index"
 import PremiumProductPreview from "./PremiumProductPreview"
 import styles from "../MobilePreviewFrame.module.css"
+import { getSectionHeaderConfig } from "../sectionHeader"
 
 function ProductGridPreview({
   section,
@@ -13,6 +14,7 @@ function ProductGridPreview({
   products,
 }: PreviewProps) {
   const config = section.config as Record<string, unknown>
+  const header = getSectionHeaderConfig(config)
   if (!config.product_card_style || config.product_card_style === "PREMIUM_FRESH") {
     return <PremiumProductPreview section={section} isSelected={isSelected} onClick={onClick} products={products} />
   }
@@ -37,7 +39,7 @@ function ProductGridPreview({
       aria-pressed={isSelected}
     >
       {/* Section header — Flutter style */}
-      <div style={{ padding: "12px 18px 0" }}>
+      {header.showText ? <div style={{ padding: "12px 18px 0" }}>
         <div
           style={{
             fontSize: 18,
@@ -48,7 +50,10 @@ function ProductGridPreview({
         >
           {title}
         </div>
-      </div>
+      </div> : null}
+      {header.showGraphic && header.imageUrl ? <div style={{ margin: `12px ${header.horizontalMargin}px ${header.bottomSpacing}px`, aspectRatio: String(header.aspectRatio), borderRadius: header.borderRadius, overflow: "hidden", background: "#f8fafc" }}>
+        <img src={header.imageUrl} alt="Section banner" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+      </div> : null}
 
       {/* Product grid */}
       <div

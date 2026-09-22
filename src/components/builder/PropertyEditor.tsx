@@ -30,6 +30,8 @@ import MosaicEditor from "./editors/MosaicEditor"
 import ProductConfigEditor from "./editors/ProductConfigEditor"
 import AnimationPicker from "./editors/AnimationPicker"
 import ArchedShowcaseEditor from "./editors/ArchedShowcaseEditor"
+import SectionHeaderEditor from "./editors/SectionHeaderEditor"
+import { getCategoryLayoutConfig } from "./sectionHeader"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -212,10 +214,8 @@ function CategoryIconsEditor({
   onChange: (config: Record<string, unknown>) => void
 }) {
   const { data: categories } = useCategories()
-  const iconSize = typeof config.icon_size === "number" ? config.icon_size : 64
-  const gap = typeof config.gap === "number" ? config.gap : 12
-  const showLabels =
-    typeof config.show_labels === "boolean" ? config.show_labels : true
+  const categoryLayout = getCategoryLayoutConfig(config)
+  const { iconSize, gap, rowGap, showLabels } = categoryLayout
   const items = normalizeCategoryIconItems(config.items)
   const availableCategories = (categories ?? [])
     .filter((category) => category.is_active)
@@ -249,6 +249,47 @@ function CategoryIconsEditor({
 
   return (
     <div className="space-y-6">
+      <SectionHeaderEditor
+        config={config}
+        onChange={onChange}
+        sectionName="Category Icons"
+      />
+
+      <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <div>
+          <div className="text-sm font-semibold text-slate-900">Layout</div>
+          <div className="mt-1 text-xs text-slate-500">Choose a horizontal rail or a wrapped four-column grid.</div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            ["horizontal_scroll", "Horizontal Scroll"],
+            ["grid", "Multi-row Grid"],
+          ] as const).map(([mode, label]) => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={categoryLayout.mode === mode}
+              onClick={() => patch({ layout_mode: mode, columns: 4 })}
+              className={cn(
+                "rounded-xl border px-3 py-3 text-sm font-semibold transition-colors",
+                categoryLayout.mode === mode
+                  ? "border-brand-500 bg-brand-50 text-brand-800"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <div>
+            <div className="text-sm font-medium text-slate-900">Columns</div>
+            <div className="text-xs text-slate-500">Premium Fresh mobile layout uses four columns.</div>
+          </div>
+          <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">4</div>
+        </div>
+      </div>
+
       <RangeControl
         id="category-icon-size"
         label="Icon Size"
@@ -270,6 +311,19 @@ function CategoryIconsEditor({
         unit="px"
         onChange={(value) => patch({ gap: value })}
       />
+
+      {categoryLayout.mode === "grid" ? (
+        <RangeControl
+          id="category-icon-row-gap"
+          label="Vertical Gap"
+          value={rowGap}
+          min={4}
+          max={32}
+          step={2}
+          unit="px"
+          onChange={(value) => patch({ row_gap: value })}
+        />
+      ) : null}
 
       <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
         <div>

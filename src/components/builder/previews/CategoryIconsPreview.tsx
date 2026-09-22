@@ -4,6 +4,7 @@ import { memo } from "react"
 import { cn } from "../../../lib/utils"
 import type { PreviewProps } from "./index"
 import styles from "../MobilePreviewFrame.module.css"
+import { getCategoryLayoutConfig, getSectionHeaderConfig } from "../sectionHeader"
 
 const FALLBACK_ICONS = ["🥦", "🥛", "🍞", "🧃", "🍎", "✨", "🥩", "🧄"]
 const FALLBACK_LABELS = [
@@ -46,15 +47,15 @@ function CategoryIconsPreview({
   categories,
 }: PreviewProps) {
   const config = section.config as Record<string, unknown>
-  const iconSize =
-    typeof config.icon_size === "number" && config.icon_size > 0 ? config.icon_size : 64
-  const gap =
-    typeof config.gap === "number" && config.gap >= 0 ? config.gap : 12
-  const showLabels = config.show_labels !== false
+  const header = getSectionHeaderConfig(config)
+  const categoryLayout = getCategoryLayoutConfig(config)
+  const { iconSize, gap, rowGap, showLabels } = categoryLayout
   const configuredItems = normalizeItems(config.items)
   const categoryMap = new Map((categories ?? []).map((category) => [category.id, category]))
 
-  const resolvedCategories = (categories ?? []).slice(0, 8)
+  // The preview must reflect the same item count as the mobile manifest: a
+  // ten-category selection is a 4/4/2 grid, not an eight-item approximation.
+  const resolvedCategories = categories ?? []
   const resolvedItems = configuredItems.length > 0
     ? configuredItems.slice(0, 10).map((item, index) => {
       const linkedCategory = item.category_id ? categoryMap.get(item.category_id) : undefined
@@ -81,12 +82,25 @@ function CategoryIconsPreview({
       onClick={onClick}
       aria-pressed={isSelected}
     >
-      <div style={{ padding: "10px 0 6px" }}>
+      <div style={{ padding: "10px 0 6px", textAlign: "left" }}>
+        {header.showText && (typeof config.title === "string" || typeof config.subtitle === "string") ? (
+          <div style={{ padding: "0 16px 10px" }}>
+            {typeof config.title === "string" && config.title.trim() ? <div style={{ color: "#141414", fontSize: 18, fontWeight: 700 }}>{config.title}</div> : null}
+            {typeof config.subtitle === "string" && config.subtitle.trim() ? <div style={{ color: "#626262", fontSize: 12, marginTop: 4 }}>{config.subtitle}</div> : null}
+          </div>
+        ) : null}
+        {header.showGraphic && header.imageUrl ? (
+          <div style={{ margin: `0 ${header.horizontalMargin}px ${header.bottomSpacing}px`, aspectRatio: String(header.aspectRatio), borderRadius: header.borderRadius, overflow: "hidden", background: "#f8fafc" }}>
+            <img src={header.imageUrl} alt="Section banner" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+        ) : null}
         <div
           style={{
-            display: "flex",
-            gap,
-            overflowX: "auto",
+            display: categoryLayout.mode === "grid" ? "grid" : "flex",
+            gridTemplateColumns: categoryLayout.mode === "grid" ? "repeat(4, minmax(0, 1fr))" : undefined,
+            columnGap: gap,
+            rowGap: categoryLayout.mode === "grid" ? rowGap : undefined,
+            overflowX: categoryLayout.mode === "grid" ? "hidden" : "auto",
             scrollbarWidth: "none",
             padding: "0 16px",
           }}
@@ -96,7 +110,8 @@ function CategoryIconsPreview({
               <div
                 key={item.key}
                 style={{
-                  minWidth: 82,
+                  minWidth: categoryLayout.mode === "grid" ? 0 : 82,
+                  width: categoryLayout.mode === "grid" ? "100%" : undefined,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -157,7 +172,8 @@ function CategoryIconsPreview({
               <div
                 key={cat.id}
                 style={{
-                  minWidth: 82,
+                  minWidth: categoryLayout.mode === "grid" ? 0 : 82,
+                  width: categoryLayout.mode === "grid" ? "100%" : undefined,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -219,7 +235,8 @@ function CategoryIconsPreview({
               <div
                 key={emoji}
                 style={{
-                  minWidth: 82,
+                  minWidth: categoryLayout.mode === "grid" ? 0 : 82,
+                  width: categoryLayout.mode === "grid" ? "100%" : undefined,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
