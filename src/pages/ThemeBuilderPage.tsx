@@ -72,6 +72,8 @@ import { useStoreContext } from "@/contexts/StoreContext"
 import { useShopScope } from "@/context/ShopScopeContext"
 import { ShopSwitcher } from "@/components/layout/ShopSwitcher"
 import { getSections, getSectionVersions } from "@/services/sections.service"
+import { resolveTabThemeData } from "@/components/builder/themeCascade"
+import { sectionsQueryKey, sectionVersionsQueryKey } from "@/hooks/useSections"
 import type {
   MerchBinding,
   ScheduleSectionLayoutPayload,
@@ -341,10 +343,16 @@ function ThemeBuilderPageContent() {
 
   const activeTheme: Theme | null = themeForTab(activeTab)
 
-  const activeThemeData: ThemeData | null =
-    activeTheme?.theme_data ??
-    themeForTab(themeTabs.find((tab) => tab.key === "all") ?? null)?.theme_data ??
-    null
+  // What this tab ACTUALLY looks like to a customer: "All"'s theme cascaded
+  // with this tab's own row on top, header image excluded from that cascade
+  // — the exact rule the backend applies when building /theme/tabs (mobile's
+  // only source of truth). A raw fallback to "All" verbatim (including its
+  // header image) here would show something no customer will ever see.
+  const allThemeData =
+    themeForTab(themeTabs.find((tab) => tab.key === "all") ?? null)?.theme_data ?? null
+  const activeThemeData: ThemeData | null = activeTab
+    ? resolveTabThemeData(allThemeData, activeTab.key, activeTheme?.theme_data ?? null)
+    : null
 
   const [chromeRegionPreviewOverride, setChromeRegionPreviewOverride] =
     useState<ThemeData | null>(null)
@@ -354,6 +362,43 @@ function ThemeBuilderPageContent() {
       setChromeRegionPreviewOverride(null)
     }
   }, [selectedChromeRegion])
+
+  // An unapplied chrome-region draft belongs to ONE theme — the tab it was
+  // edited on. If the tab (or its underlying theme row) changes out from
+  // under it, drop the draft immediately: the alternative is the classic bug
+  // this page used to have, where a still-open Header Background editor kept
+  // painting the PREVIOUS tab's unsaved image/colors over whatever tab you
+  // switch to next, and only a page refresh cleared it.
+  const chromeDraftThemeId = useRef<string | null>(null)
+  useEffect(() => {
+    const currentId = activeTheme?.id ?? null
+    if (chromeDraftThemeId.current !== currentId) {
+      chromeDraftThemeId.current = currentId
+      setChromeRegionPreviewOverride(null)
+    }
+  }, [activeTheme?.id])
+
+  // Physical-shop isolation: unsaved local edits, the section-list selection
+  // and any open chrome-region draft belong to the shop they were made
+  // under. Same "discard local state, let the data re-sync" rule the store
+  // switch above already applies — `useSections`/`useSectionVersions` are
+  // already keyed by shop, so simply clearing `isDirty` lets the existing
+  // data-sync effect load the NEW shop's sections; nothing here can show one
+  // shop's draft against another shop's actual data. (The theme-id effect
+  // just above also clears the chrome draft whenever the resolved Theme row
+  // changes, which a shop switch usually causes too — this is the backstop
+  // for the one case it wouldn't: a tab with no per-shop override on either
+  // shop, where the resolved theme id is coincidentally the same.)
+  const prevShopIdRef = useRef(activeShopId)
+  useEffect(() => {
+    if (prevShopIdRef.current !== activeShopId) {
+      setIsDirty(false)
+      setSelectedSectionId(null)
+      setSelectedChromeRegion(null)
+      setChromeRegionPreviewOverride(null)
+      prevShopIdRef.current = activeShopId
+    }
+  }, [activeShopId])
 
   const previewThemeData = chromeRegionPreviewOverride ?? activeThemeData
 
@@ -472,6 +517,13 @@ function ThemeBuilderPageContent() {
     setIsDirty(true)
   }
 
+  // Bumped at the start of every switch; a switch only applies its result if
+  // it is still the LATEST one requested. `isTabSwitching` already blocks a
+  // second switch from starting while one is in flight, so in practice this
+  // can never actually fire stale — it exists so "latest selection wins"
+  // holds structurally, not just because of that guard.
+  const tabSwitchGeneration = useRef(0)
+
   const handleTabChange = async (tabId: string) => {
     if (tabId === activeTabId || isTabSwitching) return
 
@@ -482,22 +534,36 @@ function ThemeBuilderPageContent() {
       return
     }
 
+    const generation = ++tabSwitchGeneration.current
     setIsTabSwitching(true)
+    // Synchronously, in the SAME batch as leaving the old tab: an unapplied
+    // chrome-region draft (e.g. an edited-but-not-Applied Header Background)
+    // belongs to the tab being left. Clearing it here — not only in the
+    // effect that watches activeTheme?.id — means the new tab's preview can
+    // never show even one frame of the previous tab's unsaved chrome.
+    setSelectedChromeRegion(null)
+    setChromeRegionPreviewOverride(null)
 
     try {
       const nextTab = themeTabs.find((tab) => tab.id === tabId) ?? null
+      // Same key builders `useSections`/`useSectionVersions` read from — a
+      // mismatched hand-rolled key here would warm a cache entry nothing
+      // else ever reads, and — because sections are shop-scoped server-side
+      // — must include the same shop the rest of the page is showing.
       const [nextSections, nextVersions] = await Promise.all([
         queryClient.fetchQuery({
-          queryKey: ["sections", tabId],
+          queryKey: sectionsQueryKey(tabId, activeShopId),
           queryFn: () => getSections(tabId),
           staleTime: 30_000,
         }),
         queryClient.fetchQuery({
-          queryKey: ["sections", tabId, "versions"],
+          queryKey: sectionVersionsQueryKey(tabId, activeShopId),
           queryFn: () => getSectionVersions(tabId),
           staleTime: 30_000,
         }),
       ])
+
+      if (generation !== tabSwitchGeneration.current) return
 
       if (nextTab) {
         setRequestedTabKey(nextTab.key)
@@ -509,11 +575,14 @@ function ThemeBuilderPageContent() {
       setPersistedStatus(derivePersistedStatus(nextVersions[0] ?? null))
       setVersionNumber(Math.max(1, nextVersions[0]?.version ?? 1))
     } catch (error) {
+      if (generation !== tabSwitchGeneration.current) return
       toast.error(
         error instanceof Error ? error.message : "Failed to switch tabs"
       )
     } finally {
-      setIsTabSwitching(false)
+      if (generation === tabSwitchGeneration.current) {
+        setIsTabSwitching(false)
+      }
     }
   }
 

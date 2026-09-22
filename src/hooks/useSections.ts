@@ -22,9 +22,23 @@ import type {
   UpdateSectionPayload,
 } from "@/types/theme.types"
 
+// Sections (and section-schedule versions) are scoped per shop on the server
+// — see admin/sections's `ensureShopLayout`/`shop_id IS NOT DISTINCT FROM` —
+// so `shopId` must be part of the cache identity or a shop switch would keep
+// showing the previous shop's sections. `handleTabChange`'s manual prefetch
+// in ThemeBuilderPage MUST build its key through these same functions: a
+// hand-rolled key that doesn't match warms a cache entry nothing ever reads.
+export function sectionsQueryKey(tabId: string | null, shopId: string | null = null) {
+  return ["sections", tabId, shopId ?? "global"] as const
+}
+
+export function sectionVersionsQueryKey(tabId: string | null, shopId: string | null = null) {
+  return ["sections", tabId, shopId ?? "global", "versions"] as const
+}
+
 export function useSections(tabId: string | null, shopId: string | null = null) {
   return useQuery({
-    queryKey: ["sections", tabId, shopId ?? "global"],
+    queryKey: sectionsQueryKey(tabId, shopId),
     queryFn: () => getSections(tabId!),
     enabled: !!tabId,
     staleTime: 30_000,
@@ -33,7 +47,7 @@ export function useSections(tabId: string | null, shopId: string | null = null) 
 
 export function useSectionVersions(tabId: string | null, shopId: string | null = null) {
   return useQuery({
-    queryKey: ["sections", tabId, shopId ?? "global", "versions"],
+    queryKey: sectionVersionsQueryKey(tabId, shopId),
     queryFn: () => getSectionVersions(tabId!),
     enabled: !!tabId,
     staleTime: 30_000,
