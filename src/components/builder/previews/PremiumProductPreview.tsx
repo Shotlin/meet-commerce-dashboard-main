@@ -52,7 +52,7 @@ function PremiumProductPreview({ section, isSelected, onClick, products = [] }: 
       <div style={{ fontSize: 21, fontWeight: 700, letterSpacing: -0.35, color: "#141414" }}>{String(config.title || "Our current hits")}</div>
       {config.subtitle ? <div style={{ color: "#626262", fontSize: 14, marginTop: 5, marginBottom: 14 }}>{String(config.subtitle)}</div> : null}
     </> : null}
-    {header.showGraphic && header.imageUrl ? <div style={{ margin: `0 ${header.horizontalMargin}px ${header.bottomSpacing}px`, aspectRatio: String(header.aspectRatio), borderRadius: header.borderRadius, overflow: "hidden", background: "#f8fafc" }}>
+    {header.showGraphic && header.imageUrl ? <div style={{ margin: `0 ${header.horizontalMargin - 18}px ${header.bottomSpacing}px`, aspectRatio: String(header.aspectRatio), borderRadius: header.borderRadius, overflow: "hidden", background: "#f8fafc" }}>
       <img src={header.imageUrl} alt="Section banner" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
     </div> : null}
     {products.length ? <div style={{ display: rail ? "flex" : "grid", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap: rail ? 24 : 22, overflowX: rail ? "auto" : undefined, padding: "12px 7px 10px 0", scrollSnapType: "x mandatory" }}>

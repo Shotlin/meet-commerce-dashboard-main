@@ -14,8 +14,6 @@ interface ThemeImageUploaderProps {
   accept?: string
   /** Recommended source dimensions, shown as a hint under the dropzone (e.g. "1200 × 500px"). */
   hint?: string
-  /** Optional client-side cap for artwork with a documented upload limit. */
-  maxFileSizeBytes?: number
   /**
    * How the preview thumbnail fits the image. "cover" (default) crops to
    * fill — fine for square/product thumbnails. "contain" shows the whole
@@ -43,7 +41,6 @@ export function ThemeImageUploader({
   accept = "image/*",
   hint,
   previewFit = "cover",
-  maxFileSizeBytes,
 }: ThemeImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -53,10 +50,6 @@ export function ThemeImageUploader({
   const showImagePreview = shouldUseImageUpload && looksLikeImageUrl(value)
 
   const handleFile = async (file: File) => {
-    if (maxFileSizeBytes != null && file.size > maxFileSizeBytes) {
-      toast.error(`Image must be ${Math.round(maxFileSizeBytes / (1024 * 1024))} MB or smaller`)
-      return
-    }
     setIsUploading(true)
     setProgress(0)
 

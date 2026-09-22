@@ -120,8 +120,8 @@ function CategoryIconsPreview({
               >
                 <div
                   style={{
-                    width: iconSize,
-                    height: iconSize,
+                    width: `min(100%, ${iconSize}px)`,
+                    aspectRatio: "1",
                     borderRadius: 22,
                     background: "#ffffff",
                     border: "1px solid #f0f0f0",
@@ -150,7 +150,7 @@ function CategoryIconsPreview({
                 {showLabels ? (
                   <span
                     style={{
-                      width: 82,
+                      width: "100%",
                       fontSize: 11,
                       lineHeight: 1.05,
                       fontWeight: 700,
@@ -183,8 +183,8 @@ function CategoryIconsPreview({
                 {/* Category icon container — matches Flutter: 64px, borderRadius 22 */}
                 <div
                   style={{
-                    width: iconSize,
-                    height: iconSize,
+                    width: `min(100%, ${iconSize}px)`,
+                    aspectRatio: "1",
                     borderRadius: 22,
                     background: "#ffffff",
                     border: "1px solid #f0f0f0",
@@ -213,7 +213,7 @@ function CategoryIconsPreview({
                 {showLabels ? (
                   <span
                     style={{
-                      width: 82,
+                      width: "100%",
                       fontSize: 11,
                       lineHeight: 1.05,
                       fontWeight: 700,
@@ -245,8 +245,8 @@ function CategoryIconsPreview({
               >
                 <div
                   style={{
-                    width: iconSize,
-                    height: iconSize,
+                    width: `min(100%, ${iconSize}px)`,
+                    aspectRatio: "1",
                     borderRadius: 22,
                     background: "#ffffff",
                     border: "1px solid #f0f0f0",
@@ -261,12 +261,16 @@ function CategoryIconsPreview({
                 {showLabels ? (
                   <span
                     style={{
-                      width: 82,
+                      width: "100%",
                       fontSize: 11,
                       lineHeight: 1.05,
                       fontWeight: 700,
                       color: "#131313",
                       textAlign: "center",
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
                     }}
                   >
                     {FALLBACK_LABELS[index]}

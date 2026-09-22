@@ -92,7 +92,6 @@ export default function SectionHeaderEditor({
             onChange={(value) => patch({ image_url: value })}
             accept="image/png,image/jpeg,image/webp"
             previewFit="contain"
-            maxFileSizeBytes={2 * 1024 * 1024}
           />
           <div className="-mt-3 space-y-0.5 text-xs text-slate-500">
             <div>Recommended size: 1080 × 300 px</div>
