@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import type { SectionType } from "@/types/theme.types"
 import AnimationPicker from "./AnimationPicker"
 import CardShapePicker from "./CardShapePicker"
+import SectionContainerEditor from "./SectionContainerEditor"
 import SectionHeaderEditor from "./SectionHeaderEditor"
 
 interface ProductConfigEditorProps {
@@ -72,7 +73,10 @@ export default function ProductConfigEditor({
   return (
     <div className="space-y-6">
       {supportsSectionHeader ? (
-        <SectionHeaderEditor config={config} onChange={onChange} sectionName={sectionName} />
+        <>
+          <SectionHeaderEditor config={config} onChange={onChange} sectionName={sectionName} />
+          <SectionContainerEditor config={config} onChange={onChange} />
+        </>
       ) : <>
         <div className="space-y-2">
           <Label htmlFor="product-editor-title">Title</Label>

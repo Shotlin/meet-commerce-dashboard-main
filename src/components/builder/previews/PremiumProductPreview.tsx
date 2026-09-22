@@ -3,7 +3,7 @@ import { memo, useState } from "react"
 import { cn } from "../../../lib/utils"
 import type { Product, PreviewProps } from "./index"
 import styles from "../MobilePreviewFrame.module.css"
-import { getSectionHeaderConfig } from "../sectionHeader"
+import { getSectionContainerConfig, getSectionHeaderConfig } from "../sectionHeader"
 
 function PhotoCard({ product, rail }: { product: Product; rail: boolean }) {
   const [slide, setSlide] = useState(0)
@@ -42,22 +42,47 @@ function PhotoCard({ product, rail }: { product: Product; rail: boolean }) {
 function PremiumProductPreview({ section, isSelected, onClick, products = [] }: PreviewProps) {
   const config = section.config as Record<string, unknown>
   const header = getSectionHeaderConfig(config)
+  const container = getSectionContainerConfig(config)
   const rail = section.section_type === "product_carousel"
   const columns = Math.min(2, Math.max(1, Number(config.columns) || 1))
+  const hasBanner = header.showGraphic && Boolean(header.imageUrl)
+
   return <div role="button" tabIndex={0} aria-label="Select product section" aria-pressed={isSelected}
     onClick={onClick} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); onClick() } }}
     className={cn("premium-product-section", styles.sectionSlot, styles.sectionSlotHover, isSelected && styles.sectionSlotSelected)}
-    style={{ background: "white", padding: "24px 18px", fontFamily: "'Premium DM Sans', Arial, sans-serif", textAlign: "left" }}>
-    {header.showText ? <>
+    style={{
+      background: container.backgroundColor,
+      border: container.borderWidth > 0 ? `${container.borderWidth}px solid ${container.borderColor}` : undefined,
+      // Only the top corners round — the banner is the section's top cover,
+      // the bottom edge is a plain seam with whatever comes next.
+      borderRadius: `${container.topRadius}px ${container.topRadius}px 0 0`,
+      overflow: "hidden",
+      fontFamily: "'Premium DM Sans', Arial, sans-serif",
+      textAlign: "left",
+    }}>
+    {header.showText ? <div style={{ padding: "24px 18px 0" }}>
       <div style={{ fontSize: 21, fontWeight: 700, letterSpacing: -0.35, color: "#141414" }}>{String(config.title || "Our current hits")}</div>
-      {config.subtitle ? <div style={{ color: "#626262", fontSize: 14, marginTop: 5, marginBottom: 14 }}>{String(config.subtitle)}</div> : null}
-    </> : null}
-    {header.showGraphic && header.imageUrl ? <div style={{ margin: `0 ${header.horizontalMargin - 18}px ${header.bottomSpacing}px`, aspectRatio: String(header.aspectRatio), borderRadius: header.borderRadius, overflow: "hidden", background: "#f8fafc" }}>
-      <img src={header.imageUrl} alt="Section banner" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+      {config.subtitle ? <div style={{ color: "#626262", fontSize: 14, marginTop: 5 }}>{String(config.subtitle)}</div> : null}
     </div> : null}
-    {products.length ? <div style={{ display: rail ? "flex" : "grid", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap: rail ? 24 : 22, overflowX: rail ? "auto" : undefined, padding: "12px 7px 10px 0", scrollSnapType: "x mandatory" }}>
-      {products.map((product) => <div key={product.id} style={{ flex: rail ? "0 0 66%" : undefined, minWidth: 0, scrollSnapAlign: "start" }}><PhotoCard product={product} rail={rail} /></div>)}
-    </div> : <div style={{ marginTop: 16, padding: "44px 20px", borderRadius: 14, background: "#F8F5F1", color: "#777", textAlign: "center", fontSize: 13 }}>Choose products to preview their photos and pricing.</div>}
+    {/* Full-width, flush against the container's top edge (0 margin/padding)
+        when nothing renders above it — the container's own overflow:hidden +
+        borderRadius rounds its top corners for free, so the banner never
+        needs a radius of its own. */}
+    {hasBanner ? <div
+      style={{
+        width: "100%",
+        aspectRatio: String(header.aspectRatio),
+        background: "#f8fafc",
+        marginTop: header.showText ? header.bottomSpacing : 0,
+      }}
+    >
+      <img src={header.imageUrl!} alt="Section banner" style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }} />
+    </div> : null}
+    <div style={{ padding: `${hasBanner ? header.bottomSpacing : header.showText ? 14 : 24}px 18px 24px` }}>
+      {products.length ? <div style={{ display: rail ? "flex" : "grid", gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap: rail ? 24 : 22, overflowX: rail ? "auto" : undefined, padding: "0 7px 10px 0", scrollSnapType: "x mandatory" }}>
+        {products.map((product) => <div key={product.id} style={{ flex: rail ? "0 0 66%" : undefined, minWidth: 0, scrollSnapAlign: "start" }}><PhotoCard product={product} rail={rail} /></div>)}
+      </div> : <div style={{ padding: "44px 20px", borderRadius: 14, background: "#F8F5F1", color: "#777", textAlign: "center", fontSize: 13 }}>Choose products to preview their photos and pricing.</div>}
+    </div>
   </div>
 }
 export default memo(PremiumProductPreview)

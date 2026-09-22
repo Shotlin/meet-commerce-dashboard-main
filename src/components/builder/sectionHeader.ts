@@ -63,6 +63,54 @@ export function patchSectionHeader(
   return { ...config, section_header: { ...current, ...patch } }
 }
 
+/**
+ * The premium card/box that wraps a section's graphic banner + body into one
+ * continuous block ("Premium Fresh — Product Slider" / "Premium Fresh —
+ * Product Grid"). Flat top-level `container_*` config keys, same convention
+ * as `container_color` on the fee-strip/bank-offers editors — read by both
+ * `PremiumProductPreview` here and `SectionContainerConfig` in the Flutter
+ * app (`core/theme/section_header_config.dart`); keep the two in sync.
+ */
+export interface SectionContainerConfig {
+  backgroundColor: string
+  borderColor: string
+  borderWidth: number
+  topRadius: number
+}
+
+export const DEFAULT_SECTION_CONTAINER_BACKGROUND = "#FFFFFF"
+export const DEFAULT_SECTION_CONTAINER_BORDER_COLOR = "#E5E7EB"
+export const DEFAULT_SECTION_CONTAINER_TOP_RADIUS = 16
+
+export function getSectionContainerConfig(
+  config: Record<string, unknown>
+): SectionContainerConfig {
+  const background =
+    typeof config.container_background_color === "string" &&
+    config.container_background_color.trim()
+      ? config.container_background_color
+      : DEFAULT_SECTION_CONTAINER_BACKGROUND
+  const border =
+    typeof config.container_border_color === "string" &&
+    config.container_border_color.trim()
+      ? config.container_border_color
+      : DEFAULT_SECTION_CONTAINER_BORDER_COLOR
+
+  return {
+    backgroundColor: background,
+    borderColor: border,
+    borderWidth: Math.max(0, asNumber(config.container_border_width, 0)),
+    topRadius: Math.max(0, asNumber(config.container_top_radius, DEFAULT_SECTION_CONTAINER_TOP_RADIUS)),
+  }
+}
+
+export function patchSectionContainer(
+  config: Record<string, unknown>,
+  patch: Partial<Record<string, unknown>>
+) {
+  return { ...config, ...patch }
+}
+
 export function buildSectionHeaderPrompt({
   sectionName,
   storeName,
