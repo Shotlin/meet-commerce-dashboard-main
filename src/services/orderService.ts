@@ -34,7 +34,13 @@ const adaptOrder = (b: any): Order => ({
   riderId: b.riderId || b.rider_id || b.rider?.id,
   riderName: b.riderName || b.rider_name || b.rider?.name,
   createdAt: b.createdAt || b.created_at || new Date().toISOString(),
-  warehouseLocation: b.warehouseLocation || b.shopName || 'HQ Central FC',
+  // Bug: `b.shopName` (camelCase) never matched the backend's real
+  // `shop_name` (snake_case, joined from the shops table in
+  // admin/orders/orders.repository.js#findAll) — apiClient does no
+  // case conversion, so this fell through to the hardcoded
+  // 'HQ Central FC' template placeholder for every single order,
+  // even when real shop data was already present in the response.
+  warehouseLocation: b.warehouseLocation || b.shopName || b.shop_name || 'Unassigned',
   cuttingEvidenceUrl: b.cuttingEvidenceUrl || b.video_evidence_url || '/assets/banner-01-premium-lamb.png',
   videoModerationStatus:
     b.videoModerationStatus === 'APPROVED' || b.videoModerationStatus === 'Approved'

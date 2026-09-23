@@ -13,10 +13,18 @@ import { orderService } from '../services/orderService';
 import { deliveryService, AssignableRider } from '../services/deliveryService';
 import { Order, VideoModerationStatus } from '../types';
 import { ShoppingBag, Video, Eye } from 'lucide-react';
+import { useShopScope } from '../context/ShopScopeContext';
 
 export const OrdersPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') || '';
+  // apiClient already attaches X-Shop-Id from this same scope to every
+  // request (services/apiClient.ts) — the backend now honours it
+  // (admin/orders/orders.repository.js#findAll). What was missing here was
+  // simply re-fetching when the branch selector changes; without this, the
+  // header changed but the already-loaded order list never refreshed to
+  // match it.
+  const { activeShopId } = useShopScope();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState(urlQuery);
@@ -35,7 +43,8 @@ export const OrdersPage: React.FC = () => {
   useEffect(() => {
     fetchOrders();
     fetchRiders();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeShopId]);
 
   const fetchOrders = async () => {
     setIsLoading(true);
