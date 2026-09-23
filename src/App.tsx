@@ -79,6 +79,11 @@ export const App: React.FC = () => {
                   <Route path="fulfilment" element={<FulfilmentPage />} />
                   <Route path="delivery" element={<DeliveryPage />} />
                   <Route path="crm" element={<CRMPage />} />
+                  {/* Alias so `/customers?customer=<uuid>` deep-links (from
+                      the Order Detail Drawer's Customer section) resolve to
+                      the same CRM/customer experience — `/crm` keeps working
+                      unchanged for existing links/bookmarks. */}
+                  <Route path="customers" element={<CRMPage />} />
                   <Route path="customer-activity" element={<CustomerActivityPage />} />
                   <Route path="first-time-offers" element={<FirstTimeOffersPage />} />
                   <Route path="customer-segments" element={<CustomerSegmentsPage />} />

@@ -246,6 +246,47 @@ class ApiClient {
     return this.request<T>('GET', endpoint, { params, headers: extraHeaders });
   }
 
+  /**
+   * For endpoints that return a binary body (PDF invoices/packing slips,
+   * CSV exports) instead of the usual `{ success, data }` JSON envelope —
+   * `request()`/`handleResponse()` always call `res.json()`, which would
+   * throw on a real PDF/CSV response, so this is a separate, minimal path
+   * that still attaches the same auth/shop headers and still ends the
+   * session on a real 401 (a download can 401 exactly like any other
+   * request; it must not be silently swallowed as "just try again").
+   */
+  public async getBlob(endpoint: string, params?: Record<string, any>): Promise<Blob> {
+    const headers = this.getHeaders();
+    const bearer = headers['Authorization'];
+    const tokenSent = bearer ? bearer.replace(/^Bearer /, '') : null;
+
+    let res: Response;
+    try {
+      res = await fetch(this.buildUrl(endpoint, params), { method: 'GET', headers });
+    } catch {
+      this.isConnected = false;
+      throw new ApiError(NETWORK_ERROR_MESSAGE, { isNetworkError: true });
+    }
+
+    if (!res.ok) {
+      if (res.status === 401 && tokenSent) {
+        sessionManager.reportUnauthorized(tokenSent);
+        throw new ApiError(SESSION_EXPIRED_MESSAGE, { status: 401, isAuthError: true });
+      }
+      let backendMessage: string | undefined;
+      try {
+        const body = await res.json();
+        backendMessage = body?.message;
+      } catch {
+        // Not JSON — the generic message below is all we have.
+      }
+      throw new ApiError(backendMessage || `HTTP error ${res.status}: ${res.statusText}`, { status: res.status });
+    }
+
+    this.isConnected = true;
+    return res.blob();
+  }
+
   public post<T>(endpoint: string, body: any = {}, extraHeaders?: Record<string, string>): Promise<ApiResponse<T>> {
     return this.request<T>('POST', endpoint, { body: body || {}, headers: extraHeaders });
   }

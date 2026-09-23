@@ -13,16 +13,25 @@ export type ScopeLocation =
   | 'Bengaluru Central FC' 
   | 'Vendor: MeatCraft Farms';
 
-export type OrderStatus = 
-  | 'Pending' 
-  | 'Confirmed' 
-  | 'In QC' 
-  | 'Cutting Completed' 
-  | 'Packed' 
-  | 'Out for Delivery' 
-  | 'Delivered' 
-  | 'Cancelled' 
-  | 'Returned';
+export type OrderStatus =
+  | 'Pending'
+  | 'Confirmed'
+  | 'In QC'
+  | 'Cutting Completed'
+  | 'Packed'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled'
+  | 'Returned'
+  // A real backend status this dashboard doesn't recognize — rendered as
+  // an "Unknown" badge instead of silently defaulting to 'Pending' or
+  // crashing. Meet Commerce's real order-status vocabulary is only
+  // PENDING/ORDER_PLACED/CONFIRMED/PREPARING/PACKED/OUT_FOR_DELIVERY/
+  // DELIVERED/CANCELLED/REFUNDED — 'In QC'/'Cutting Completed'/'Returned'
+  // above don't actually exist as real order statuses anywhere in this
+  // codebase (no backend value ever produces them); they're kept only so
+  // any old data/tests referencing them still type-check.
+  | 'Unknown';
 
 export type PaymentStatus = 'Paid' | 'Pending' | 'Refunded' | 'Failed';
 
@@ -47,7 +56,10 @@ export interface OrderItem {
   productName: string;
   category: string;
   cutType: string;
-  declaredWeightKg: number;
+  // Optional: Meet Commerce has no backend data model for declared/actual
+  // per-item weight at all (see orderService.ts's adaptOrder) — these are
+  // only ever populated for a system that actually records them.
+  declaredWeightKg?: number;
   actualWeightKg?: number;
   unitPrice: number;
   totalPrice: number;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Badge } from '../components/common/Badge';
@@ -13,7 +14,17 @@ type CrmTab = 'all' | 'ltv' | 'vip' | 'churned';
 
 export const CRMPage: React.FC = () => {
   const [tab, setTab] = useState<CrmTab>('all');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // URL-driven so a customer deep-link (`/crm?customer=<uuid>` or the
+  // `/customers` alias route below) opens the right profile and survives a
+  // refresh — the Order Detail Drawer's "Customer" section links here.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedId = searchParams.get('customer');
+  const setSelectedId = (id: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set('customer', id);
+    else next.delete('customer');
+    setSearchParams(next);
+  };
 
   const allQuery = useQuery({
     queryKey: queryKeys.customers.list(),
