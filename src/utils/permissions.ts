@@ -4,7 +4,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'HQ Admin': [
     '/', '/orders', '/warehouse/receiving', '/inventory', '/vendors', '/finance', '/analytics',
     '/fulfilment', '/delivery', '/shops', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
-    '/content', '/themes', '/themes/new', '/themes/builder', '/theme-tabs', '/loyalty', '/merchandising', '/traceability', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps'
+    '/content', '/themes', '/themes/new', '/themes/builder', '/theme-tabs', '/loyalty', '/merchandising', '/traceability', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay'
   ],
   'Warehouse Manager': [
     '/', '/orders', '/warehouse/receiving', '/inventory', '/fulfilment', '/delivery', '/shops', '/recalls', '/catalogue'
