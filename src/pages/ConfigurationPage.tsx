@@ -9,7 +9,7 @@ import { PaymentOffersPanel } from '../components/domain/PaymentOffersPanel';
 import { PincodeMappingsPanel } from '../components/domain/PincodeMappingsPanel';
 import { PaymentGatewayConfigPanel } from '../components/domain/PaymentGatewayConfigPanel';
 import { SupportSettingsPanel } from '../components/domain/SupportSettingsPanel';
-import { Map, Settings } from 'lucide-react';
+import { CreditCard, Map, Settings } from 'lucide-react';
 
 export const ConfigurationPage: React.FC = () => {
   return (
@@ -56,6 +56,27 @@ export const ConfigurationPage: React.FC = () => {
               </div>
             </div>
             <Link to="/configuration/maps">
+              <Button variant="outline" size="sm">
+                Configure
+              </Button>
+            </Link>
+          </div>
+
+          <div className="h-px bg-border my-3" />
+
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-[10px] bg-rose-50 flex items-center justify-center shrink-0">
+                <CreditCard className="w-4 h-4 text-brand-berry" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-ink">Razorpay</p>
+                <p className="text-[11px] text-status-neutral">
+                  TEST / LIVE credentials, connection testing, and environment switching — no .env edits needed.
+                </p>
+              </div>
+            </div>
+            <Link to="/configuration/razorpay">
               <Button variant="outline" size="sm">
                 Configure
               </Button>

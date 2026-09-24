@@ -48,6 +48,7 @@ import { ShopsPage } from './pages/ShopsPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import MapsSettingsPage from './pages/MapsSettingsPage';
+import RazorpaySettingsPage from './pages/RazorpaySettingsPage';
 import { LoginPage } from './pages/LoginPage';
 
 export const App: React.FC = () => {
@@ -110,6 +111,7 @@ export const App: React.FC = () => {
                   <Route path="shops/:id" element={<StoreDetailPage />} />
                   <Route path="configuration" element={<ConfigurationPage />} />
                   <Route path="configuration/maps" element={<MapsSettingsPage />} />
+                  <Route path="configuration/razorpay" element={<RazorpaySettingsPage />} />
                 </Route>
 
                 {/* Fallback */}
