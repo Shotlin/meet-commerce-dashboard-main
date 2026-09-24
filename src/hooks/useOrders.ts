@@ -11,6 +11,7 @@ import type {
   RefundOrderPayload,
   CancelOrderPayload,
   RescheduleOrderPayload,
+  RecordSettlementPayload,
 } from '../types/order.types';
 
 /** Stable cache-key fragment for the current shop scope ("all" vs a concrete id). */
@@ -87,6 +88,24 @@ export function useAddOrderNote() {
   return useMutation({
     mutationFn: ({ orderId, body }: { orderId: string; body: string }) => adminOrdersService.addOrderNote(orderId, body),
     onSuccess: (_data, { orderId }) => qc.invalidateQueries({ queryKey: queryKeys.adminOrders.notes(orderId) }),
+  });
+}
+
+export function useRecordSettlement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, payload }: { orderId: string; payload: RecordSettlementPayload }) =>
+      adminOrdersService.recordSettlement(orderId, payload),
+    onSuccess: (_data, { orderId }) => invalidateOrders(qc, orderId),
+  });
+}
+
+export function useReverseSettlement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, entryId, reason }: { orderId: string; entryId: string; reason?: string }) =>
+      adminOrdersService.reverseSettlement(orderId, entryId, reason),
+    onSuccess: (_data, { orderId }) => invalidateOrders(qc, orderId),
   });
 }
 

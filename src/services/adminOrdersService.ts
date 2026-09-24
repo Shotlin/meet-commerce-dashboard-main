@@ -16,6 +16,9 @@ import type {
   CancelOrderPayload,
   RescheduleOrderPayload,
   ReconcilePaymentResult,
+  SettlementEntry,
+  SettlementInfo,
+  RecordSettlementPayload,
 } from '../types/order.types';
 
 // ── snake_case (real backend rows) -> camelCase (typed) mapping ────────────
@@ -122,6 +125,49 @@ export function mapPayment(p: any): OrderPaymentDetail | null {
   };
 }
 
+function mapSettlementEntry(e: any): SettlementEntry {
+  return {
+    id: e.id,
+    entryType: e.entryType ?? e.entry_type,
+    amount: num(e.amount),
+    method: e.method,
+    cashAmount: num(e.cashAmount ?? e.cash_amount),
+    upiAmount: num(e.upiAmount ?? e.upi_amount),
+    reference: e.reference ?? null,
+    methodNote: e.methodNote ?? e.method_note ?? null,
+    internalNote: e.internalNote ?? e.internal_note ?? null,
+    reversesEntryId: e.reversesEntryId ?? e.reverses_entry_id ?? null,
+    recordedBy: e.recordedBy ?? e.recorded_by,
+    recordedByName: e.recordedByName ?? e.recorded_by_name ?? null,
+    createdAt: e.createdAt ?? e.created_at,
+  };
+}
+
+// Backend returns this already-computed (never trust client-side arithmetic
+// for money) — the dashboard only formats/displays it. Falls back to a
+// zeroed, "nothing due" shape rather than throwing if a caller somehow
+// gets an order response with no settlement block at all (an older
+// cached response, or a non-order-detail context reusing this mapper).
+function mapSettlementInfo(s: any): SettlementInfo {
+  if (!s) {
+    return {
+      totalPayable: 0, walletAmount: 0, outstanding: 0, received: 0, amountDue: 0,
+      paymentStatus: 'PENDING', history: [], settledBy: null, settledAt: null,
+    };
+  }
+  return {
+    totalPayable: num(s.totalPayable),
+    walletAmount: num(s.walletAmount),
+    outstanding: num(s.outstanding),
+    received: num(s.received),
+    amountDue: num(s.amountDue),
+    paymentStatus: s.paymentStatus,
+    history: Array.isArray(s.history) ? s.history.map(mapSettlementEntry) : [],
+    settledBy: s.settledBy ?? null,
+    settledAt: s.settledAt ?? null,
+  };
+}
+
 function mapDelivery(d: any): OrderDeliveryAssignment | null {
   if (!d) return null;
   return {
@@ -159,6 +205,7 @@ export function mapOrderDetail(o: any): OrderDetail {
     timeline: Array.isArray(o.timeline) ? o.timeline.map(mapTimeline) : [],
     payment: mapPayment(o.payment),
     delivery: mapDelivery(o.delivery),
+    settlement: mapSettlementInfo(o.settlement),
     // Meet Commerce has no backend data model for variable-weight/
     // cutting-evidence at all yet (no declared/actual weight, no video
     // URL, no lot id column anywhere in the schema) — this stays `null`
@@ -220,6 +267,24 @@ export const adminOrdersService = {
     const response = await apiClient.get<any>(`/api/v1/admin/orders/${id}`);
     if (!response.success || !response.data) throw new Error(response.message || `Order ${id} not found`);
     return mapOrderDetail(response.data);
+  },
+
+  async getSettlementInfo(id: string): Promise<SettlementInfo> {
+    const response = await apiClient.get<any>(`/api/v1/admin/orders/${id}/settlements`);
+    if (!response.success || !response.data) throw new Error(response.message || 'Failed to fetch settlement info');
+    return mapSettlementInfo(response.data);
+  },
+
+  async recordSettlement(id: string, payload: RecordSettlementPayload): Promise<SettlementInfo> {
+    const response = await apiClient.post<any>(`/api/v1/admin/orders/${id}/settlements`, payload);
+    if (!response.success || !response.data) throw new Error(response.message || 'Failed to record payment settlement');
+    return mapSettlementInfo(response.data);
+  },
+
+  async reverseSettlement(id: string, entryId: string, reason?: string): Promise<SettlementInfo> {
+    const response = await apiClient.post<any>(`/api/v1/admin/orders/${id}/settlements/${entryId}/reverse`, { reason });
+    if (!response.success || !response.data) throw new Error(response.message || 'Failed to reverse payment settlement');
+    return mapSettlementInfo(response.data);
   },
 
   async getOrderNotes(id: string): Promise<OrderNoteEntry[]> {

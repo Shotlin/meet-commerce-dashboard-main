@@ -148,6 +148,56 @@ export interface OrderDetail extends OrderListRow {
   // assignment's evidence fields; when there is none, this is `null` and
   // the drawer must render an empty/unavailable state, never a default.
   evidence: OrderCuttingEvidence | null;
+  settlement: SettlementInfo;
+}
+
+/**
+ * Manual payment settlement — for an order delivered outside the rider app
+ * / online-payment flow, an admin/finance user records that cash/UPI was
+ * actually collected. Distinct from `payment` (the Razorpay online-payment
+ * record, if any) and never auto-derived from delivery status: a delivered
+ * COD order stays PENDING/PARTIALLY_PAID until someone records the real
+ * collection here.
+ */
+export type SettlementEntryType = 'SETTLEMENT' | 'REVERSAL';
+export type SettlementMethod = 'CASH' | 'UPI' | 'CASH_UPI' | 'OTHER';
+
+export interface SettlementEntry {
+  id: string;
+  entryType: SettlementEntryType;
+  amount: number;
+  method: SettlementMethod;
+  cashAmount: number;
+  upiAmount: number;
+  reference: string | null;
+  methodNote: string | null;
+  internalNote: string | null;
+  reversesEntryId: string | null;
+  recordedBy: string;
+  recordedByName: string | null;
+  createdAt: string;
+}
+
+export interface SettlementInfo {
+  totalPayable: number;
+  walletAmount: number;
+  outstanding: number;
+  received: number;
+  amountDue: number;
+  paymentStatus: string;
+  history: SettlementEntry[];
+  settledBy: string | null;
+  settledAt: string | null;
+}
+
+export interface RecordSettlementPayload {
+  amount: number;
+  method: SettlementMethod;
+  cashAmount?: number;
+  upiAmount?: number;
+  reference?: string;
+  methodNote?: string;
+  internalNote?: string;
 }
 
 export interface RazorpayPaymentDetail {

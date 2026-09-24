@@ -123,4 +123,52 @@ describe('mapOrderDetail', () => {
     expect(detail.timeline).toHaveLength(1);
     expect(detail.timeline[0].changedByName).toBe('Admin');
   });
+
+  it('maps the settlement block (manual COD/UPI payment collection) through its own mapper', () => {
+    const detail = mapOrderDetail({
+      id: 'order-1',
+      created_at: '',
+      items: [],
+      timeline: [],
+      settlement: {
+        totalPayable: 380,
+        walletAmount: 0,
+        outstanding: 380,
+        received: 200,
+        amountDue: 180,
+        paymentStatus: 'PARTIALLY_PAID',
+        settledBy: null,
+        settledAt: null,
+        history: [
+          {
+            id: 'entry-1',
+            entryType: 'SETTLEMENT',
+            amount: 200,
+            method: 'CASH',
+            cashAmount: 200,
+            upiAmount: 0,
+            reference: null,
+            methodNote: null,
+            internalNote: null,
+            reversesEntryId: null,
+            recordedBy: 'admin-1',
+            recordedByName: 'Sayan Mondal',
+            createdAt: '2026-09-24T10:00:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(detail.settlement.amountDue).toBe(180);
+    expect(detail.settlement.paymentStatus).toBe('PARTIALLY_PAID');
+    expect(detail.settlement.history).toHaveLength(1);
+    expect(detail.settlement.history[0].recordedByName).toBe('Sayan Mondal');
+    expect(detail.settlement.history[0].method).toBe('CASH');
+  });
+
+  it('never fabricates a settlement block when the backend sends none — a real, zeroed "nothing due" shape, not undefined', () => {
+    const detail = mapOrderDetail({ id: 'order-1', created_at: '', items: [], timeline: [] });
+    expect(detail.settlement.amountDue).toBe(0);
+    expect(detail.settlement.history).toEqual([]);
+  });
 });

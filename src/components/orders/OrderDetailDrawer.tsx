@@ -33,15 +33,18 @@ import {
 import {
   Package, User, MapPin, FileText, Receipt, RotateCcw, XCircle, RefreshCw,
   ChevronDown, ChevronRight, CreditCard, AlertTriangle, CheckCircle2, Video,
+  Wallet, Undo2,
 } from 'lucide-react';
 import {
   useOrderDetail, useOrderNotes, useAddOrderNote, useUpdateOrderStatus,
   useAssignRider, useRefundOrder, useCancelOrder, useResyncPayment, useRazorpayDetails,
+  useRecordSettlement, useReverseSettlement,
 } from '../../hooks/useOrders';
 import { useCustomerDetail } from '../../hooks/useCustomers';
 import { adminOrdersService } from '../../services/adminOrdersService';
 import { deliveryService, AssignableRider } from '../../services/deliveryService';
-import { OrderDetail } from '../../types/order.types';
+import { OrderDetail, SettlementEntry, RecordSettlementPayload } from '../../types/order.types';
+import { SettlementModal } from './SettlementModal';
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
   ORDER_PLACED: ['CONFIRMED', 'CANCELLED'],
@@ -83,6 +86,8 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
   const refundOrder = useRefundOrder();
   const cancelOrder = useCancelOrder();
   const resyncPayment = useResyncPayment();
+  const recordSettlement = useRecordSettlement();
+  const reverseSettlement = useReverseSettlement();
 
   const [noteDraft, setNoteDraft] = useState('');
   const [statusChoice, setStatusChoice] = useState('');
@@ -99,6 +104,9 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [riders, setRiders] = useState<AssignableRider[]>([]);
   const [selectedRiderId, setSelectedRiderId] = useState('');
+  const [settlementModal, setSettlementModal] = useState(false);
+  const [reverseTarget, setReverseTarget] = useState<SettlementEntry | null>(null);
+  const [reverseReason, setReverseReason] = useState('');
 
   const razorpayDetailsQuery = useRazorpayDetails(orderId, showRazorpayDetails);
 
@@ -195,6 +203,33 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
       setCancelReason('');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Cancel failed');
+    }
+  };
+
+  const handleRecordSettlement = async (payload: RecordSettlementPayload) => {
+    if (!order) return;
+    try {
+      const result = await recordSettlement.mutateAsync({ orderId: order.id, payload });
+      toast.success(
+        result.paymentStatus === 'PAID'
+          ? `Order fully settled — ${fmtCurrency(payload.amount)} recorded, status now Paid`
+          : `${fmtCurrency(payload.amount)} recorded — ${fmtCurrency(result.amountDue)} still due (Partially Paid)`
+      );
+      setSettlementModal(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to record payment');
+    }
+  };
+
+  const handleReverseSettlement = async () => {
+    if (!order || !reverseTarget) return;
+    try {
+      await reverseSettlement.mutateAsync({ orderId: order.id, entryId: reverseTarget.id, reason: reverseReason.trim() || undefined });
+      toast.success('Settlement entry reversed');
+      setReverseTarget(null);
+      setReverseReason('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to reverse settlement');
     }
   };
 
@@ -463,6 +498,27 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                   </div>
                 </Section>
 
+                <Separator />
+
+                {/* H2. PAYMENT SETTLEMENT — manual cash/UPI collection recorded
+                    by an admin/finance user, for orders delivered outside the
+                    rider app / online-payment flow. Deliberately independent
+                    of delivery status: a delivered COD order stays
+                    PENDING/PARTIALLY_PAID here until someone records the real
+                    collection — it never flips to Paid just because it shipped. */}
+                <Section title="Payment Settlement" icon={<Wallet className="h-4 w-4" />}>
+                  {order.settlement ? (
+                    <SettlementSection
+                      settlement={order.settlement}
+                      totalAmount={order.totalAmount}
+                      onRecordPayment={() => setSettlementModal(true)}
+                      onReverse={(entry) => setReverseTarget(entry)}
+                    />
+                  ) : (
+                    <Skeleton className="h-16 w-full" />
+                  )}
+                </Section>
+
                 {/* I. RAZORPAY DETAILS */}
                 {hasGatewayPayment && (
                   <>
@@ -617,6 +673,36 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {order && (
+        <SettlementModal
+          open={settlementModal}
+          onOpenChange={setSettlementModal}
+          amountDue={order.settlement?.amountDue ?? 0}
+          onConfirm={handleRecordSettlement}
+          isSubmitting={recordSettlement.isPending}
+        />
+      )}
+
+      <AlertDialog open={!!reverseTarget} onOpenChange={(v) => { if (!v) { setReverseTarget(null); setReverseReason(''); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reverse this settlement entry?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {reverseTarget && `${fmtCurrency(reverseTarget.amount)} via ${reverseTarget.method} recorded by ${reverseTarget.recordedByName || 'an admin'} on ${fmtDateTime(reverseTarget.createdAt)}.`}
+              {' '}This adds an audited reversal entry — it never edits or deletes the original record — and recomputes the order's payment status.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="px-1">
+            <label className="text-xs font-semibold">Reason (optional)</label>
+            <Textarea value={reverseReason} onChange={(e) => setReverseReason(e.target.value)} rows={2} className="mt-1 text-xs" />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Back</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReverseSettlement} disabled={reverseSettlement.isPending}>Yes, reverse entry</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }
@@ -635,6 +721,105 @@ function Row({ label, value, bold, mono, valueClass }: { label: string; value: s
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
       <span className={`${bold ? 'font-bold' : 'font-medium'} ${mono ? 'font-mono' : ''} ${valueClass || ''}`}>{value}</span>
+    </div>
+  );
+}
+
+const SETTLEMENT_STATUS_BADGE_CLASS: Record<string, string> = {
+  PAID: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+  PARTIALLY_PAID: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+  PENDING: 'bg-muted text-muted-foreground hover:bg-muted',
+  FAILED: 'bg-red-100 text-red-700 hover:bg-red-100',
+  EXPIRED: 'bg-red-100 text-red-700 hover:bg-red-100',
+  REFUNDED: 'bg-muted text-muted-foreground hover:bg-muted',
+};
+
+function methodBreakdown(entry: { method: string; amount: number; cashAmount: number; upiAmount: number }): string {
+  if (entry.method === 'CASH_UPI') return `${fmtCurrency(entry.cashAmount)} Cash + ${fmtCurrency(entry.upiAmount)} UPI`;
+  if (entry.method === 'CASH') return `${fmtCurrency(entry.amount)} Cash`;
+  if (entry.method === 'UPI') return `${fmtCurrency(entry.amount)} UPI`;
+  return `${fmtCurrency(entry.amount)} (Other)`;
+}
+
+function SettlementSection({
+  settlement, totalAmount, onRecordPayment, onReverse,
+}: {
+  settlement: NonNullable<OrderDetail['settlement']>;
+  totalAmount: number;
+  onRecordPayment: () => void;
+  onReverse: (entry: SettlementEntry) => void;
+}) {
+  const activeSettlements = settlement.history.filter((e) => e.entryType === 'SETTLEMENT');
+  const reversedIds = new Set(settlement.history.filter((e) => e.entryType === 'REVERSAL').map((e) => e.reversesEntryId));
+  const methodSummary = activeSettlements.length > 0
+    ? activeSettlements
+        .filter((e) => !reversedIds.has(e.id))
+        .map((e) => methodBreakdown(e))
+        .join(' + ')
+    : null;
+
+  return (
+    <div className="space-y-3 text-xs">
+      <div className="space-y-1">
+        <Row label="Total" value={fmtCurrency(totalAmount)} />
+        <Row label="Received" value={fmtCurrency(settlement.received)} />
+        {methodSummary && <Row label="Method" value={methodSummary} />}
+        {settlement.amountDue > 0.01 && (
+          <Row label="Amount Due" value={fmtCurrency(settlement.amountDue)} valueClass="text-red-600" bold />
+        )}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-muted-foreground">Status</span>
+          <Badge variant="outline" className={`text-[10px] ${SETTLEMENT_STATUS_BADGE_CLASS[settlement.paymentStatus] || ''}`}>
+            {settlement.paymentStatus.replace('_', ' ')}
+          </Badge>
+        </div>
+        {settlement.paymentStatus === 'PAID' && settlement.settledBy && (
+          <>
+            <Row label="Settled by" value={settlement.settledBy} />
+            <Row label="Settled at" value={fmtDateTime(settlement.settledAt)} />
+          </>
+        )}
+      </div>
+
+      {settlement.amountDue > 0.01 && (
+        <Button size="sm" onClick={onRecordPayment} className="w-full">
+          <Wallet className="mr-1.5 h-3.5 w-3.5" /> Record Payment
+        </Button>
+      )}
+
+      {settlement.history.length > 0 && (
+        <div className="space-y-1.5 border-t border-border/60 pt-2">
+          <p className="font-semibold text-muted-foreground">Settlement History</p>
+          {settlement.history.map((entry) => {
+            const isReversal = entry.entryType === 'REVERSAL';
+            const alreadyReversed = reversedIds.has(entry.id);
+            return (
+              <div key={entry.id} className="flex items-start justify-between gap-2 rounded-md bg-muted/40 px-2 py-1.5">
+                <div className="min-w-0">
+                  <p className={isReversal ? 'text-red-600' : 'text-ink'}>
+                    {isReversal ? '↩ Reversal — ' : ''}{methodBreakdown(entry)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {entry.recordedByName || 'Admin'} · {fmtDateTime(entry.createdAt)}
+                    {entry.reference && ` · ${entry.reference}`}
+                  </p>
+                  {(entry.methodNote || entry.internalNote) && (
+                    <p className="text-[10px] italic text-muted-foreground">{entry.methodNote || entry.internalNote}</p>
+                  )}
+                </div>
+                {!isReversal && !alreadyReversed && (
+                  <button
+                    onClick={() => onReverse(entry)}
+                    className="flex shrink-0 items-center gap-1 text-[10px] font-medium text-red-600 hover:underline"
+                  >
+                    <Undo2 className="h-3 w-3" /> Reverse
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
