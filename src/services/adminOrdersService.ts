@@ -5,6 +5,7 @@ import type {
   OrderDetail,
   OrderFilters,
   OrderStatusCounts,
+  SettlementSummary,
   OrderNoteEntry,
   OrderTimelineEntry,
   OrderLineItem,
@@ -200,6 +201,19 @@ export const adminOrdersService = {
     const response = await apiClient.get<Record<string, number>>('/api/v1/admin/orders/stats-by-status');
     if (!response.success || !response.data) throw new Error(response.message || 'Failed to fetch order status counts');
     return { NEEDS_REVIEW: 0, RECOVERED: 0, ...response.data };
+  },
+
+  async getSettlementSummary(filters: OrderFilters): Promise<SettlementSummary> {
+    const response = await apiClient.get<any>('/api/v1/admin/orders/settlement-summary', buildQuery(filters));
+    if (!response.success || !response.data) throw new Error(response.message || 'Failed to fetch settlement summary');
+    const d = response.data;
+    return {
+      codCollected: Number(d.codCollected ?? 0),
+      onlineCollected: Number(d.onlineCollected ?? 0),
+      walletCollected: Number(d.walletCollected ?? 0),
+      pendingAmount: Number(d.pendingAmount ?? 0),
+      orderCount: Number(d.orderCount ?? 0),
+    };
   },
 
   async getOrderDetail(id: string): Promise<OrderDetail> {

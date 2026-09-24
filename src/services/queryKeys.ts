@@ -113,6 +113,7 @@ export const queryKeys = {
     all: ['admin-orders'] as const,
     list: (shopKey: string, filters?: Record<string, unknown>) => [...queryKeys.adminOrders.all, 'list', shopKey, filters] as const,
     statusCounts: (shopKey: string) => [...queryKeys.adminOrders.all, 'status-counts', shopKey] as const,
+    settlementSummary: (shopKey: string, filters?: Record<string, unknown>) => [...queryKeys.adminOrders.all, 'settlement-summary', shopKey, filters] as const,
     detail: (id: string) => [...queryKeys.adminOrders.all, 'detail', id] as const,
     notes: (id: string) => [...queryKeys.adminOrders.all, 'notes', id] as const,
     razorpayDetails: (id: string) => [...queryKeys.adminOrders.all, 'razorpay-details', id] as const,

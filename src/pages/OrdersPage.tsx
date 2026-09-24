@@ -11,6 +11,7 @@ import { OrderDetailDrawer } from '../components/orders/OrderDetailDrawer';
 import {
   useOrders,
   useOrderStatusCounts,
+  useSettlementSummary,
   useBulkAssignRiders,
   useBulkUpdateStatus,
   useBulkReconcilePayments,
@@ -19,7 +20,7 @@ import { deliveryService, AssignableRider } from '../services/deliveryService';
 import { adminOrdersService } from '../services/adminOrdersService';
 import { useDebounce } from '../hooks/useDebounce';
 import { OrderListRow, OrderFilters, BackendOrderStatus } from '../types/order.types';
-import { ShoppingBag, Eye, Download, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Eye, Download, RefreshCw, AlertTriangle, Banknote, CreditCard, Wallet, Clock3 } from 'lucide-react';
 
 const STATUS_TABS: { label: string; value: BackendOrderStatus | '' }[] = [
   { label: 'All', value: '' },
@@ -127,6 +128,7 @@ export const OrdersPage: React.FC = () => {
 
   const ordersQuery = useOrders(filters);
   const statusCountsQuery = useOrderStatusCounts();
+  const settlementQuery = useSettlementSummary(filters);
   const bulkAssign = useBulkAssignRiders();
   const bulkStatus = useBulkUpdateStatus();
   const bulkReconcile = useBulkReconcilePayments();
@@ -303,6 +305,57 @@ export const OrdersPage: React.FC = () => {
           </>
         }
       />
+
+      {/* Customer money settled — how much has actually been collected for
+          the orders currently in view, split by how it was collected. Net
+          of wallet on the COD/Online figures (that portion is its own
+          tile) so the four numbers never double-count the same rupee. */}
+      <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Card padding="sm" className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+            <Banknote className="h-4.5 w-4.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-muted-foreground">Cash on Delivery Collected</p>
+            <p className="truncate text-base font-bold text-ink">
+              {settlementQuery.isLoading ? '—' : fmtCurrency(settlementQuery.data?.codCollected ?? 0)}
+            </p>
+          </div>
+        </Card>
+        <Card padding="sm" className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+            <CreditCard className="h-4.5 w-4.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-muted-foreground">Paid Online</p>
+            <p className="truncate text-base font-bold text-ink">
+              {settlementQuery.isLoading ? '—' : fmtCurrency(settlementQuery.data?.onlineCollected ?? 0)}
+            </p>
+          </div>
+        </Card>
+        <Card padding="sm" className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-raspberry/10 text-brand-raspberry">
+            <Wallet className="h-4.5 w-4.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-muted-foreground">Covered by Wallet</p>
+            <p className="truncate text-base font-bold text-ink">
+              {settlementQuery.isLoading ? '—' : fmtCurrency(settlementQuery.data?.walletCollected ?? 0)}
+            </p>
+          </div>
+        </Card>
+        <Card padding="sm" className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+            <Clock3 className="h-4.5 w-4.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-muted-foreground">Pending Collection</p>
+            <p className="truncate text-base font-bold text-ink">
+              {settlementQuery.isLoading ? '—' : fmtCurrency(settlementQuery.data?.pendingAmount ?? 0)}
+            </p>
+          </div>
+        </Card>
+      </div>
 
       {/* Status tabs */}
       <div className="mb-3 flex flex-wrap gap-1.5">

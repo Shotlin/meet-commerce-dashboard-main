@@ -204,6 +204,22 @@ export interface OrderStatusCounts {
   RECOVERED: number;
 }
 
+/**
+ * "Customer money settled" — how much has actually been collected for
+ * the current filtered view, split by how it was collected. `codCollected`/
+ * `onlineCollected` are net of any wallet amount (that portion is counted
+ * once, under `walletCollected`); `pendingAmount` is what's still owed on
+ * orders that haven't reached `payment_status: 'PAID'` yet (an unpaid COD
+ * order, or an ONLINE order awaiting confirmation).
+ */
+export interface SettlementSummary {
+  codCollected: number;
+  onlineCollected: number;
+  walletCollected: number;
+  pendingAmount: number;
+  orderCount: number;
+}
+
 export interface RefundOrderPayload {
   reason: string;
   refundTo: 'wallet' | 'original' | 'none';

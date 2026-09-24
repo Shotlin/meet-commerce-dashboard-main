@@ -38,6 +38,17 @@ export function useOrderStatusCounts() {
   });
 }
 
+/** "Customer money settled" — COD vs online vs wallet vs still pending, for exactly the filters the Orders page currently has applied. */
+export function useSettlementSummary(filters: OrderFilters) {
+  const shopKey = useShopKey();
+  return useQuery({
+    queryKey: queryKeys.adminOrders.settlementSummary(shopKey, filters as Record<string, unknown>),
+    queryFn: () => adminOrdersService.getSettlementSummary(filters),
+    placeholderData: (prev) => prev,
+    staleTime: 15_000,
+  });
+}
+
 export function useOrderDetail(orderId: string | null) {
   return useQuery({
     queryKey: queryKeys.adminOrders.detail(orderId ?? ''),
