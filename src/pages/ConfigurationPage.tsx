@@ -8,6 +8,7 @@ import { FeeSettingsPanel } from '../components/domain/FeeSettingsPanel';
 import { PaymentOffersPanel } from '../components/domain/PaymentOffersPanel';
 import { PincodeMappingsPanel } from '../components/domain/PincodeMappingsPanel';
 import { PaymentGatewayConfigPanel } from '../components/domain/PaymentGatewayConfigPanel';
+import { SupportSettingsPanel } from '../components/domain/SupportSettingsPanel';
 import { Map, Settings } from 'lucide-react';
 
 export const ConfigurationPage: React.FC = () => {
@@ -31,6 +32,10 @@ export const ConfigurationPage: React.FC = () => {
 
       <div className="mt-4">
         <PincodeMappingsPanel />
+      </div>
+
+      <div className="mt-4">
+        <SupportSettingsPanel />
       </div>
 
       <div className="mt-4">
