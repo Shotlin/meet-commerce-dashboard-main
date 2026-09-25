@@ -12,12 +12,18 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Loader2, Search } from "lucide-react"
+import { ArrowLeft, Loader2, PackageSearch, Search } from "lucide-react"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useAdminProducts } from "@/hooks/useProductsAdmin"
-import { useCreateShopProduct, useUpdateShopProduct } from "@/hooks/useShopProductsAdmin"
+import {
+  useAdjustShopProductStock,
+  useCreateShopProduct,
+  useShopProductInventoryLots,
+  useUpdateShopProduct,
+} from "@/hooks/useShopProductsAdmin"
+import { AdjustStockModal } from "@/components/products/AdjustStockModal"
 import type { AdminProduct } from "@/types/product.types"
-import type { ShopProduct } from "@/types/shopProduct.types"
+import type { AdjustShopProductStockPayload, ShopProduct } from "@/types/shopProduct.types"
 
 interface ShopProductFormDialogProps {
   open: boolean
@@ -79,11 +85,17 @@ export function ShopProductFormDialog({
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | null>(null)
   const [form, setForm] = useState<OverrideFormState>(() => buildInitialOverrides(shopProduct))
   const [search, setSearch] = useState("")
+  const [adjustStockOpen, setAdjustStockOpen] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
 
   const { data, isLoading } = useAdminProducts({ search: debouncedSearch || undefined, limit: 50 })
   const createShopProduct = useCreateShopProduct(shopId)
   const updateShopProduct = useUpdateShopProduct(shopId)
+  const { data: inventoryLots, isLoading: isLoadingLots } = useShopProductInventoryLots(
+    shopId,
+    shopProduct?.id ?? null
+  )
+  const adjustStock = useAdjustShopProductStock(shopId)
 
   useEffect(() => {
     if (open) {
@@ -123,6 +135,17 @@ export function ShopProductFormDialog({
 
   const showOverrideForm = isEdit || !!selectedProduct
   const productLabel = isEdit ? shopProduct?.product.name : selectedProduct?.name
+
+  const lots = inventoryLots?.lots ?? []
+  const lotQuantityTotal = inventoryLots?.lotQuantityTotal ?? 0
+
+  const handleAdjustStock = (payload: AdjustShopProductStockPayload) => {
+    if (!shopProduct) return
+    adjustStock.mutate(
+      { shopProductId: shopProduct.id, payload },
+      { onSuccess: () => setAdjustStockOpen(false) }
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -262,7 +285,15 @@ export function ShopProductFormDialog({
                   required
                 />
                 {isEdit && (
-                  <p className="text-[11px] text-muted-foreground">Use the stock adjustment flow to change this.</p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-[11px]"
+                    onClick={() => setAdjustStockOpen(true)}
+                  >
+                    Adjust stock…
+                  </Button>
                 )}
               </div>
               <div className="space-y-1.5">
@@ -284,6 +315,47 @@ export function ShopProductFormDialog({
                 />
               </div>
             </div>
+
+            {isEdit && (
+              <div className="rounded-lg border p-3">
+                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                  <PackageSearch className="h-3.5 w-3.5" />
+                  Vendor Batches
+                </div>
+                {isLoadingLots ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : lots.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    No vendor-received stock is linked to this product yet — stock here is manually maintained.
+                  </p>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      {lots.map((lot) => (
+                        <div
+                          key={lot.id}
+                          className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{lot.vendor_name ?? "Unknown vendor"}</p>
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {lot.batch_number}
+                              {lot.supply_number ? ` · ${lot.supply_number}` : ""}
+                              {lot.expiry_date ? ` · exp ${lot.expiry_date.slice(0, 10)}` : ""}
+                            </p>
+                          </div>
+                          <span className="ml-2 shrink-0 font-semibold">{lot.quantity_on_hand}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      Total from vendor batches: <span className="font-semibold text-ink">{lotQuantityTotal}</span>
+                      {" · "}Sellable stock: <span className="font-semibold text-ink">{shopProduct?.stock_quantity}</span>
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
@@ -308,6 +380,16 @@ export function ShopProductFormDialog({
           </form>
         )}
       </DialogContent>
+      {shopProduct && (
+        <AdjustStockModal
+          open={adjustStockOpen}
+          onOpenChange={setAdjustStockOpen}
+          productLabel={shopProduct.product.name ?? "Shop product"}
+          currentStock={shopProduct.stock_quantity}
+          onConfirm={handleAdjustStock}
+          isSubmitting={adjustStock.isPending}
+        />
+      )}
     </Dialog>
   )
 }

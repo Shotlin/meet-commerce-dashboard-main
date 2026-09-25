@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+  adjustShopProductStock,
   createShopProduct,
   deleteShopProduct,
+  getShopProductInventoryLots,
   listShopProducts,
   updateShopProduct,
 } from '../services/shopProductsAdminService';
 import type {
+  AdjustShopProductStockPayload,
   CreateShopProductPayload,
   ShopProductListParams,
   UpdateShopProductPayload,
@@ -59,6 +62,34 @@ export function useDeleteShopProduct(shopId: string | null) {
     onSuccess: () => {
       toast.success('Product removed from shop');
       qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  });
+}
+
+/**
+ * The vendor batches backing one shop product's stock — "which vendor
+ * supplied this number." Only meaningful in edit mode (a shop product must
+ * already exist), so callers pass `null` for `shopProductId` until then.
+ */
+export function useShopProductInventoryLots(shopId: string | null, shopProductId: string | null) {
+  return useQuery({
+    queryKey: ['shop-products', shopId, shopProductId, 'inventory-lots'],
+    queryFn: () => getShopProductInventoryLots(shopId as string, shopProductId as string),
+    enabled: !!shopId && !!shopProductId,
+    staleTime: 15_000,
+  });
+}
+
+export function useAdjustShopProductStock(shopId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shopProductId, payload }: { shopProductId: string; payload: AdjustShopProductStockPayload }) =>
+      adjustShopProductStock(shopId as string, shopProductId, payload),
+    onSuccess: (_data, { shopProductId }) => {
+      toast.success('Stock adjusted');
+      qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
+      qc.invalidateQueries({ queryKey: ['shop-products', shopId, shopProductId, 'inventory-lots'] });
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   });

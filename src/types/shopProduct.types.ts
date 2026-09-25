@@ -78,3 +78,35 @@ export interface UpdateShopProductPayload {
   is_available?: boolean;
   is_featured?: boolean;
 }
+
+/**
+ * A vendor-supplied batch backing (part of) a shop product's sellable
+ * stock — one row per `inventory_lots` record, joined through to the
+ * procurement receipt that produced it. `GET /api/v1/shop-products/:id/inventory-lots`.
+ */
+export interface ShopProductInventoryLot {
+  id: string;
+  batch_number: string;
+  quantity_on_hand: number | string;
+  quantity_reserved: number | string;
+  expiry_date: string | null;
+  created_at: string;
+  supply_order_id: string | null;
+  supply_number: string | null;
+  vendor_id: string | null;
+  vendor_name: string | null;
+  video_url: string | null;
+}
+
+export interface ShopProductInventoryLotsResult {
+  shopProduct: ShopProduct;
+  lots: ShopProductInventoryLot[];
+  lotQuantityTotal: number;
+}
+
+/** `POST /api/v1/shops/:shopId/products/:shopProductId/adjust-stock`. */
+export interface AdjustShopProductStockPayload {
+  quantity_delta: number;
+  type: 'MANUAL_ADJUSTMENT' | 'DAMAGED_STOCK' | 'RETURN_STOCK';
+  reason: string;
+}

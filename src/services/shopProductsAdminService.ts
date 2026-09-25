@@ -1,7 +1,9 @@
 import { apiClient } from './apiClient';
 import type {
+  AdjustShopProductStockPayload,
   CreateShopProductPayload,
   ShopProduct,
+  ShopProductInventoryLotsResult,
   ShopProductListParams,
   ShopProductListResult,
   UpdateShopProductPayload,
@@ -60,4 +62,45 @@ export async function updateShopProduct(
 export async function deleteShopProduct(shopId: string, id: string): Promise<void> {
   const res = await apiClient.delete<null>(`/api/v1/shop-products/${id}`, { 'X-Shop-Id': shopId });
   if (!res.success) throw new Error(res.message || 'Failed to remove product from shop');
+}
+
+/**
+ * The vendor batches (inventory_lots) actually backing this shop product's
+ * stock_quantity — "which vendor supplied this number." Empty `lots` means
+ * either this product has never been vendor-restocked, or its stock is
+ * entirely manual (both are valid, unremarkable states).
+ */
+export async function getShopProductInventoryLots(
+  shopId: string,
+  shopProductId: string
+): Promise<ShopProductInventoryLotsResult> {
+  const res = await apiClient.get<ShopProductInventoryLotsResult>(
+    `/api/v1/shop-products/${shopProductId}/inventory-lots`,
+    undefined,
+    { 'X-Shop-Id': shopId }
+  );
+  if (res.success && res.data) return res.data;
+  throw new Error(res.message || 'Failed to fetch inventory lots');
+}
+
+/**
+ * Apply a signed stock delta with a mandatory reason, recorded as a real
+ * `stock_movements` ledger row — the "stock adjustment flow" the Edit Shop
+ * Pricing & Stock modal's Stock field has always pointed at (it previously
+ * pointed at nothing; this is the backend endpoint that already existed).
+ * `shopProductId` is the URL's `:productId` segment per the backend's own
+ * naming (it is actually `shop_products.id`, not the master product id).
+ */
+export async function adjustShopProductStock(
+  shopId: string,
+  shopProductId: string,
+  payload: AdjustShopProductStockPayload
+): Promise<ShopProduct> {
+  const res = await apiClient.post<{ shopProduct: ShopProduct; movement: unknown }>(
+    `/api/v1/shops/${shopId}/products/${shopProductId}/adjust-stock`,
+    payload,
+    { 'X-Shop-Id': shopId }
+  );
+  if (res.success && res.data) return res.data.shopProduct;
+  throw new Error(res.message || 'Failed to adjust stock');
 }
