@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Ban, Gavel, Send, TimerReset } from 'lucide-react';
+import { ArrowLeft, Ban, ExternalLink, Gavel, Send, TimerReset } from 'lucide-react';
 
 import { PageHeader } from '../components/layout/PageHeader';
 import { Card } from '../components/common/Card';
@@ -21,12 +21,15 @@ import {
 import {
   MODE_LABEL,
   QUOTE_STATUS_BADGE,
+  SUPPLY_STAGES,
   formatDateTime,
   formatMoney,
   recipientStatusBadge,
   requestStatusBadge,
+  supplyStageIndex,
+  supplyStatusBadge,
 } from '../utils/procurementStatus';
-import type { ProcurementQuote } from '../types/procurement.types';
+import type { ProcurementQuote, SupplyOrderDetail } from '../types/procurement.types';
 
 const inputClass =
   'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30';
@@ -158,6 +161,7 @@ export default function ProcurementDetailPage() {
           { id: 'overview', label: 'Overview' },
           { id: 'recipients', label: 'Recipients', count: request.recipients?.length },
           { id: 'quotes', label: 'Quotes', count: quotes?.length },
+          { id: 'fulfilment', label: 'Fulfilment', count: request.supply_order ? 1 : undefined },
         ]}
         activeTab={tab}
         onChange={setTab}
@@ -251,6 +255,21 @@ export default function ProcurementDetailPage() {
         </Card>
       )}
 
+      {tab === 'fulfilment' && (
+        <div>
+          {!request.supply_order ? (
+            <Card padding="md">
+              <EmptyState
+                title="Not awarded yet"
+                description="Fulfilment tracking starts once a vendor accepts a fixed offer or is awarded an RFQ quote — accept/award status, processing stages, quality evidence, and dispatch will all show up here automatically."
+              />
+            </Card>
+          ) : (
+            <FulfilmentTab supply={request.supply_order} />
+          )}
+        </div>
+      )}
+
       <Modal
         isOpen={Boolean(quoteToAward)}
         onClose={() => setQuoteToAward(null)}
@@ -322,6 +341,119 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="flex items-center justify-between gap-3">
       <dt className="text-[11px] font-bold text-muted uppercase">{label}</dt>
       <dd className="text-xs text-ink text-right">{value}</dd>
+    </div>
+  );
+}
+
+// Live vendor fulfilment status, surfaced directly on the request an admin
+// is already looking at — previously there was no way to answer "did the
+// vendor accept? are they processing? has a video been submitted? has it
+// shipped?" without separately knowing to go find the unlinked Supply
+// Orders list. Mirrors SupplyOrderDetailPage's own stage tracker for a
+// consistent look, plus a direct link there for the full action set
+// (Mark Delivered / Confirm Receipt).
+function FulfilmentTab({ supply }: { supply: SupplyOrderDetail }) {
+  const navigate = useNavigate();
+  const badge = supplyStatusBadge(supply.status);
+  const currentIndex = supplyStageIndex(supply.status);
+  const isTerminal = ['CANCELLED', 'REJECTED_AT_RECEIPT'].includes(supply.status);
+
+  return (
+    <div className="space-y-4">
+      <Card padding="md">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-xs font-bold text-ink">{supply.supply_number}</div>
+            <div className="text-[11px] text-muted">{supply.vendor_name ?? '—'}</div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Badge variant={badge.variant}>{badge.label}</Badge>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<ExternalLink className="w-3.5 h-3.5" />}
+              onClick={() => navigate(`/procurement/supplies/${supply.id}`)}
+            >
+              Open Supply Order
+            </Button>
+          </div>
+        </div>
+
+        {isTerminal ? (
+          <div className="text-xs font-bold text-ink">This supply order was {badge.label.toLowerCase()}.</div>
+        ) : (
+          <div className="flex items-center justify-between overflow-x-auto py-1">
+            {SUPPLY_STAGES.map((stage, idx) => {
+              const done = idx < currentIndex;
+              const current = idx === currentIndex;
+              return (
+                <div key={stage.id} className="flex items-center gap-2 shrink-0">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                      done ? 'bg-status-success text-white' : current ? 'bg-brand-raspberry text-white' : 'bg-rose-100 text-muted'
+                    }`}
+                  >
+                    {idx + 1}
+                  </div>
+                  <span className={`text-[10px] whitespace-nowrap ${current ? 'font-bold text-ink' : 'text-muted'}`}>{stage.label}</span>
+                  {idx < SUPPLY_STAGES.length - 1 && <div className="w-6 h-0.5 bg-border mx-1" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card title="Commercial summary" padding="md">
+          <dl className="space-y-2 text-xs">
+            <Row label="Award value" value={formatMoney(supply.award_amount)} />
+            <Row label="Promised delivery" value={formatDateTime(supply.promised_delivery_at)} />
+            <Row label="Dispatched" value={formatDateTime(supply.dispatched_at)} />
+            <Row label="Received" value={formatDateTime(supply.received_at)} />
+            {supply.delivery_reference && <Row label="Delivery reference" value={supply.delivery_reference} />}
+          </dl>
+        </Card>
+
+        <Card title="Quality evidence" padding="md">
+          {supply.evidence?.length ? (
+            <div className="space-y-2">
+              {supply.evidence.map((item) => (
+                <div key={item.id} className="flex items-center justify-between rounded-[10px] border border-border px-3 py-2">
+                  <div className="text-xs text-ink">{item.evidence_type.replace(/_/g, ' ')}</div>
+                  <a href={item.media_url} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-brand-raspberry hover:underline">
+                    View
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted">No evidence submitted yet.</p>
+          )}
+        </Card>
+      </div>
+
+      <Card title="Processing history" padding="md">
+        {supply.events?.length ? (
+          <ol className="space-y-3">
+            {supply.events.map((event) => (
+              <li key={event.id} className="flex gap-3">
+                <div className="mt-1 w-2 h-2 rounded-full bg-brand-raspberry shrink-0" />
+                <div>
+                  <div className="text-xs font-bold text-ink">{event.to_status.replace(/_/g, ' ')}</div>
+                  <div className="text-[11px] text-muted">
+                    {formatDateTime(event.created_at)}
+                    {event.actor_role ? ` · ${event.actor_role}` : ''}
+                    {event.note ? ` · ${event.note}` : ''}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-[11px] text-muted">No events recorded yet.</p>
+        )}
+      </Card>
     </div>
   );
 }

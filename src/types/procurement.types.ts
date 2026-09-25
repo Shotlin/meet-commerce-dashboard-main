@@ -102,6 +102,9 @@ export interface ProcurementRequest {
 export interface ProcurementRequestDetail extends ProcurementRequest {
   items: ProcurementRequestItem[];
   recipients: ProcurementRecipient[];
+  // The supply order created when this request was awarded, if any — null
+  // before award. Backend: vendor-procurement.service.js#getRequest.
+  supply_order: SupplyOrderDetail | null;
 }
 
 export interface ProcurementRequestListRow extends ProcurementRequest {
