@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Badge } from '../common/Badge';
 import { Modal } from '../common/Modal';
 import { getVendorPerformance, getVendorReviews } from '../../services/procurementService';
+import { queryKeys } from '../../services/queryKeys';
 import { formatDateTime, formatMoney } from '../../utils/procurementStatus';
 
 interface Props {
@@ -13,12 +14,12 @@ interface Props {
 
 export default function VendorPerformanceModal({ isOpen, onClose, vendorId, vendorName }: Props) {
   const performanceQuery = useQuery({
-    queryKey: ['procurement', 'vendor-performance', vendorId],
+    queryKey: queryKeys.procurement.vendorPerformance(vendorId ?? ''),
     queryFn: () => getVendorPerformance(vendorId as string),
     enabled: isOpen && Boolean(vendorId),
   });
   const reviewsQuery = useQuery({
-    queryKey: ['procurement', 'vendor-reviews', vendorId],
+    queryKey: queryKeys.procurement.vendorReviews(vendorId ?? ''),
     queryFn: () => getVendorReviews(vendorId as string),
     enabled: isOpen && Boolean(vendorId),
   });

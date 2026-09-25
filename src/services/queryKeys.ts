@@ -16,6 +16,9 @@ export const queryKeys = {
     preview: (params: Record<string, unknown>) => [...queryKeys.procurement.all, 'preview', params] as const,
     supplies: (filters?: Record<string, unknown>) => [...queryKeys.procurement.all, 'supplies', filters] as const,
     supplyDetail: (id: string) => [...queryKeys.procurement.all, 'supply-detail', id] as const,
+    products: () => [...queryKeys.procurement.all, 'products'] as const,
+    vendorPerformance: (vendorId: string) => [...queryKeys.procurement.all, 'vendor-performance', vendorId] as const,
+    vendorReviews: (vendorId: string) => [...queryKeys.procurement.all, 'vendor-reviews', vendorId] as const,
   },
   returns: {
     all: ['returns'] as const,

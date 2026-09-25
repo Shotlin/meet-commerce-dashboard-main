@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 
 import { PageHeader } from '../components/layout/PageHeader';
@@ -8,6 +9,8 @@ import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { EmptyState } from '../components/states/EmptyState';
 import { useMarkSupplyDelivered, useSupplyOrderDetail } from '../hooks/useProcurement';
+import { getProducts } from '../services/productsAdminService';
+import { queryKeys } from '../services/queryKeys';
 import ReceiveSupplyModal from '../components/procurement/ReceiveSupplyModal';
 import {
   SUPPLY_STAGES,
@@ -21,6 +24,20 @@ export default function SupplyOrderDetailPage() {
   const { supplyId } = useParams<{ supplyId: string }>();
   const navigate = useNavigate();
   const { data: supply, isLoading } = useSupplyOrderDetail(supplyId);
+  const markDelivered = useMarkSupplyDelivered();
+  const [receiveOpen, setReceiveOpen] = useState(false);
+  // Fetched once the receiving modal is actually needed — the catalog can be
+  // sizeable and most supply-order views never open "Confirm Receipt".
+  const productsQuery = useQuery({
+    queryKey: queryKeys.procurement.products(),
+    queryFn: () => getProducts({ limit: 500 }),
+    enabled: receiveOpen,
+    staleTime: 5 * 60 * 1000,
+  });
+  const productOptions = useMemo(
+    () => (productsQuery.data?.products ?? []).map((p) => ({ id: p.id, name: p.name })),
+    [productsQuery.data],
+  );
 
   if (isLoading) {
     return <div className="p-6 text-xs text-muted">Loading supply order…</div>;
@@ -36,8 +53,6 @@ export default function SupplyOrderDetailPage() {
   const badge = supplyStatusBadge(supply.status);
   const currentIndex = supplyStageIndex(supply.status);
   const isTerminal = ['CANCELLED', 'REJECTED_AT_RECEIPT'].includes(supply.status);
-  const markDelivered = useMarkSupplyDelivered();
-  const [receiveOpen, setReceiveOpen] = useState(false);
   const canConfirmReceipt = ['DISPATCHED', 'DELIVERED_PENDING_RECEIPT'].includes(supply.status);
 
   return (
@@ -177,7 +192,7 @@ export default function SupplyOrderDetailPage() {
           isOpen={receiveOpen}
           onClose={() => setReceiveOpen(false)}
           supply={supply}
-          products={[]}
+          products={productOptions}
         />
       )}
     </div>

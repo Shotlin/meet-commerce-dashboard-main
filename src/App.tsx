@@ -46,6 +46,11 @@ import { PlatformPage } from './pages/PlatformPage';
 import { MerchandisingPage } from './pages/MerchandisingPage';
 import { ShopsPage } from './pages/ShopsPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
+import ProcurementPage from './pages/ProcurementPage';
+import ProcurementCreatePage from './pages/ProcurementCreatePage';
+import ProcurementDetailPage from './pages/ProcurementDetailPage';
+import SupplyOrdersPage from './pages/SupplyOrdersPage';
+import SupplyOrderDetailPage from './pages/SupplyOrderDetailPage';
 import { ConfigurationPage } from './pages/ConfigurationPage';
 import MapsSettingsPage from './pages/MapsSettingsPage';
 import RazorpaySettingsPage from './pages/RazorpaySettingsPage';
@@ -69,6 +74,11 @@ export const App: React.FC = () => {
                   <Route path="warehouse/receiving" element={<WarehouseQCPage />} />
                   <Route path="inventory" element={<InventoryPage />} />
                   <Route path="vendors" element={<VendorsPage />} />
+                  <Route path="procurement" element={<ProcurementPage />} />
+                  <Route path="procurement/new" element={<ProcurementCreatePage />} />
+                  <Route path="procurement/supplies" element={<SupplyOrdersPage />} />
+                  <Route path="procurement/supplies/:supplyId" element={<SupplyOrderDetailPage />} />
+                  <Route path="procurement/:id" element={<ProcurementDetailPage />} />
                   <Route path="finance" element={<FinancePage />} />
                   <Route path="analytics" element={<AnalyticsPage />} />
 

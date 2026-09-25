@@ -85,6 +85,7 @@ export const SidebarNav: React.FC = () => {
         { to: '/warehouse/receiving', label: 'Warehouse QC', icon: <Warehouse className="w-4 h-4" />, badge: qcHeldCount, isCore: true },
         { to: '/inventory', label: 'Inventory & Lots', icon: <Boxes className="w-4 h-4" />, isCore: true },
         { to: '/vendors', label: 'Vendors & Procurement', icon: <Store className="w-4 h-4" />, isCore: true },
+        { to: '/procurement', label: 'Procurement Requests', icon: <PackageCheck className="w-4 h-4" />, isCore: true },
         { to: '/finance', label: 'Finance & Payouts', icon: <IndianRupee className="w-4 h-4" />, isCore: true },
         { to: '/analytics', label: 'Analytics & Reports', icon: <BarChart3 className="w-4 h-4" />, isCore: true },
       ],

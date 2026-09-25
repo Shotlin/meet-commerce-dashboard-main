@@ -51,6 +51,16 @@ export function isRouteAllowed(routePath: string, role: UserRole): boolean {
   if (segments[0] === 'shops' && segments.length === 2) {
     return allowedRoutes.includes('/shops');
   }
+  // /procurement/supplies/:supplyId (supply order detail) — a dynamic child
+  // of /procurement/supplies, checked before the generic /procurement/:id
+  // rule below so it doesn't get mistaken for a request id.
+  if (segments[0] === 'procurement' && segments[1] === 'supplies' && segments.length === 3) {
+    return allowedRoutes.includes('/procurement/supplies');
+  }
+  // /procurement/:id (request detail) — same dynamic-child pattern as /themes/:id.
+  if (segments[0] === 'procurement' && segments.length === 2) {
+    return allowedRoutes.includes('/procurement');
+  }
   return false;
 }
 
