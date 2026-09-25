@@ -10,7 +10,8 @@ import { Modal } from '../components/common/Modal';
 import { DetailDrawer } from '../components/layout/DetailDrawer';
 import { vendorService } from '../services/vendorService';
 import { Vendor } from '../types';
-import { Store, CheckCircle2, FileText, Download, ShieldCheck } from 'lucide-react';
+import { Store, CheckCircle2, FileText, Download, ShieldCheck, TrendingUp } from 'lucide-react';
+import VendorPerformanceModal from '../components/procurement/VendorPerformanceModal';
 
 export const VendorsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +27,7 @@ export const VendorsPage: React.FC = () => {
 
   // Vendor Compliance Documents Drawer State
   const [selectedVendorForDocs, setSelectedVendorForDocs] = useState<Vendor | null>(null);
+  const [selectedVendorForPerformance, setSelectedVendorForPerformance] = useState<Vendor | null>(null);
 
   const [actionFeedback, setActionFeedback] = useState<{ type: 'success' | 'danger'; text: string } | null>(null);
 
@@ -164,6 +166,14 @@ export const VendorsPage: React.FC = () => {
           >
             Docs
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<TrendingUp className="w-3.5 h-3.5" />}
+            onClick={() => setSelectedVendorForPerformance(row)}
+          >
+            Performance
+          </Button>
         </div>
       ),
     },
@@ -251,6 +261,12 @@ export const VendorsPage: React.FC = () => {
       </Modal>
 
       {/* Vendor Compliance Documents Drawer */}
+      <VendorPerformanceModal
+        isOpen={Boolean(selectedVendorForPerformance)}
+        onClose={() => setSelectedVendorForPerformance(null)}
+        vendorId={selectedVendorForPerformance?.id ?? null}
+        vendorName={selectedVendorForPerformance?.companyName}
+      />
       <DetailDrawer
         isOpen={!!selectedVendorForDocs}
         onClose={() => setSelectedVendorForDocs(null)}

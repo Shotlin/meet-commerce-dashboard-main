@@ -32,6 +32,7 @@ import {
   Mail,
   AlertCircle,
   ShoppingCart,
+  PackageCheck,
   History,
   Bell,
   Tags,
