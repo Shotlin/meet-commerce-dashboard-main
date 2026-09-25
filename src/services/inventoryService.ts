@@ -1,20 +1,29 @@
 import { InventoryLot } from '../types';
 import { apiClient } from './apiClient';
 
+// Real fields only below — the backend's GET /inventory/lots (see
+// InventoryRepository#listLots) now LEFT JOINs the actual vendor-procurement
+// chain (receipt item -> receipt -> supply order -> vendor -> quality
+// video), so a vendor-sourced lot has real data here. A lot that was never
+// linked to a vendor receipt (e.g. a manual stock adjustment) genuinely has
+// none of this — shown as "Unknown"/null rather than an invented name, per
+// this codebase's "no fake mockup" convention (see CLAUDE.md's Orders
+// audit, which deleted a near-identical fabricated component for the same
+// reason).
 const adaptLot = (b: any): InventoryLot => ({
-  id: b.id || b._id || `lot-${Date.now()}`,
-  lotNumber: b.lotNumber || b.batch_number || `LOT-MEAT-${Math.floor(Math.random() * 9000 + 1000)}`,
-  sku: b.sku || 'SKU-MUT-G01',
-  productName: b.productName || b.product_name || b.product?.title || 'Fresh Meat Lot',
-  vendorName: b.vendorName || b.vendor?.companyName || 'MeatCraft Farms Ltd.',
-  batchNumber: b.batchNumber || b.batch_number || b.batchCode || 'BATCH-2026-88',
-  receivedDate: b.receivedDate || b.created_at || new Date().toISOString().split('T')[0],
-  expiryDate: b.expiryDate || b.expiry_date || '2026-08-15',
-  availableWeightKg: Number(b.availableWeightKg ?? b.quantity_available ?? b.stockKg ?? 100.0),
-  reservedWeightKg: Number(b.reservedWeightKg ?? b.quantity_reserved ?? 0.0),
-  pickedWeightKg: Number(b.pickedWeightKg ?? 0.0),
-  storageTempCelsius: Number(b.storageTempCelsius ?? 2.1),
-  warehouseLocation: b.warehouseLocation || 'North Delhi Hub (Cold Bay 1)',
+  id: b.id,
+  lotNumber: b.batchNumber || b.batch_number || b.id,
+  sku: b.sku || b.product_id || '—',
+  productName: b.productName || b.product_name || 'Unknown product',
+  vendorName: b.vendorName || b.vendor_name || 'Unknown vendor',
+  batchNumber: b.batchNumber || b.batch_number || '—',
+  receivedDate: b.receivedDate || b.created_at || '',
+  expiryDate: b.expiryDate || b.expiry_date || '',
+  availableWeightKg: Number(b.availableWeightKg ?? b.quantity_available ?? 0),
+  reservedWeightKg: Number(b.reservedWeightKg ?? b.quantity_reserved ?? 0),
+  pickedWeightKg: Number(b.pickedWeightKg ?? 0),
+  storageTempCelsius: Number(b.storageTempCelsius ?? 0),
+  warehouseLocation: b.warehouseLocation || b.warehouse_name || b.warehouse_code || 'Unknown warehouse',
   status:
     b.status === 'QUARANTINED' || b.status === 'Quarantined'
       ? 'Quarantined'
@@ -24,11 +33,19 @@ const adaptLot = (b: any): InventoryLot => ({
       ? 'Expired'
       : 'Active',
   lineage: {
-    vendorId: b.lineage?.vendorId || 'VEN-101',
-    supplyBatchId: b.lineage?.supplyBatchId || 'SB-8821',
-    qcReceiptId: b.lineage?.qcReceiptId || 'QCR-2026-0912',
-    farmOrigin: b.lineage?.farmOrigin || 'Satara Organic Farms, Maharashtra',
+    vendorId: b.lineage?.vendorId || b.vendor_id || '',
+    supplyBatchId: b.lineage?.supplyBatchId || b.supply_number || '',
+    qcReceiptId: b.lineage?.qcReceiptId || '',
+    farmOrigin: b.lineage?.farmOrigin || '',
   },
+  vendorTrace:
+    b.vendor_name || b.vendorName
+      ? {
+          vendorName: b.vendorName || b.vendor_name,
+          supplyNumber: b.supplyNumber || b.supply_number || '',
+          videoUrl: b.videoUrl || b.video_url || null,
+        }
+      : null,
 });
 
 export const inventoryService = {

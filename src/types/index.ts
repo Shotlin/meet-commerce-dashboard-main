@@ -126,6 +126,16 @@ export interface InventoryLot {
     qcReceiptId: string;
     farmOrigin: string;
   };
+  /** Real vendor-procurement trace, when this lot came from a received
+   * vendor supply order — null for a manually-adjusted lot. Backs the
+   * "which vendor's stock is this, and can I see their quality video"
+   * question this page exists to answer; never fabricated like the
+   * `lineage` block above. */
+  vendorTrace: {
+    vendorName: string;
+    supplyNumber: string;
+    videoUrl: string | null;
+  } | null;
 }
 
 export interface Vendor {

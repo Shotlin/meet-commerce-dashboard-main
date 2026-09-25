@@ -8,10 +8,66 @@ import { Table, Column } from '../components/common/Table';
 import { FilterBar } from '../components/common/FilterBar';
 import { DetailDrawer } from '../components/layout/DetailDrawer';
 import { TemperatureLogger } from '../components/domain/TemperatureLogger';
-import { LotTraceTree } from '../components/domain/LotTraceTree';
 import { inventoryService } from '../services/inventoryService';
 import { InventoryLot } from '../types';
-import { Boxes, Eye } from 'lucide-react';
+import { Boxes, Eye, Film, GitCommit } from 'lucide-react';
+
+/**
+ * Real vendor-batch trace for this lot (vendor, supply order, quality
+ * video) — replaces the old `LotTraceTree` here, which rendered a fixed,
+ * hardcoded 5-node story ("Satara Organic Farms", "Aarav Patel (Paid)")
+ * regardless of which lot was open. This card shows only what the backend
+ * actually knows for THIS lot (InventoryRepository#listLots' real joins),
+ * and says so plainly when a lot has no vendor link at all (e.g. a manual
+ * stock adjustment).
+ */
+const VendorBatchTraceCard: React.FC<{ lot: InventoryLot }> = ({ lot }) => (
+  <div className="bg-surface border border-border rounded-[12px] p-5 shadow-card">
+    <div className="flex items-center justify-between pb-3 mb-4 border-b border-border">
+      <div className="flex items-center gap-2">
+        <GitCommit className="w-5 h-5 text-brand-berry" />
+        <h3 className="text-sm font-bold text-ink">Vendor Batch & Quality Video</h3>
+      </div>
+      <Badge variant={lot.vendorTrace ? 'success' : 'neutral'}>
+        {lot.vendorTrace ? 'Traced to a vendor supply' : 'No vendor link'}
+      </Badge>
+    </div>
+
+    {lot.vendorTrace ? (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <span className="block text-status-neutral">Vendor</span>
+            <span className="font-bold text-ink">{lot.vendorTrace.vendorName}</span>
+          </div>
+          <div>
+            <span className="block text-status-neutral">Supply Order</span>
+            <span className="font-mono-num font-semibold text-ink">{lot.vendorTrace.supplyNumber || '—'}</span>
+          </div>
+        </div>
+
+        {lot.vendorTrace.videoUrl ? (
+          <video
+            controls
+            src={lot.vendorTrace.videoUrl}
+            className="w-full rounded-[10px] border border-border bg-black"
+            style={{ maxHeight: 320 }}
+          />
+        ) : (
+          <div className="flex items-center gap-2 text-xs text-status-neutral bg-rose-50/60 border border-border rounded-[10px] p-3">
+            <Film className="w-4 h-4" />
+            This vendor has not uploaded a cleaning/packing video for this batch yet.
+          </div>
+        )}
+      </div>
+    ) : (
+      <p className="text-xs text-status-neutral">
+        This lot was not created from a received vendor supply order (e.g. a manual stock adjustment), so there is no
+        vendor or video to trace.
+      </p>
+    )}
+  </div>
+);
 
 export const InventoryPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,12 +138,20 @@ export const InventoryPage: React.FC = () => {
       ),
     },
     {
-      header: 'Storage Temp',
-      cell: (row) => (
-        <span className="font-mono-num text-xs font-semibold text-status-success bg-status-success/10 px-2 py-0.5 rounded-full">
-          {row.storageTempCelsius.toFixed(1)} °C
-        </span>
-      ),
+      header: 'Vendor Video',
+      cell: (row) =>
+        row.vendorTrace?.videoUrl ? (
+          <a
+            href={row.vendorTrace.videoUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-semibold text-brand-berry underline underline-offset-2"
+          >
+            Watch
+          </a>
+        ) : (
+          <span className="text-xs text-status-neutral">—</span>
+        ),
     },
     {
       header: 'Expiry Date',
@@ -183,8 +247,8 @@ export const InventoryPage: React.FC = () => {
               locationName={selectedLot.warehouseLocation}
             />
 
-            {/* Lot Traceability Tree */}
-            <LotTraceTree lotId={selectedLot.lotNumber} />
+            {/* Real vendor batch + quality video trace for this lot */}
+            <VendorBatchTraceCard lot={selectedLot} />
           </div>
         )}
       </DetailDrawer>

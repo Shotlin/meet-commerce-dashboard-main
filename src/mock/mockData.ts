@@ -206,7 +206,8 @@ export const mockInventoryLots: InventoryLot[] = [
       supplyBatchId: 'SB-8821',
       qcReceiptId: 'QCR-2026-0912',
       farmOrigin: 'Satara Organic Farms, Maharashtra'
-    }
+    },
+    vendorTrace: null
   },
   {
     id: 'lot-2',
@@ -228,7 +229,8 @@ export const mockInventoryLots: InventoryLot[] = [
       supplyBatchId: 'SB-4109',
       qcReceiptId: 'QCR-2026-0899',
       farmOrigin: 'Ratnagiri Deep Sea Catch'
-    }
+    },
+    vendorTrace: null
   },
   {
     id: 'lot-3',
@@ -250,7 +252,8 @@ export const mockInventoryLots: InventoryLot[] = [
       supplyBatchId: 'SB-9912',
       qcReceiptId: 'QCR-2026-0914',
       farmOrigin: 'Hosur Bio-Secure Poultry Farm'
-    }
+    },
+    vendorTrace: null
   }
 ];
 
