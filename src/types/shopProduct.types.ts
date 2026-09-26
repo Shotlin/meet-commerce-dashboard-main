@@ -96,6 +96,8 @@ export interface ShopProductInventoryLot {
   vendor_id: string | null;
   vendor_name: string | null;
   video_url: string | null;
+  is_manual_entry?: boolean;
+  manual_notes?: string | null;
 }
 
 export interface ShopProductInventoryLotsResult {
@@ -109,4 +111,28 @@ export interface AdjustShopProductStockPayload {
   quantity_delta: number;
   type: 'MANUAL_ADJUSTMENT' | 'DAMAGED_STOCK' | 'RETURN_STOCK';
   reason: string;
+}
+
+/**
+ * `POST /api/v1/shops/:shopId/products/:shopProductId/inventory-lots/manual`
+ * — backfills a vendor batch (name, quantity, expiry, optional quality
+ * video) for stock that never came through the real Vendor Procurement
+ * receiving pipeline. `also_add_to_stock` is opt-in: leave it off to attach
+ * batch provenance to stock that's already correctly set, without double-
+ * counting it.
+ */
+export interface CreateManualInventoryLotPayload {
+  vendor_name: string;
+  quantity: number;
+  expiry_date: string;
+  video_url?: string;
+  batch_reference?: string;
+  notes?: string;
+  also_add_to_stock: boolean;
+}
+
+export interface CreateManualInventoryLotResult {
+  lot: ShopProductInventoryLot;
+  shopProduct: ShopProduct;
+  movement: unknown | null;
 }

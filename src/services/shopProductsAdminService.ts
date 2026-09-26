@@ -1,6 +1,8 @@
 import { apiClient } from './apiClient';
 import type {
   AdjustShopProductStockPayload,
+  CreateManualInventoryLotPayload,
+  CreateManualInventoryLotResult,
   CreateShopProductPayload,
   ShopProduct,
   ShopProductInventoryLotsResult,
@@ -103,4 +105,26 @@ export async function adjustShopProductStock(
   );
   if (res.success && res.data) return res.data.shopProduct;
   throw new Error(res.message || 'Failed to adjust stock');
+}
+
+/**
+ * Backfill a vendor batch for a shop product whose stock never came
+ * through the real Vendor Procurement receiving pipeline — creates a real
+ * `inventory_lots` row (vendor name, quantity, expiry, optional quality
+ * video) tagged as manual, so it shows up in the same "Vendor Batches"
+ * panel as a real receipt does. Optionally also applies the quantity as a
+ * stock delta (`also_add_to_stock`) in the same backend transaction.
+ */
+export async function createManualInventoryLot(
+  shopId: string,
+  shopProductId: string,
+  payload: CreateManualInventoryLotPayload
+): Promise<CreateManualInventoryLotResult> {
+  const res = await apiClient.post<CreateManualInventoryLotResult>(
+    `/api/v1/shops/${shopId}/products/${shopProductId}/inventory-lots/manual`,
+    payload,
+    { 'X-Shop-Id': shopId }
+  );
+  if (res.success && res.data) return res.data;
+  throw new Error(res.message || 'Failed to backfill vendor batch');
 }

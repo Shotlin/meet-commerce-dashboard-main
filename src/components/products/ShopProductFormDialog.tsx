@@ -17,13 +17,19 @@ import { useDebounce } from "@/hooks/useDebounce"
 import { useAdminProducts } from "@/hooks/useProductsAdmin"
 import {
   useAdjustShopProductStock,
+  useCreateManualInventoryLot,
   useCreateShopProduct,
   useShopProductInventoryLots,
   useUpdateShopProduct,
 } from "@/hooks/useShopProductsAdmin"
 import { AdjustStockModal } from "@/components/products/AdjustStockModal"
+import { BackfillVendorBatchModal } from "@/components/products/BackfillVendorBatchModal"
 import type { AdminProduct } from "@/types/product.types"
-import type { AdjustShopProductStockPayload, ShopProduct } from "@/types/shopProduct.types"
+import type {
+  AdjustShopProductStockPayload,
+  CreateManualInventoryLotPayload,
+  ShopProduct,
+} from "@/types/shopProduct.types"
 
 interface ShopProductFormDialogProps {
   open: boolean
@@ -86,6 +92,7 @@ export function ShopProductFormDialog({
   const [form, setForm] = useState<OverrideFormState>(() => buildInitialOverrides(shopProduct))
   const [search, setSearch] = useState("")
   const [adjustStockOpen, setAdjustStockOpen] = useState(false)
+  const [backfillBatchOpen, setBackfillBatchOpen] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
 
   const { data, isLoading } = useAdminProducts({ search: debouncedSearch || undefined, limit: 50 })
@@ -96,6 +103,7 @@ export function ShopProductFormDialog({
     shopProduct?.id ?? null
   )
   const adjustStock = useAdjustShopProductStock(shopId)
+  const backfillVendorBatch = useCreateManualInventoryLot(shopId)
 
   useEffect(() => {
     if (open) {
@@ -144,6 +152,14 @@ export function ShopProductFormDialog({
     adjustStock.mutate(
       { shopProductId: shopProduct.id, payload },
       { onSuccess: () => setAdjustStockOpen(false) }
+    )
+  }
+
+  const handleBackfillVendorBatch = (payload: CreateManualInventoryLotPayload) => {
+    if (!shopProduct) return
+    backfillVendorBatch.mutate(
+      { shopProductId: shopProduct.id, payload },
+      { onSuccess: () => setBackfillBatchOpen(false) }
     )
   }
 
@@ -318,15 +334,28 @@ export function ShopProductFormDialog({
 
             {isEdit && (
               <div className="rounded-lg border p-3">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                  <PackageSearch className="h-3.5 w-3.5" />
-                  Vendor Batches
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                    <PackageSearch className="h-3.5 w-3.5" />
+                    Vendor Batches
+                  </div>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-[11px]"
+                    onClick={() => setBackfillBatchOpen(true)}
+                  >
+                    Backfill vendor batch…
+                  </Button>
                 </div>
                 {isLoadingLots ? (
                   <Skeleton className="h-10 w-full" />
                 ) : lots.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
-                    No vendor-received stock is linked to this product yet — stock here is manually maintained.
+                    No vendor-received stock is linked to this product yet — either receive it through
+                    Procurement Requests, or use "Backfill vendor batch…" above if this stock already came
+                    from a vendor before that flow existed.
                   </p>
                 ) : (
                   <>
@@ -337,7 +366,14 @@ export function ShopProductFormDialog({
                           className="flex items-center justify-between rounded-md bg-muted/40 px-2 py-1.5 text-xs"
                         >
                           <div className="min-w-0">
-                            <p className="truncate font-medium">{lot.vendor_name ?? "Unknown vendor"}</p>
+                            <p className="truncate font-medium">
+                              {lot.vendor_name ?? "Unknown vendor"}
+                              {lot.is_manual_entry && (
+                                <span className="ml-1.5 rounded-sm bg-amber-100 px-1 py-0.5 text-[10px] font-medium text-amber-800">
+                                  Manually added
+                                </span>
+                              )}
+                            </p>
                             <p className="truncate text-[11px] text-muted-foreground">
                               {lot.batch_number}
                               {lot.supply_number ? ` · ${lot.supply_number}` : ""}
@@ -388,6 +424,16 @@ export function ShopProductFormDialog({
           currentStock={shopProduct.stock_quantity}
           onConfirm={handleAdjustStock}
           isSubmitting={adjustStock.isPending}
+        />
+      )}
+      {shopProduct && (
+        <BackfillVendorBatchModal
+          open={backfillBatchOpen}
+          onOpenChange={setBackfillBatchOpen}
+          productLabel={shopProduct.product.name ?? "Shop product"}
+          currentStock={shopProduct.stock_quantity}
+          onConfirm={handleBackfillVendorBatch}
+          isSubmitting={backfillVendorBatch.isPending}
         />
       )}
     </Dialog>

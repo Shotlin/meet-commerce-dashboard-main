@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   adjustShopProductStock,
+  createManualInventoryLot,
   createShopProduct,
   deleteShopProduct,
   getShopProductInventoryLots,
@@ -10,6 +11,7 @@ import {
 } from '../services/shopProductsAdminService';
 import type {
   AdjustShopProductStockPayload,
+  CreateManualInventoryLotPayload,
   CreateShopProductPayload,
   ShopProductListParams,
   UpdateShopProductPayload,
@@ -88,6 +90,26 @@ export function useAdjustShopProductStock(shopId: string | null) {
       adjustShopProductStock(shopId as string, shopProductId, payload),
     onSuccess: (_data, { shopProductId }) => {
       toast.success('Stock adjusted');
+      qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
+      qc.invalidateQueries({ queryKey: ['shop-products', shopId, shopProductId, 'inventory-lots'] });
+    },
+    onError: (err) => toast.error(getErrorMessage(err)),
+  });
+}
+
+/**
+ * Backfill a vendor batch for a shop product manually (see
+ * `createManualInventoryLot` in shopProductsAdminService). Invalidates both
+ * the lots list (so the new batch shows up immediately) and the shop
+ * product list (in case the stock bump was also applied).
+ */
+export function useCreateManualInventoryLot(shopId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shopProductId, payload }: { shopProductId: string; payload: CreateManualInventoryLotPayload }) =>
+      createManualInventoryLot(shopId as string, shopProductId, payload),
+    onSuccess: (_data, { shopProductId }) => {
+      toast.success('Vendor batch backfilled');
       qc.invalidateQueries({ queryKey: ['shop-products', shopId] });
       qc.invalidateQueries({ queryKey: ['shop-products', shopId, shopProductId, 'inventory-lots'] });
     },
