@@ -106,9 +106,36 @@ describe('mapOrderDetail', () => {
     expect(detail.tipAmount).toBe(0);
   });
 
-  it('evidence is always null — Meet Commerce has no backend data model for cutting evidence, so this must never be fabricated', () => {
+  it('qualityEvidence is an honest empty array — never fabricated — when the backend sends none', () => {
     const detail = mapOrderDetail({ id: 'order-1', created_at: '', items: [], timeline: [] });
-    expect(detail.evidence).toBeNull();
+    expect(detail.qualityEvidence).toEqual([]);
+  });
+
+  it('maps real per-item vendor quality video entries (§7.5) through their own mapper', () => {
+    const detail = mapOrderDetail({
+      id: 'order-1',
+      created_at: '',
+      items: [],
+      timeline: [],
+      quality_evidence: [
+        {
+          orderItemId: 'oi-1',
+          productName: 'Chicken Breast Boneless (1 kg)',
+          videoUrl: 'https://cdn.example/vid.mp4',
+          vendorName: 'Kolkata Fresh Chicken Co.',
+          supplyNumber: 'SUP-20260926-7544',
+        },
+      ],
+    });
+    expect(detail.qualityEvidence).toEqual([
+      {
+        orderItemId: 'oi-1',
+        productName: 'Chicken Breast Boneless (1 kg)',
+        videoUrl: 'https://cdn.example/vid.mp4',
+        vendorName: 'Kolkata Fresh Chicken Co.',
+        supplyNumber: 'SUP-20260926-7544',
+      },
+    ]);
   });
 
   it('maps items and timeline arrays through their own mappers', () => {

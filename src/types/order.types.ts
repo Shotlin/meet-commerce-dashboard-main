@@ -111,15 +111,20 @@ export interface OrderDeliveryAssignment {
   distanceKm: number | null;
 }
 
-// Only present when the order genuinely has variable-weight / cutting
-// data — never fabricated when absent (see OrderDetail.evidence below).
-export interface OrderCuttingEvidence {
+/**
+ * A real vendor quality/cleaning video, resolved per order item via
+ * order_item → inventory_lot allocation → procurement receipt → supply
+ * order → vendor (§7.5) — the same trace the customer app's invoice-QR
+ * scan resolves. One entry per item that has a resolvable video; an item
+ * with no allocation (manually stocked, or predates this feature) simply
+ * has no entry here — never a fabricated one.
+ */
+export interface OrderQualityEvidenceItem {
+  orderItemId: string;
+  productName: string;
   videoUrl: string;
-  moderationStatus: 'APPROVED' | 'PENDING_REVIEW' | 'REJECTED';
-  declaredWeightKg: number | null;
-  actualWeightKg: number | null;
-  weightVarianceKg: number | null;
-  lotTraceIds: string[];
+  vendorName: string | null;
+  supplyNumber: string | null;
 }
 
 export interface OrderDetail extends OrderListRow {
@@ -143,11 +148,11 @@ export interface OrderDetail extends OrderListRow {
   timeline: OrderTimelineEntry[];
   payment: OrderPaymentDetail | null;
   delivery: OrderDeliveryAssignment | null;
-  // Populated only when the order actually has cutting-evidence data —
-  // Meet Commerce's real signal for this is the presence of a delivery
-  // assignment's evidence fields; when there is none, this is `null` and
-  // the drawer must render an empty/unavailable state, never a default.
-  evidence: OrderCuttingEvidence | null;
+  // Real per-item vendor quality videos (§7.5) — empty array when no item
+  // resolves to one (manually-stocked item, or an order predating this
+  // feature); the drawer must render an honest empty state, never fabricate
+  // a video.
+  qualityEvidence: OrderQualityEvidenceItem[];
   settlement: SettlementInfo;
 }
 

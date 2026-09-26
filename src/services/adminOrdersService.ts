@@ -11,6 +11,7 @@ import type {
   OrderLineItem,
   OrderPaymentDetail,
   OrderDeliveryAssignment,
+  OrderQualityEvidenceItem,
   RazorpayPaymentDetail,
   RefundOrderPayload,
   CancelOrderPayload,
@@ -206,12 +207,22 @@ export function mapOrderDetail(o: any): OrderDetail {
     payment: mapPayment(o.payment),
     delivery: mapDelivery(o.delivery),
     settlement: mapSettlementInfo(o.settlement),
-    // Meet Commerce has no backend data model for variable-weight/
-    // cutting-evidence at all yet (no declared/actual weight, no video
-    // URL, no lot id column anywhere in the schema) — this stays `null`
-    // for every real order rather than ever inventing one. The moment a
-    // real field exists to back it, map it here.
-    evidence: null,
+    // Real per-item vendor quality videos (§7.5) — resolved server-side
+    // via order_item → inventory_lot allocation → procurement receipt →
+    // supply order → vendor. Empty array (never fabricated) when no item
+    // resolves one — a manually-stocked item, or an order that predates
+    // this feature.
+    qualityEvidence: Array.isArray(o.quality_evidence) ? o.quality_evidence.map(mapQualityEvidenceItem) : [],
+  };
+}
+
+function mapQualityEvidenceItem(e: any): OrderQualityEvidenceItem {
+  return {
+    orderItemId: e.orderItemId ?? e.order_item_id,
+    productName: e.productName ?? e.product_name ?? 'Item',
+    videoUrl: e.videoUrl ?? e.video_url,
+    vendorName: e.vendorName ?? e.vendor_name ?? null,
+    supplyNumber: e.supplyNumber ?? e.supply_number ?? null,
   };
 }
 

@@ -460,14 +460,26 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
 
                 <Separator />
 
-                {/* G. VARIABLE-WEIGHT / CUTTING EVIDENCE */}
+                {/* G. VENDOR QUALITY / CUTTING VIDEO (§7.5 — one per item, real data) */}
                 <Section title="Vendor Cutting Evidence" icon={<Video className="h-4 w-4" />}>
-                  {order.evidence ? (
-                    <div className="text-xs">
-                      <video src={order.evidence.videoUrl} controls className="w-full rounded-md" />
+                  {order.qualityEvidence.length > 0 ? (
+                    <div className="space-y-3">
+                      {order.qualityEvidence.map((evidence) => (
+                        <div key={evidence.orderItemId} className="text-xs">
+                          <p className="mb-1 font-semibold">{evidence.productName}</p>
+                          <video src={evidence.videoUrl} controls className="w-full rounded-md" />
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            {evidence.vendorName ?? 'Unknown vendor'}
+                            {evidence.supplyNumber ? ` · ${evidence.supplyNumber}` : ''}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">No cutting evidence recorded for this order.</p>
+                    <p className="text-xs text-muted-foreground">
+                      No vendor quality video is linked to this order — either an item wasn't traceable to a
+                      vendor batch (manually stocked), or this order predates that traceability.
+                    </p>
                   )}
                 </Section>
 
