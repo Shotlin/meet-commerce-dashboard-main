@@ -97,6 +97,7 @@ export const SidebarNav: React.FC = () => {
         { to: '/categories', label: 'Categories', icon: <Tags className="w-4 h-4" /> },
         { to: '/fulfilment', label: 'Fulfilment Waves', icon: <Boxes className="w-4 h-4" /> },
         { to: '/delivery', label: 'Riders & Dispatch', icon: <Truck className="w-4 h-4" /> },
+        { to: '/riders', label: 'Rider Management', icon: <Users className="w-4 h-4" /> },
         { to: '/shops', label: 'Shops & Warehouses', icon: <Store className="w-4 h-4" /> },
       ],
     },

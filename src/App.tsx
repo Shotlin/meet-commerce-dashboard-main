@@ -20,6 +20,7 @@ import ProductFamiliesPage from './pages/ProductFamiliesPage';
 import ProductFamilyDetailPage from './pages/ProductFamilyDetailPage';
 import CategoriesPage from './pages/CategoriesPage';
 import { FulfilmentPage } from './pages/FulfilmentPage';
+import { RidersPage } from './pages/RidersPage';
 import { DeliveryPage } from './pages/DeliveryPage';
 import { CRMPage } from './pages/CRMPage';
 import CustomerActivityPage from './pages/CustomerActivityPage';
@@ -89,6 +90,7 @@ export const App: React.FC = () => {
                   <Route path="categories" element={<CategoriesPage />} />
                   <Route path="fulfilment" element={<FulfilmentPage />} />
                   <Route path="delivery" element={<DeliveryPage />} />
+                  <Route path="riders" element={<RidersPage />} />
                   <Route path="crm" element={<CRMPage />} />
                   {/* Alias so `/customers?customer=<uuid>` deep-links (from
                       the Order Detail Drawer's Customer section) resolve to
