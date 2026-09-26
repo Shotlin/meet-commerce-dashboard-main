@@ -48,6 +48,10 @@ export default function ReceiveSupplyModal({ isOpen, onClose, supply, products }
           received_quantity: Number(item.agreed_quantity),
           accepted_quantity: Number(item.agreed_quantity),
           rejected_quantity: 0,
+          // Pre-filled from what was already agreed at award time — a
+          // known SKU is never re-guessed from scratch here, only
+          // corrected if the physical goods genuinely differ.
+          product_id: item.product_id ?? undefined,
         },
       ]),
     ),
@@ -151,6 +155,9 @@ export default function ReceiveSupplyModal({ isOpen, onClose, supply, products }
                         </option>
                       ))}
                     </select>
+                    {item.product_id && (
+                      <p className="mt-1 text-[10px] text-muted">Pre-filled from the request — change if wrong.</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">

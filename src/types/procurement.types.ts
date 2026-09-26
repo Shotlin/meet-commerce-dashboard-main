@@ -145,6 +145,14 @@ export interface SupplyOrderItem {
   supply_order_id: string;
   request_item_id: string | null;
   category_id: string | null;
+  /**
+   * The exact catalog SKU this line was awarded against (migration 143) —
+   * carried forward from the original request item's `product_id` through
+   * both the fixed-offer accept and RFQ award paths, so the receiving
+   * modal can pre-fill "Inventory product" instead of asking staff to
+   * re-pick a product that was already known at award time.
+   */
+  product_id: string | null;
   item_name: string;
   agreed_quantity: string | number;
   unit: QuantityUnit;
@@ -237,7 +245,14 @@ export interface EligibleVendorPreviewResponse {
 
 export interface RequestItemInput {
   category_id: string;
-  product_id?: string;
+  /**
+   * Required (backend `REQUEST_ITEM_SCHEMA`, migration 143) — a request
+   * item is tied to one exact catalog SKU from creation, not just a
+   * category + free-text name, so it flows forward unchanged through
+   * quote/award/supply-order-item all the way to receiving instead of
+   * staff re-guessing which SKU a text label meant at goods-in time.
+   */
+  product_id: string;
   item_name: string;
   requested_quantity: number;
   unit: QuantityUnit;

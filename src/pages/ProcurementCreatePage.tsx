@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Search, Trash2 } from 'lucide-react';
 
 import { PageHeader } from '../components/layout/PageHeader';
 import { Stepper } from '../components/common/Stepper';
@@ -9,10 +9,13 @@ import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { useCreateProcurementRequest, useEligibleVendorPreview, usePublishProcurementRequest } from '../hooks/useProcurement';
 import { useAdminCategories } from '../hooks/useCategoriesAdmin';
+import { useAdminProducts } from '../hooks/useProductsAdmin';
+import { useDebounce } from '../hooks/useDebounce';
 import { shopManagementService } from '../services/shopManagementService';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../services/queryKeys';
 import type { ProcurementMode, QuantityUnit, RequestItemInput } from '../types/procurement.types';
+import type { AdminProduct } from '../types/product.types';
 
 const STEPS = [
   { id: 'store', title: 'Store & Mode', description: 'Destination store and procurement mode' },
@@ -38,11 +41,102 @@ interface DraftState {
 
 const EMPTY_ITEM: RequestItemInput = {
   category_id: '',
+  product_id: '',
   item_name: '',
   requested_quantity: 1,
   unit: 'KG',
   fixed_unit_price: undefined,
 };
+
+/**
+ * Search-and-select a real catalog product for one request line — replaces
+ * the old free-text "Item name" input. Selecting a product auto-fills its
+ * name and category (both read-only after that, "Change" resets them), so
+ * a request item is tied to one exact SKU from creation and can never
+ * drift from what the catalog actually calls it.
+ */
+function ItemProductPicker({
+  index,
+  item,
+  onSelect,
+  onClear,
+}: {
+  index: number;
+  item: RequestItemInput;
+  onSelect: (product: AdminProduct) => void;
+  onClear: () => void;
+}) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const debouncedSearch = useDebounce(search, 300);
+  const { data, isLoading } = useAdminProducts({ search: debouncedSearch || undefined, limit: 20 });
+  const products = data?.products ?? [];
+
+  if (item.product_id && item.item_name) {
+    return (
+      <div>
+        <label className={labelClass}>Product (SKU) *</label>
+        <div className="flex items-center justify-between rounded-[10px] border border-border bg-muted/30 px-3 py-2 text-xs">
+          <span className="truncate font-semibold text-ink">{item.item_name}</span>
+          <button
+            type="button"
+            className="ml-2 shrink-0 text-[11px] font-semibold text-brand-raspberry"
+            onClick={onClear}
+          >
+            Change
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <label className={labelClass} htmlFor={`item-product-${index}`}>Product (SKU) *</label>
+      <div className="flex items-center gap-2 rounded-[10px] border border-border bg-white px-3 py-2">
+        <Search className="h-3.5 w-3.5 shrink-0 text-muted" />
+        <input
+          id={`item-product-${index}`}
+          className="w-full border-0 p-0 text-xs focus:outline-none focus:ring-0"
+          placeholder="Search catalog…"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+        />
+      </div>
+      {open && (
+        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-[10px] border border-border bg-white shadow-lg">
+          {isLoading ? (
+            <div className="p-2 text-[11px] text-muted">Searching…</div>
+          ) : products.length === 0 ? (
+            <div className="p-2 text-[11px] text-muted">
+              {search ? 'No products found' : 'Type to search the catalog…'}
+            </div>
+          ) : (
+            products.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-muted/40"
+                onClick={() => {
+                  onSelect(p);
+                  setSearch('');
+                  setOpen(false);
+                }}
+              >
+                <span className="truncate font-medium text-ink">{p.name}</span>
+                <span className="ml-auto shrink-0 text-[11px] text-muted">{p.category_name ?? '—'}</span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProcurementCreatePage() {
   const navigate = useNavigate();
@@ -77,7 +171,9 @@ export default function ProcurementCreatePage() {
   const selectedItemCategories = draft.items.map((item) => item.category_id).filter(Boolean);
 
   const canLeaveStore = Boolean(draft.shop_id) && Boolean(draft.title.trim());
-  const canLeaveItems = draft.items.every((item) => item.category_id && item.item_name && item.requested_quantity > 0);
+  const canLeaveItems = draft.items.every(
+    (item) => item.product_id && item.category_id && item.item_name && item.requested_quantity > 0
+  );
   const canLeaveTerms =
     Boolean(draft.required_delivery_at) &&
     Boolean(draft.response_deadline) &&
@@ -220,30 +316,23 @@ export default function ProcurementCreatePage() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   <div className="col-span-2">
-                    <label className={labelClass} htmlFor={`item-name-${index}`}>Item name *</label>
-                    <input
-                      id={`item-name-${index}`}
-                      className={inputClass}
-                      placeholder="e.g. Chicken"
-                      value={item.item_name}
-                      onChange={(e) => updateItem(index, { item_name: e.target.value })}
+                    <ItemProductPicker
+                      index={index}
+                      item={item}
+                      onSelect={(product) =>
+                        updateItem(index, {
+                          product_id: product.id,
+                          item_name: product.name,
+                          category_id: product.category_id ?? '',
+                        })
+                      }
+                      onClear={() => updateItem(index, { product_id: '', item_name: '', category_id: '' })}
                     />
-                  </div>
-                  <div>
-                    <label className={labelClass} htmlFor={`item-category-${index}`}>Category *</label>
-                    <select
-                      id={`item-category-${index}`}
-                      className={inputClass}
-                      value={item.category_id}
-                      onChange={(e) => updateItem(index, { category_id: e.target.value })}
-                    >
-                      <option value="">Select…</option>
-                      {(categoriesQuery.data ?? []).map((category: { id: string; name: string }) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
+                    {item.product_id && (
+                      <p className="mt-1 text-[11px] text-muted">
+                        Category: {(categoriesQuery.data ?? []).find((c: { id: string; name: string }) => c.id === item.category_id)?.name ?? '—'}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className={labelClass} htmlFor={`item-qty-${index}`}>Quantity *</label>
