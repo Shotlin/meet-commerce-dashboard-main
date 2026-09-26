@@ -7,6 +7,7 @@ import {
   deleteShopProduct,
   getShopProductInventoryLots,
   listShopProducts,
+  lookupInventoryLotsForProduct,
   updateShopProduct,
 } from '../services/shopProductsAdminService';
 import type {
@@ -79,6 +80,21 @@ export function useShopProductInventoryLots(shopId: string | null, shopProductId
     queryKey: ['shop-products', shopId, shopProductId, 'inventory-lots'],
     queryFn: () => getShopProductInventoryLots(shopId as string, shopProductId as string),
     enabled: !!shopId && !!shopProductId,
+    staleTime: 15_000,
+  });
+}
+
+/**
+ * The "Add Product to Shop" counterpart to `useShopProductInventoryLots` —
+ * looks up real vendor-received batches for a master catalog product not
+ * yet added to this shop. Callers pass `null` for `productId` until a
+ * product has actually been selected in the attach-search step.
+ */
+export function useInventoryLotsForProduct(shopId: string | null, productId: string | null) {
+  return useQuery({
+    queryKey: ['shop-products', shopId, 'lookup-inventory-lots', productId],
+    queryFn: () => lookupInventoryLotsForProduct(shopId as string, productId as string),
+    enabled: !!shopId && !!productId,
     staleTime: 15_000,
   });
 }

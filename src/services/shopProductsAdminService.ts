@@ -5,6 +5,7 @@ import type {
   CreateManualInventoryLotResult,
   CreateShopProductPayload,
   ShopProduct,
+  ShopProductInventoryLot,
   ShopProductInventoryLotsResult,
   ShopProductListParams,
   ShopProductListResult,
@@ -105,6 +106,28 @@ export async function adjustShopProductStock(
   );
   if (res.success && res.data) return res.data.shopProduct;
   throw new Error(res.message || 'Failed to adjust stock');
+}
+
+/**
+ * The "Add Product to Shop" counterpart to `getShopProductInventoryLots` —
+ * looks up real vendor-received batches for a master catalog product
+ * BEFORE it's ever been added to this shop (no `shop_products` id exists
+ * yet to key off). Surfaces stock a store already received through a real
+ * Procurement Request/receive cycle that predates listing the product for
+ * the shop, so "Add Product to Shop" doesn't ask for a disconnected,
+ * typed-from-scratch stock number when a real number already exists.
+ */
+export async function lookupInventoryLotsForProduct(
+  shopId: string,
+  productId: string
+): Promise<{ lots: ShopProductInventoryLot[]; lotQuantityTotal: number }> {
+  const res = await apiClient.get<{ lots: ShopProductInventoryLot[]; lotQuantityTotal: number }>(
+    `/api/v1/shops/${shopId}/products/lookup-inventory-lots`,
+    { productId },
+    { 'X-Shop-Id': shopId }
+  );
+  if (res.success && res.data) return res.data;
+  throw new Error(res.message || 'Failed to look up inventory lots');
 }
 
 /**

@@ -19,6 +19,7 @@ import {
   useAdjustShopProductStock,
   useCreateManualInventoryLot,
   useCreateShopProduct,
+  useInventoryLotsForProduct,
   useShopProductInventoryLots,
   useUpdateShopProduct,
 } from "@/hooks/useShopProductsAdmin"
@@ -102,6 +103,17 @@ export function ShopProductFormDialog({
     shopId,
     shopProduct?.id ?? null
   )
+  // "Add Product to Shop" counterpart — a product can have real
+  // vendor-received stock sitting in inventory_lots from a Procurement
+  // Request that was received before this product was ever added to the
+  // shop (§7.5.1's receive bridge skips syncing stock when no
+  // shop_products row exists yet). Surface it the moment a product is
+  // picked in the attach-search step, not just after it's already a shop
+  // product.
+  const { data: newProductLots, isLoading: isLoadingNewProductLots } = useInventoryLotsForProduct(
+    shopId,
+    !isEdit ? selectedProduct?.id ?? null : null
+  )
   const adjustStock = useAdjustShopProductStock(shopId)
   const backfillVendorBatch = useCreateManualInventoryLot(shopId)
 
@@ -112,6 +124,17 @@ export function ShopProductFormDialog({
       setSearch("")
     }
   }, [open, shopProduct])
+
+  // Once a real, already-received vendor batch total resolves for the
+  // just-picked product, suggest it as the initial stock — but only while
+  // the admin hasn't touched Stock away from the untouched default (0),
+  // so this never silently overwrites a number they've already typed.
+  useEffect(() => {
+    if (!isEdit && selectedProduct && newProductLots && newProductLots.lotQuantityTotal > 0 && form.stockQuantity === 0) {
+      patch({ stockQuantity: newProductLots.lotQuantityTotal })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct?.id, newProductLots])
 
   const patch = (next: Partial<OverrideFormState>) => setForm((prev) => ({ ...prev, ...next }))
 
@@ -331,6 +354,47 @@ export function ShopProductFormDialog({
                 />
               </div>
             </div>
+
+            {!isEdit && selectedProduct && (newProductLots?.lots.length ?? 0) > 0 && (
+              <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-amber-900">
+                  <PackageSearch className="h-3.5 w-3.5" />
+                  Vendor batches already received for this product
+                </div>
+                {isLoadingNewProductLots ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <>
+                    <p className="mb-2 text-[11px] text-amber-900">
+                      This product was received through a real Procurement Request before it was added to
+                      this shop — the stock below has been suggested as the starting number (still
+                      editable).
+                    </p>
+                    <div className="space-y-1.5">
+                      {(newProductLots?.lots ?? []).map((lot) => (
+                        <div
+                          key={lot.id}
+                          className="flex items-center justify-between rounded-md bg-white px-2 py-1.5 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">{lot.vendor_name ?? "Unknown vendor"}</p>
+                            <p className="truncate text-[11px] text-muted-foreground">
+                              {lot.batch_number}
+                              {lot.supply_number ? ` · ${lot.supply_number}` : ""}
+                              {lot.expiry_date ? ` · exp ${lot.expiry_date.slice(0, 10)}` : ""}
+                            </p>
+                          </div>
+                          <span className="ml-2 shrink-0 font-semibold">{lot.quantity_on_hand}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[11px] font-semibold text-amber-900">
+                      Total already received: {newProductLots?.lotQuantityTotal ?? 0}
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
 
             {isEdit && (
               <div className="rounded-lg border p-3">
