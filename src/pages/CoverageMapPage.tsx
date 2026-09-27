@@ -7,12 +7,20 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 // maplibre-gl resolves its worker chunk at runtime as `./maplibre-gl-worker.mjs`
 // relative to its own bundle URL (see maplibre-gl/dist/maplibre-gl.mjs#defaultWorkerUrl) —
 // a dynamic string Vite's static import analysis can't see, so the file never made it
-// into the build output and Vercel's SPA rewrite served index.html for it instead
-// (silently breaking every map on this page). Importing it with `?url` makes Vite treat
-// it as a real asset and emit it under /assets/, and setWorkerUrl points maplibre at it.
-// eslint-disable-next-line import/no-unresolved
-import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
-setWorkerUrl(maplibreWorkerUrl);
+// into the build output at all (Vercel's SPA rewrite served index.html for it instead,
+// silently breaking every map on this page). A `?url` import of just the worker file
+// isn't enough on its own either — that worker file itself has its own internal
+// `import ... from "./maplibre-gl-shared.mjs"` (a second, ~500KB internal dependency
+// chunk maplibre-gl splits its worker/main-thread-shared code into), and Vite's `?url`
+// suffix copies a file byte-for-byte as an opaque asset without resolving or copying
+// along anything it imports — so that second file 404'd exactly the same way. Fixed by
+// copying BOTH files verbatim into public/maplibre-worker/ (Vite serves public/ files
+// unhashed, at a fixed path, so the worker's relative sibling import keeps resolving
+// correctly, exactly as it does inside node_modules/maplibre-gl/dist/) and pointing
+// setWorkerUrl at the fixed path instead of importing anything. If maplibre-gl is ever
+// upgraded, re-copy both files from node_modules/maplibre-gl/dist/ (a version mismatch
+// between the app's bundled maplibre-gl and these two files can break map rendering).
+setWorkerUrl('/maplibre-worker/maplibre-gl-worker.mjs');
 import { Users, MapPinned, ShieldCheck, RefreshCw, Bike, MapPin as MapPinIcon } from 'lucide-react';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Card } from '../components/common/Card';
