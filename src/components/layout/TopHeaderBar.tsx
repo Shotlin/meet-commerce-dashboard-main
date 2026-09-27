@@ -8,6 +8,7 @@ import { isRouteAllowed, getPrimaryRouteForRole } from '../../utils/permissions'
 import { Modal } from '../common/Modal';
 import { apiClient } from '../../services/apiClient';
 import { ShopSwitcher } from './ShopSwitcher';
+import { LiveOrdersIndicator } from '../domain/LiveOrdersIndicator';
 
 interface TopHeaderBarProps {
   /** Opens the mobile off-canvas nav drawer — only rendered/used below `lg`. */
@@ -344,6 +345,11 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({ onOpenMenu }) => {
           <span className="hidden sm:inline">{role}</span>
           <ChevronDown className="w-3 h-3 ml-0.5 hidden sm:inline" />
         </button>
+
+        {/* Real-time order socket status — proves the live connection this
+            component's own new-order sound/toast/list-refresh depend on is
+            actually up, instead of a silent "why didn't it play" guess. */}
+        <LiveOrdersIndicator />
 
         {/* Notification Bell Container */}
         <div className="relative" ref={notificationContainerRef}>

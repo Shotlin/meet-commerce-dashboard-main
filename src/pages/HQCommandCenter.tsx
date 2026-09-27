@@ -7,6 +7,7 @@ import { Table, Column } from '../components/common/Table';
 import { Modal } from '../components/common/Modal';
 import { analyticsService } from '../services/analyticsService';
 import { orderService } from '../services/orderService';
+import { NEW_ORDER_EVENT } from '../hooks/useLiveOrderAlerts';
 import { useScope } from '../context/ScopeContext';
 import { useAuth } from '../context/AuthContext';
 import { exportHQReportCSV } from '../utils/exportReport';
@@ -43,11 +44,25 @@ export const HQCommandCenter: React.FC = () => {
 
   useEffect(() => {
     fetchData(true);
-    // 15-second live telemetry polling interval
+    // 15-second live telemetry polling interval — the fallback for anything
+    // this page doesn't have a real-time signal for (KPIs, exceptions).
     const timer = setInterval(() => {
       fetchData(false);
     }, 15000);
-    return () => clearInterval(timer);
+
+    // A genuinely new order fires immediately over the socket
+    // (`useLiveOrderAlerts`, mounted globally in `TopHeaderBar`) — refetch
+    // right away instead of waiting up to 15s for the next poll tick. This
+    // page uses plain `useState`+`fetch`, not TanStack Query, so it can't
+    // subscribe to that hook's own cache-invalidation; a plain window event
+    // is the cheapest way to reach it without restructuring its data layer.
+    const onNewOrder = () => fetchData(false);
+    window.addEventListener(NEW_ORDER_EVENT, onNewOrder);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener(NEW_ORDER_EVENT, onNewOrder);
+    };
   }, [location, role]);
 
   const fetchData = async (showLoading = true) => {
