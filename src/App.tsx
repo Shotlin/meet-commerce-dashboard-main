@@ -42,6 +42,7 @@ import AbandonedCartsPage from './pages/AbandonedCartsPage';
 import { PlatformPage } from './pages/PlatformPage';
 import { MerchandisingPage } from './pages/MerchandisingPage';
 import { ShopsPage } from './pages/ShopsPage';
+import { CoverageMapPage } from './pages/CoverageMapPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import ProcurementPage from './pages/ProcurementPage';
 import ProcurementCreatePage from './pages/ProcurementCreatePage';
@@ -112,6 +113,7 @@ export const App: React.FC = () => {
                   <Route path="platform" element={<PlatformPage />} />
                   <Route path="merchandising" element={<MerchandisingPage />} />
                   <Route path="shops" element={<ShopsPage />} />
+                  <Route path="coverage-map" element={<CoverageMapPage />} />
                   <Route path="shops/:id" element={<StoreDetailPage />} />
                   <Route path="configuration" element={<ConfigurationPage />} />
                   <Route path="configuration/maps" element={<MapsSettingsPage />} />

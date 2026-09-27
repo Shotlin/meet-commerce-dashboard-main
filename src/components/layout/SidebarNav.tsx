@@ -35,7 +35,8 @@ import {
   Bell,
   Tags,
   LogOut,
-  X
+  X,
+  MapPinned
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
@@ -102,6 +103,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
         { to: '/delivery', label: 'Riders & Dispatch', icon: <Truck className="w-4 h-4" /> },
         { to: '/riders', label: 'Rider Management', icon: <Users className="w-4 h-4" /> },
         { to: '/shops', label: 'Shops & Warehouses', icon: <Store className="w-4 h-4" /> },
+        { to: '/coverage-map', label: 'Coverage Map', icon: <MapPinned className="w-4 h-4" /> },
       ],
     },
     {

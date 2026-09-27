@@ -100,6 +100,12 @@ export const queryKeys = {
     addresses: (id: string) => [...queryKeys.customers.all, 'addresses', id] as const,
     timeline: (userId: string, filters?: Record<string, unknown>) => [...queryKeys.customers.all, 'timeline', userId, filters] as const,
   },
+  coverageMap: {
+    all: ['coverage-map'] as const,
+    forShop: (shopId: string | null) => [...queryKeys.coverageMap.all, shopId] as const,
+    riders: (shopId: string | null) => [...queryKeys.coverageMap.all, 'riders', shopId] as const,
+    olaStyle: () => [...queryKeys.coverageMap.all, 'ola-style'] as const,
+  },
   themeTabs: {
     all: ['theme-tabs'] as const,
     list: (filters?: Record<string, unknown>) => [...queryKeys.themeTabs.all, 'list', filters] as const,
