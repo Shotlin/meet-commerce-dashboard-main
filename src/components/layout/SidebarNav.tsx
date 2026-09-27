@@ -6,7 +6,6 @@ import {
   ShoppingBag,
   Store,
   Boxes,
-  Warehouse,
   Truck,
   Users,
   LifeBuoy,
@@ -18,7 +17,6 @@ import {
   Palette,
   LayoutTemplate,
   BarChart3,
-  GitBranch,
   Shield,
   Send,
   Sliders,
@@ -66,7 +64,7 @@ export const SidebarNav: React.FC = () => {
     logout();
     navigate('/login', { replace: true });
   };
-  const { qcHeldCount, pendingOrdersCount, supportTicketsCount, exceptionCount } = useScope();
+  const { pendingOrdersCount, supportTicketsCount, exceptionCount } = useScope();
 
   // Profile Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -82,7 +80,6 @@ export const SidebarNav: React.FC = () => {
       items: [
         { to: '/', label: 'HQ Command', icon: <LayoutDashboard className="w-4 h-4" />, isCore: true },
         { to: '/orders', label: 'Orders & Evidence', icon: <ShoppingBag className="w-4 h-4" />, badge: pendingOrdersCount, isCore: true },
-        { to: '/warehouse/receiving', label: 'Warehouse QC', icon: <Warehouse className="w-4 h-4" />, badge: qcHeldCount, isCore: true },
         { to: '/inventory', label: 'Inventory & Lots', icon: <Boxes className="w-4 h-4" />, isCore: true },
         { to: '/vendors', label: 'Vendors & Procurement', icon: <Store className="w-4 h-4" />, isCore: true },
         { to: '/procurement', label: 'Procurement Requests', icon: <PackageCheck className="w-4 h-4" />, isCore: true },
@@ -95,7 +92,6 @@ export const SidebarNav: React.FC = () => {
       items: [
         { to: '/catalogue', label: 'Products', icon: <Boxes className="w-4 h-4" /> },
         { to: '/categories', label: 'Categories', icon: <Tags className="w-4 h-4" /> },
-        { to: '/fulfilment', label: 'Fulfilment Waves', icon: <Boxes className="w-4 h-4" /> },
         { to: '/delivery', label: 'Riders & Dispatch', icon: <Truck className="w-4 h-4" /> },
         { to: '/riders', label: 'Rider Management', icon: <Users className="w-4 h-4" /> },
         { to: '/shops', label: 'Shops & Warehouses', icon: <Store className="w-4 h-4" /> },
@@ -129,7 +125,6 @@ export const SidebarNav: React.FC = () => {
     {
       title: 'SYSTEM & PLATFORM',
       items: [
-        { to: '/traceability', label: 'Chain of Custody', icon: <GitBranch className="w-4 h-4" /> },
         { to: '/governance', label: 'Governance & Auditing', icon: <Shield className="w-4 h-4" /> },
         { to: '/retention', label: 'Retention Engine', icon: <Send className="w-4 h-4" /> },
         { to: '/abandoned-carts', label: 'Abandoned Carts', icon: <ShoppingCart className="w-4 h-4" /> },

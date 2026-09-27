@@ -2,32 +2,32 @@ import { UserRole } from '../types';
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'HQ Admin': [
-    '/', '/orders', '/warehouse/receiving', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
-    '/fulfilment', '/delivery', '/shops', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
-    '/content', '/themes', '/themes/new', '/themes/builder', '/theme-tabs', '/loyalty', '/merchandising', '/traceability', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay'
+    '/', '/orders', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
+    '/delivery', '/shops', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
+    '/content', '/themes', '/themes/new', '/themes/builder', '/theme-tabs', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay'
   ],
   'Warehouse Manager': [
-    '/', '/orders', '/warehouse/receiving', '/inventory', '/fulfilment', '/delivery', '/shops', '/recalls', '/catalogue', '/procurement', '/procurement/new', '/procurement/supplies'
+    '/', '/orders', '/inventory', '/delivery', '/shops', '/recalls', '/catalogue', '/procurement', '/procurement/new', '/procurement/supplies'
   ],
   'Vendor': [
     '/', '/vendors', '/inventory', '/catalogue', '/orders'
   ],
   'Fulfilment Agent': [
-    '/', '/fulfilment', '/delivery', '/orders', '/warehouse/receiving', '/shops'
+    '/', '/delivery', '/orders', '/shops'
   ],
   'Finance Lead': [
     '/', '/finance', '/analytics', '/loyalty', '/orders', '/vendors'
   ],
   'Governance Auditor': [
-    '/', '/governance', '/traceability', '/analytics', '/recalls', '/orders', '/inventory'
+    '/', '/governance', '/analytics', '/recalls', '/orders', '/inventory'
   ],
 };
 
 export const ROLE_LANDING_PAGES: Record<UserRole, string> = {
   'HQ Admin': '/',
-  'Warehouse Manager': '/warehouse/receiving',
+  'Warehouse Manager': '/inventory',
   'Vendor': '/vendors',
-  'Fulfilment Agent': '/fulfilment',
+  'Fulfilment Agent': '/delivery',
   'Finance Lead': '/finance',
   'Governance Auditor': '/governance',
 };

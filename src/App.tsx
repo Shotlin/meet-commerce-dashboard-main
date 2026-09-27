@@ -10,7 +10,6 @@ import { HQCommandCenter } from './pages/HQCommandCenter';
 import { OrdersPage } from './pages/OrdersPage';
 import { VendorsPage } from './pages/VendorsPage';
 import { InventoryPage } from './pages/InventoryPage';
-import { WarehouseQCPage } from './pages/WarehouseQCPage';
 import { FinancePage } from './pages/FinancePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 
@@ -19,7 +18,6 @@ import ProductsPage from './pages/ProductsPage';
 import ProductFamiliesPage from './pages/ProductFamiliesPage';
 import ProductFamilyDetailPage from './pages/ProductFamilyDetailPage';
 import CategoriesPage from './pages/CategoriesPage';
-import { FulfilmentPage } from './pages/FulfilmentPage';
 import { RidersPage } from './pages/RidersPage';
 import { DeliveryPage } from './pages/DeliveryPage';
 import { CRMPage } from './pages/CRMPage';
@@ -39,7 +37,6 @@ import EditThemePage from './pages/EditThemePage';
 import ThemeBuilderPage from './pages/ThemeBuilderPage';
 import ThemeTabsManagementPage from './pages/ThemeTabsManagementPage';
 import { LoyaltyPage } from './pages/LoyaltyPage';
-import { TraceabilityPage } from './pages/TraceabilityPage';
 import { GovernancePage } from './pages/GovernancePage';
 import { RetentionPage } from './pages/RetentionPage';
 import AbandonedCartsPage from './pages/AbandonedCartsPage';
@@ -72,7 +69,6 @@ export const App: React.FC = () => {
                   {/* Core Modules */}
                   <Route index element={<HQCommandCenter />} />
                   <Route path="orders" element={<OrdersPage />} />
-                  <Route path="warehouse/receiving" element={<WarehouseQCPage />} />
                   <Route path="inventory" element={<InventoryPage />} />
                   <Route path="vendors" element={<VendorsPage />} />
                   <Route path="procurement" element={<ProcurementPage />} />
@@ -88,7 +84,6 @@ export const App: React.FC = () => {
                   <Route path="products/families" element={<ProductFamiliesPage />} />
                   <Route path="products/families/:id" element={<ProductFamilyDetailPage />} />
                   <Route path="categories" element={<CategoriesPage />} />
-                  <Route path="fulfilment" element={<FulfilmentPage />} />
                   <Route path="delivery" element={<DeliveryPage />} />
                   <Route path="riders" element={<RidersPage />} />
                   <Route path="crm" element={<CRMPage />} />
@@ -113,7 +108,6 @@ export const App: React.FC = () => {
                   <Route path="themes/:id" element={<EditThemePage />} />
                   <Route path="theme-tabs" element={<ThemeTabsManagementPage />} />
                   <Route path="loyalty" element={<LoyaltyPage />} />
-                  <Route path="traceability" element={<TraceabilityPage />} />
                   <Route path="governance" element={<GovernancePage />} />
                   <Route path="retention" element={<RetentionPage />} />
                   <Route path="abandoned-carts" element={<AbandonedCartsPage />} />
