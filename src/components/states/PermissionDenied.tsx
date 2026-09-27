@@ -13,7 +13,7 @@ export const PermissionDenied: React.FC<{ requiredRole?: string; onSwitchRole?: 
       </div>
       <h3 className="text-base font-bold text-ink">Access Restricted — Permission Required</h3>
       <p className="text-xs text-status-neutral max-w-md mt-1.5 leading-relaxed">
-        Your current role scope does not have permission to view or execute operations in this module. Access is restricted to <span className="font-semibold text-brand-berry">{requiredRole}</span>.
+        Your current role scope does not have permission to view or execute operations in this module. Access is restricted to <span className="font-semibold text-ink-2">{requiredRole}</span>.
       </p>
       {onSwitchRole && (
         <div className="mt-4">

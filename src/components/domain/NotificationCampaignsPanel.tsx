@@ -13,7 +13,7 @@ import {
 } from '../../services/notificationCampaignService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const SEGMENTS: { value: SegmentKey; label: string }[] = [
@@ -69,7 +69,7 @@ const TemplatesSection: React.FC = () => {
   return (
     <Card title="Notification Templates" action={
       <div className="flex items-center gap-2">
-        <Badge variant="brand" icon={<FileText className="w-3 h-3" />}>{templates.length} Templates</Badge>
+        <Badge variant="neutral" icon={<FileText className="w-3 h-3" />}>{templates.length} Templates</Badge>
         <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Template</Button>
       </div>
     }>
@@ -154,7 +154,7 @@ const CampaignsSection: React.FC = () => {
   return (
     <Card title="Notification Campaigns" action={
       <div className="flex items-center gap-2">
-        <Badge variant="brand" icon={<Send className="w-3 h-3" />}>{campaigns.length} Campaigns</Badge>
+        <Badge variant="neutral" icon={<Send className="w-3 h-3" />}>{campaigns.length} Campaigns</Badge>
         <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCompose}>Compose</Button>
       </div>
     }>
@@ -182,8 +182,8 @@ const CampaignsSection: React.FC = () => {
               </select>
             </div>
             <div className="flex items-center gap-1.5 pb-2 text-xs">
-              <Users2 className="w-3.5 h-3.5 text-brand-berry" />
-              <span className="font-mono-num font-bold text-brand-berry">{segmentCount ?? '…'}</span>
+              <Users2 className="w-3.5 h-3.5 text-ink-2" />
+              <span className="font-mono-num font-bold text-ink-2">{segmentCount ?? '…'}</span>
               <span className="text-status-neutral">recipients</span>
             </div>
           </div>

@@ -11,7 +11,7 @@ export const RetentionPage: React.FC = () => {
       <PageHeader
         title="Retention & Communications Platform"
         subtitle="Abandoned cart recovery campaigns, review moderation queue, and push notification scheduler."
-        badge={<Badge variant="brand" icon={<Send className="w-3.5 h-3.5" />}>Cart Rescue Active</Badge>}
+        badge={<Badge variant="success" icon={<Send className="w-3.5 h-3.5" />}>Cart Rescue Active</Badge>}
       />
 
       <div className="grid grid-cols-1 gap-4">
@@ -19,7 +19,7 @@ export const RetentionPage: React.FC = () => {
 
         <Card title="Product Review Moderation Queue">
           <p className="text-xs text-status-neutral">12 Verified Buyer Reviews Pending Moderation</p>
-          <div className="mt-3 font-mono-num text-xs font-bold text-brand-berry">
+          <div className="mt-3 font-mono-num text-xs font-bold text-ink-2">
             4.8 Avg Rating Across Mutton & Seafood
           </div>
         </Card>

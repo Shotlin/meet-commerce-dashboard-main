@@ -135,7 +135,7 @@ export const VendorsPage: React.FC = () => {
     {
       header: 'Fulfilled GMV',
       cell: (row) => (
-        <span className="font-mono-num font-bold text-brand-berry">
+        <span className="font-mono-num font-bold text-ink">
           ₹{(row.totalFulfilledValue / 100000).toFixed(2)} Lakhs
         </span>
       ),
@@ -184,7 +184,7 @@ export const VendorsPage: React.FC = () => {
       <PageHeader
         title="Vendor Management & Procurement"
         subtitle="Manage vendor onboarding, FSSAI licensing compliance, KYC verification, and supply contract awards."
-        badge={<Badge variant="brand" icon={<Store className="w-3.5 h-3.5" />}>{vendors.length} Onboarded Vendors</Badge>}
+        badge={<Badge variant="neutral" icon={<Store className="w-3.5 h-3.5" />}>{vendors.length} Onboarded Vendors</Badge>}
       />
 
       {/* Action Feedback Banner */}
@@ -232,7 +232,7 @@ export const VendorsPage: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-status-neutral font-sans">Total Fulfilled GMV:</span>
-                <span className="font-bold text-brand-berry">
+                <span className="font-bold text-ink">
                   ₹{(selectedVendorForKyc.totalFulfilledValue / 100000).toFixed(2)} Lakhs
                 </span>
               </div>
@@ -293,7 +293,7 @@ export const VendorsPage: React.FC = () => {
                 {/* Doc 1: FSSAI License */}
                 <div className="p-3 border border-border rounded-[12px] flex items-center justify-between hover:bg-rose-50/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-[10px] bg-rose-100 text-brand-berry font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-[10px] bg-muted text-ink-2 font-bold flex items-center justify-center">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>
@@ -314,7 +314,7 @@ export const VendorsPage: React.FC = () => {
                 {/* Doc 2: GSTIN Registration */}
                 <div className="p-3 border border-border rounded-[12px] flex items-center justify-between hover:bg-rose-50/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-[10px] bg-rose-100 text-brand-berry font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-[10px] bg-muted text-ink-2 font-bold flex items-center justify-center">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>
@@ -335,7 +335,7 @@ export const VendorsPage: React.FC = () => {
                 {/* Doc 3: Cold Chain SLA Contract */}
                 <div className="p-3 border border-border rounded-[12px] flex items-center justify-between hover:bg-rose-50/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-[10px] bg-rose-100 text-brand-berry font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-[10px] bg-muted text-ink-2 font-bold flex items-center justify-center">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
                     <div>
@@ -356,7 +356,7 @@ export const VendorsPage: React.FC = () => {
                 {/* Doc 4: Microbiological Lab Swab Report */}
                 <div className="p-3 border border-border rounded-[12px] flex items-center justify-between hover:bg-rose-50/50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-[10px] bg-rose-100 text-brand-berry font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-[10px] bg-muted text-ink-2 font-bold flex items-center justify-center">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>

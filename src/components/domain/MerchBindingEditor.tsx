@@ -5,7 +5,7 @@ import { catalogPickerService, ProductOption } from '../../services/catalogPicke
 import { MerchBinding } from '../../services/sectionService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const money = (v: number | string | null | undefined) => (v == null ? '' : `₹${Number(v).toFixed(0)}`);

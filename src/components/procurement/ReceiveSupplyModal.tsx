@@ -19,7 +19,7 @@ const ISSUE_CATEGORIES = [
 ];
 
 const inputClass =
-  'w-full px-2.5 py-1.5 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30';
+  'w-full px-2.5 py-1.5 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300';
 const labelClass = 'block text-[10px] font-bold text-muted mb-1 uppercase';
 
 interface Props {

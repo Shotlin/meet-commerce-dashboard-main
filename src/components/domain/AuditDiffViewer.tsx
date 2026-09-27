@@ -28,13 +28,13 @@ export const AuditDiffViewer: React.FC<AuditDiffViewerProps> = ({
     <div className="bg-surface border border-border rounded-[12px] p-5 shadow-card font-sans">
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <FileText className="w-5 h-5 text-brand-berry" />
+          <FileText className="w-5 h-5 text-ink-2" />
           <div>
             <h3 className="text-sm font-bold text-ink">System Audit Trail Entry</h3>
             <p className="text-xs text-status-neutral">{actor} • <span className="font-mono-num">{timestamp}</span></p>
           </div>
         </div>
-        <span className="font-mono-num text-xs font-bold text-brand-berry bg-rose-100 px-2 py-0.5 rounded-full border border-brand-berry/20">
+        <span className="font-mono-num text-xs font-bold text-ink bg-rose-100 px-2 py-0.5 rounded-full border border-border">
           {action}
         </span>
       </div>

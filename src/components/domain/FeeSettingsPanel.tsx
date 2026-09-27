@@ -105,7 +105,7 @@ const SECTIONS: SectionDef[] = [
 ];
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const FeeSettingsForm: React.FC<{ value: FeeSettingsInput; onChange: (next: FeeSettingsInput) => void }> = ({ value, onChange }) => {
@@ -116,7 +116,7 @@ const FeeSettingsForm: React.FC<{ value: FeeSettingsInput; onChange: (next: FeeS
     <div className="space-y-5">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <h4 className="text-xs font-bold text-brand-berry uppercase tracking-wider mb-2">{section.title}</h4>
+          <h4 className="text-xs font-bold text-ink-2 uppercase tracking-wider mb-2">{section.title}</h4>
           <div className="grid grid-cols-2 gap-3">
             {section.fields.map((f) => {
               const v = raw[f.key];
@@ -172,7 +172,7 @@ const FeeSettingsForm: React.FC<{ value: FeeSettingsInput; onChange: (next: FeeS
 const summaryRow = (label: string, value: React.ReactNode) => (
   <div className="flex justify-between items-center p-2.5 bg-rose-50/60 rounded-[12px] border border-border">
     <span className="font-bold text-ink">{label}</span>
-    <span className="font-mono-num font-bold text-brand-berry">{value}</span>
+    <span className="font-mono-num font-bold text-ink-2">{value}</span>
   </div>
 );
 
@@ -271,7 +271,7 @@ export const FeeSettingsPanel: React.FC = () => {
 
       <Card
         title="Per-Shop Fee Overrides"
-        action={<Badge variant="brand" icon={<Store className="w-3 h-3" />}>{shops.length} Shops</Badge>}
+        action={<Badge variant="neutral" icon={<Store className="w-3 h-3" />}>{shops.length} Shops</Badge>}
       >
         <div className="flex items-center gap-3 mb-3">
           <select className={inputClass + ' max-w-xs'} value={selectedShopId} onChange={(e) => setSelectedShopId(e.target.value)}>
@@ -324,9 +324,9 @@ export const FeeSettingsPanel: React.FC = () => {
                 <span className={`font-mono-num ${fee.waived ? 'line-through text-status-neutral' : 'font-bold text-ink'}`}>₹{fee.amount.toFixed(2)}</span>
               </div>
             ))}
-            <div className="flex justify-between items-center p-2.5 bg-rose-100/60 rounded-[12px] border border-brand-raspberry/20 mt-2">
+            <div className="flex justify-between items-center p-2.5 bg-rose-100/60 rounded-[12px] border border-border mt-2">
               <span className="font-bold text-ink">Total Payable</span>
-              <span className="font-mono-num font-bold text-brand-berry text-sm">₹{previewResult.totalPayable.toFixed(2)}</span>
+              <span className="font-mono-num font-bold text-ink text-sm">₹{previewResult.totalPayable.toFixed(2)}</span>
             </div>
             {previewResult.freeDelivery.enabled && !previewResult.freeDelivery.unlocked && previewResult.freeDelivery.amountToUnlock > 0 && (
               <p className="text-[11px] text-status-neutral pt-1">Add ₹{previewResult.freeDelivery.amountToUnlock.toFixed(2)} more for free delivery.</p>

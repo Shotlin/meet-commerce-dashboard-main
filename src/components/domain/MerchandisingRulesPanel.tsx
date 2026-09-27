@@ -13,7 +13,7 @@ import {
 } from '../../services/merchandisingService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const emptyMilestone: CartMilestoneInput = {
@@ -60,7 +60,7 @@ const CartMilestonesSection: React.FC = () => {
 
   const columns: Column<CartMilestone>[] = [
     { header: 'Milestone', cell: (row) => <span className="font-bold text-ink">{row.name}</span> },
-    { header: 'Threshold', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.minCartAmount.toFixed(0)}+</span> },
+    { header: 'Threshold', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.minCartAmount.toFixed(0)}+</span> },
     { header: 'Reward', cell: (row) => (
       <span>{row.rewardType === 'CASHBACK' ? `₹${row.rewardValue} cashback` : row.rewardType === 'FLAT_DISCOUNT' ? `₹${row.rewardValue} off` : 'Coupon unlock'}</span>
     ) },
@@ -77,7 +77,7 @@ const CartMilestonesSection: React.FC = () => {
   return (
     <Card title="Cart Milestones (Spend More, Save More)" action={
       <div className="flex items-center gap-2">
-        <Badge variant="brand" icon={<Gift className="w-3 h-3" />}>{milestones.length} Rules</Badge>
+        <Badge variant="neutral" icon={<Gift className="w-3 h-3" />}>{milestones.length} Rules</Badge>
         <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Milestone</Button>
       </div>
     }>
@@ -189,7 +189,7 @@ const FirstTimeOffersSection: React.FC = () => {
   return (
     <Card title="First-Time Customer Offers" action={
       <div className="flex items-center gap-2">
-        <Badge variant="brand" icon={<Sparkles className="w-3 h-3" />}>{offers.length} Offers</Badge>
+        <Badge variant="neutral" icon={<Sparkles className="w-3 h-3" />}>{offers.length} Offers</Badge>
         <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Offer</Button>
       </div>
     }>

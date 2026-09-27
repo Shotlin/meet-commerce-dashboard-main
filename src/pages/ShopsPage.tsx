@@ -23,7 +23,7 @@ export const ShopsPage: React.FC = () => {
     { header: 'Shop', cell: (row) => <div><p className="font-bold text-ink">{row.name}</p><p className="text-[11px] text-status-neutral font-mono-num">{row.branch_code}</p></div> },
     { header: 'Location', cell: (row) => <span>{row.city}, {row.state}</span> },
     { header: 'Orders', accessorKey: 'total_orders', isMono: true },
-    { header: 'Revenue', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{Number(row.total_revenue).toFixed(2)}</span> },
+    { header: 'Revenue', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{Number(row.total_revenue).toFixed(2)}</span> },
     { header: 'Commission', cell: (row) => <span className="font-mono-num">{Number(row.commission_rate).toFixed(1)}%</span> },
     { header: 'Status', cell: (row) => <Badge variant={row.is_active ? 'success' : 'neutral'}>{row.is_active ? 'Active' : 'Inactive'}</Badge> },
   ];
@@ -33,7 +33,7 @@ export const ShopsPage: React.FC = () => {
       <PageHeader
         title="Shops, Warehouses & Staff Scope"
         subtitle="Physical FC location management, staff shift assignments, coverage radius, and opening hours."
-        badge={<Badge variant="brand" icon={<Store className="w-3.5 h-3.5" />}>{shops.length} Active FC Hubs</Badge>}
+        badge={<Badge variant="neutral" icon={<Store className="w-3.5 h-3.5" />}>{shops.length} Active FC Hubs</Badge>}
         actions={<Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setAddOpen(true)}>Add Store</Button>}
       />
 

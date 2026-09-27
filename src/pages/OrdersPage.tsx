@@ -34,13 +34,13 @@ const STATUS_TABS: { label: string; value: BackendOrderStatus | '' }[] = [
   { label: 'Refunded', value: 'REFUNDED' },
 ];
 
-const STATUS_BADGE: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'neutral' | 'brand'> = {
+const STATUS_BADGE: Record<string, 'success' | 'info' | 'warning' | 'danger' | 'neutral' | 'brand' | 'violet'> = {
   ORDER_PLACED: 'info',
   PENDING: 'info',
-  CONFIRMED: 'brand',
+  CONFIRMED: 'violet',
   PREPARING: 'warning',
   PACKED: 'warning',
-  OUT_FOR_DELIVERY: 'brand',
+  OUT_FOR_DELIVERY: 'violet',
   DELIVERED: 'success',
   CANCELLED: 'danger',
   REFUNDED: 'neutral',
@@ -230,7 +230,7 @@ export const OrdersPage: React.FC = () => {
     { header: 'Shop', cell: (row) => <span className="text-xs">{row.shopName || '—'}</span> },
     {
       header: 'Amount',
-      cell: (row) => <span className="font-mono-num text-xs font-bold text-brand-berry">{fmtCurrency(row.totalAmount)}</span>,
+      cell: (row) => <span className="font-mono-num text-xs font-bold text-ink">{fmtCurrency(row.totalAmount)}</span>,
     },
     {
       header: 'Payment',
@@ -256,7 +256,7 @@ export const OrdersPage: React.FC = () => {
       header: 'Order Type / ETA',
       cell: (row) => (
         <div>
-          <Badge variant={row.orderType === 'EXPRESS' ? 'brand' : row.orderType === 'SCHEDULED' ? 'info' : 'neutral'} size="sm">
+          <Badge variant={row.orderType === 'EXPRESS' ? 'warning' : row.orderType === 'SCHEDULED' ? 'info' : 'neutral'} size="sm">
             {row.orderType}
           </Badge>
           <div className="mt-0.5">
@@ -293,7 +293,7 @@ export const OrdersPage: React.FC = () => {
       <PageHeader
         title="Orders"
         subtitle="Manage customer orders, payment reconciliation, rider assignment, and fulfillment."
-        badge={<Badge variant="brand" icon={<ShoppingBag className="w-3.5 h-3.5" />}>{pagination.total} Orders</Badge>}
+        badge={<Badge variant="neutral" icon={<ShoppingBag className="w-3.5 h-3.5" />}>{pagination.total} Orders</Badge>}
         actions={
           <>
             <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={() => ordersQuery.refetch()}>
@@ -334,7 +334,7 @@ export const OrdersPage: React.FC = () => {
           </div>
         </Card>
         <Card padding="sm" className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-raspberry/10 text-brand-raspberry">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600">
             <Wallet className="h-4.5 w-4.5" />
           </span>
           <div className="min-w-0">
@@ -365,7 +365,7 @@ export const OrdersPage: React.FC = () => {
             onClick={() => updateQuery({ status: tab.value || undefined, needsReview: undefined, recovered: undefined, page: undefined })}
             className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
               status === tab.value && !needsReviewOnly && !recoveredOnly
-                ? 'border-brand-raspberry bg-brand-raspberry text-white'
+                ? 'border-ink bg-ink text-white'
                 : 'border-border bg-white text-ink hover:bg-rose-50'
             }`}
           >
@@ -410,7 +410,7 @@ export const OrdersPage: React.FC = () => {
           placeholder="Search order #, customer name, or phone..."
           value={searchDraft}
           onChange={(e) => setSearchDraft(e.target.value)}
-          className="min-w-[240px] flex-1 rounded-[10px] border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30"
+          className="min-w-[240px] flex-1 rounded-[10px] border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
         />
         <select
           value={paymentMethod}
@@ -467,7 +467,7 @@ export const OrdersPage: React.FC = () => {
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-brand-raspberry/30 bg-rose-50 px-4 py-2.5">
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-[12px] border border-border bg-rose-50 px-4 py-2.5">
           <span className="text-xs font-semibold text-ink">{selectedIds.size} selected</span>
           <select
             defaultValue=""
@@ -525,7 +525,7 @@ export const OrdersPage: React.FC = () => {
                 key={p}
                 onClick={() => updateQuery({ page: p })}
                 className={`h-8 w-8 rounded-[8px] text-xs font-semibold ${
-                  p === pagination.page ? 'bg-brand-raspberry text-white' : 'border border-border bg-white text-ink hover:bg-rose-50'
+                  p === pagination.page ? 'bg-ink text-white' : 'border border-border bg-white text-ink hover:bg-rose-50'
                 }`}
               >
                 {p}

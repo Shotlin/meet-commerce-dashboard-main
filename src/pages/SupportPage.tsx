@@ -93,7 +93,7 @@ export const SupportPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3">
-        <RefreshCw className="w-8 h-8 text-brand-berry animate-spin mx-auto" />
+        <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
         <p className="text-xs font-bold text-ink">Connecting to Live Support Tickets API (/api/v1/support/tickets)...</p>
       </div>
     );
@@ -119,7 +119,7 @@ export const SupportPage: React.FC = () => {
       <PageHeader
         title="Support Desk Inbox & Refunds"
         subtitle="Customer support tickets, order context panel, refund/replacement workflow, and private staff notes."
-        badge={<Badge variant="brand" icon={<LifeBuoy className="w-3.5 h-3.5" />}>{openTicketsCount} Open Tickets</Badge>}
+        badge={<Badge variant="warning" icon={<LifeBuoy className="w-3.5 h-3.5" />}>{openTicketsCount} Open Tickets</Badge>}
         actions={
           <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={fetchTickets}>
             Refresh API Data
@@ -155,7 +155,7 @@ export const SupportPage: React.FC = () => {
           >
             <div className="space-y-2">
               <p className="text-xs text-status-neutral">
-                Customer: <strong className="text-ink">{t.customerName}</strong> • Category: <strong className="text-ink">{t.category}</strong> • Linked Order: <span className="font-mono-num font-bold text-brand-berry">{t.orderNumber}</span>
+                Customer: <strong className="text-ink">{t.customerName}</strong> • Category: <strong className="text-ink">{t.category}</strong> • Linked Order: <span className="font-mono-num font-bold text-ink-2">{t.orderNumber}</span>
               </p>
 
               {/* Staff Private Notes Log */}
@@ -220,7 +220,7 @@ export const SupportPage: React.FC = () => {
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
               placeholder="Enter note (e.g. Cold-chain temperature logger verified at 2.4°C. Seal intact)..."
-              className="w-full p-2.5 bg-rose-50/50 border border-border rounded-[12px] focus:bg-white text-ink text-xs focus:outline-none focus:border-brand-raspberry h-24"
+              className="w-full p-2.5 bg-rose-50/50 border border-border rounded-[12px] focus:bg-white text-ink text-xs focus:outline-none focus:border-rose-400 h-24"
               required
             />
           </div>
@@ -258,7 +258,7 @@ export const SupportPage: React.FC = () => {
                 value="Refund"
                 checked={refundType === 'Refund'}
                 onChange={() => setRefundType('Refund')}
-                className="text-brand-raspberry focus:ring-brand-raspberry"
+                className="text-ink focus:ring-rose-300"
               />
               <div>
                 <p className="font-bold text-ink">Process 100% Instant Refund</p>
@@ -273,7 +273,7 @@ export const SupportPage: React.FC = () => {
                 value="Replacement"
                 checked={refundType === 'Replacement'}
                 onChange={() => setRefundType('Replacement')}
-                className="text-brand-raspberry focus:ring-brand-raspberry"
+                className="text-ink focus:ring-rose-300"
               />
               <div>
                 <p className="font-bold text-ink">Dispatch Priority Order Replacement</p>

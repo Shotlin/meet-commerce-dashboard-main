@@ -372,7 +372,7 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                     <div className="space-y-3">
                       {order.timeline.map((t) => (
                         <div key={t.id} className="flex gap-3">
-                          <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-raspberry" />
+                          <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-ink-2" />
                           <div>
                             <p className="text-sm font-semibold">{t.toStatus.replace(/_/g, ' ')}</p>
                             <p className="text-xs text-muted-foreground">
@@ -413,7 +413,7 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
 
                 {/* E. CUSTOMER */}
                 <Section title="Customer" icon={<User className="h-4 w-4" />}>
-                  <button className="text-sm font-semibold text-brand-raspberry hover:underline" onClick={() => order.customerId && openCustomer(order.customerId)}>
+                  <button className="text-sm font-semibold text-status-info hover:underline" onClick={() => order.customerId && openCustomer(order.customerId)}>
                     {order.customerName || 'Unknown Customer'}
                   </button>
                   <p className="text-xs text-muted-foreground">{order.customerPhone || '—'}{order.customerEmail ? ` · ${order.customerEmail}` : ''}</p>
@@ -452,7 +452,7 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                             {item.quantity} × {fmtCurrency(item.unitPrice)}{item.netQuantity ? ` · ${item.netQuantity}` : item.unit ? ` · ${item.unit}` : ''}
                           </p>
                         </div>
-                        <span className="text-xs font-bold text-brand-raspberry">{fmtCurrency(item.lineTotal)}</span>
+                        <span className="text-xs font-bold text-ink">{fmtCurrency(item.lineTotal)}</span>
                       </div>
                     ))}
                   </div>

@@ -32,7 +32,7 @@ import {
 import type { ProcurementQuote, SupplyOrderDetail } from '../types/procurement.types';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300';
 
 export default function ProcurementDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -421,7 +421,7 @@ function FulfilmentTab({ supply }: { supply: SupplyOrderDetail }) {
               {supply.evidence.map((item) => (
                 <div key={item.id} className="flex items-center justify-between rounded-[10px] border border-border px-3 py-2">
                   <div className="text-xs text-ink">{item.evidence_type.replace(/_/g, ' ')}</div>
-                  <a href={item.media_url} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-brand-raspberry hover:underline">
+                  <a href={item.media_url} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-status-info hover:underline">
                     View
                   </a>
                 </div>
@@ -438,7 +438,7 @@ function FulfilmentTab({ supply }: { supply: SupplyOrderDetail }) {
           <ol className="space-y-3">
             {supply.events.map((event) => (
               <li key={event.id} className="flex gap-3">
-                <div className="mt-1 w-2 h-2 rounded-full bg-brand-raspberry shrink-0" />
+                <div className="mt-1 w-2 h-2 rounded-full bg-ink-2 shrink-0" />
                 <div>
                   <div className="text-xs font-bold text-ink">{event.to_status.replace(/_/g, ' ')}</div>
                   <div className="text-[11px] text-muted">

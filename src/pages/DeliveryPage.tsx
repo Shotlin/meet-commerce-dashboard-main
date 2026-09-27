@@ -46,7 +46,7 @@ export const DeliveryPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3">
-        <RefreshCw className="w-8 h-8 text-brand-berry animate-spin mx-auto" />
+        <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
         <p className="text-xs font-bold text-ink">Connecting to Live Delivery Fleet API (http://localhost:4500)...</p>
       </div>
     );
@@ -73,7 +73,7 @@ export const DeliveryPage: React.FC = () => {
       <PageHeader
         title="Delivery Command & Rider Fleet Map"
         subtitle="Live online-rider roster and active delivery assignments."
-        badge={<Badge variant="brand" icon={<Truck className="w-3.5 h-3.5" />}>{riders.length} Online Riders</Badge>}
+        badge={<Badge variant="success" icon={<Truck className="w-3.5 h-3.5" />}>{riders.length} Online Riders</Badge>}
         actions={
           <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={() => fetchDeliveryData(true)}>
             Refresh API Data
@@ -86,7 +86,7 @@ export const DeliveryPage: React.FC = () => {
           <p className="text-2xl font-extrabold text-ink font-mono-num">{riders.length}</p>
         </Card>
         <Card title="On a Delivery">
-          <p className="text-2xl font-extrabold text-brand-berry font-mono-num">{onDelivery.length}</p>
+          <p className="text-2xl font-extrabold text-violet-600 font-mono-num">{onDelivery.length}</p>
         </Card>
         <Card title="Idle">
           <p className="text-2xl font-extrabold text-status-neutral font-mono-num">{idle.length}</p>
@@ -108,7 +108,7 @@ export const DeliveryPage: React.FC = () => {
                       <Phone className="w-3 h-3" /> {r.phone}
                     </p>
                   </div>
-                  <Badge variant={r.delivery_status ? 'brand' : 'neutral'}>
+                  <Badge variant={r.delivery_status ? 'violet' : 'neutral'}>
                     {r.delivery_status ? DELIVERY_STATUS_LABEL[r.delivery_status] : 'Idle'}
                   </Badge>
                 </div>
@@ -118,7 +118,7 @@ export const DeliveryPage: React.FC = () => {
                     {r.vehicle_type || 'Vehicle N/A'}
                   </span>
                   {r.current_lat != null && r.current_lng != null ? (
-                    <span className="text-brand-berry font-bold flex items-center gap-1">
+                    <span className="text-ink font-bold flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {r.current_lat.toFixed(3)}, {r.current_lng.toFixed(3)}
                     </span>

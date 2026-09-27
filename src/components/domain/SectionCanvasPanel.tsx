@@ -19,7 +19,7 @@ import { SECTION_FIELD_DEFS, FieldDef } from './sectionFieldRegistry';
 import { MerchBindingEditor } from './MerchBindingEditor';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const humanize = (type: string) => type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -137,17 +137,17 @@ const SortableSectionCard: React.FC<{
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 border border-border rounded-[12px] bg-rose-50/50 hover:border-brand-raspberry transition-all"
+      className="flex items-center gap-3 p-3 border border-border rounded-[12px] bg-rose-50/50 hover:border-rose-400 transition-all"
     >
       <button
         {...attributes}
         {...listeners}
-        className="p-1.5 rounded-full text-status-neutral cursor-grab active:cursor-grabbing hover:text-brand-berry shrink-0"
+        className="p-1.5 rounded-full text-status-neutral cursor-grab active:cursor-grabbing hover:text-ink shrink-0"
         title="Drag to reorder"
       >
         <GripVertical className="w-4 h-4" />
       </button>
-      <Layers className="w-4 h-4 text-brand-berry shrink-0" />
+      <Layers className="w-4 h-4 text-ink-2 shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-ink">{humanize(section.section_type)}</p>
         <p className="text-[10px] text-status-neutral font-mono-num">order {section.sort_order}</p>

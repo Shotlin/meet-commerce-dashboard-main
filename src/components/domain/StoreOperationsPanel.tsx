@@ -10,7 +10,7 @@ import {
 } from '../../services/storeOpsService';
 
 const inputClass =
-  'w-full px-2.5 py-1.5 text-xs rounded-[8px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-2.5 py-1.5 text-xs rounded-[8px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 
 const WEEKDAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -160,7 +160,7 @@ export const StoreOperationsPanel: React.FC = () => {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-bold text-brand-berry uppercase tracking-wider">Weekly Hours</h4>
+                <h4 className="text-xs font-bold text-ink-2 uppercase tracking-wider">Weekly Hours</h4>
                 <Button variant="outline" size="sm" icon={<Save className="w-3.5 h-3.5" />} isLoading={weeklyHoursMutation.isPending} onClick={() => weeklyForm && weeklyHoursMutation.mutate(weeklyForm)}>
                   Save Hours
                 </Button>
@@ -199,7 +199,7 @@ export const StoreOperationsPanel: React.FC = () => {
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-bold text-brand-berry uppercase tracking-wider">Weekly Template</h4>
+                <h4 className="text-xs font-bold text-ink-2 uppercase tracking-wider">Weekly Template</h4>
                 <Button variant="outline" size="sm" icon={<Save className="w-3.5 h-3.5" />} isLoading={templateMutation.isPending} onClick={() => templateForm && templateMutation.mutate(templateForm)}>
                   Save Template
                 </Button>
@@ -220,7 +220,7 @@ export const StoreOperationsPanel: React.FC = () => {
             </div>
 
             <div>
-              <h4 className="text-xs font-bold text-brand-berry uppercase tracking-wider mb-2">Next 7 Days</h4>
+              <h4 className="text-xs font-bold text-ink-2 uppercase tracking-wider mb-2">Next 7 Days</h4>
               {days.length === 0 ? (
                 <p className="text-xs text-status-neutral">No materialized days yet — click "Generate 30 Days" above.</p>
               ) : (

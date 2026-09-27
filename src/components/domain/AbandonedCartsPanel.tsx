@@ -12,13 +12,13 @@ import {
 } from '../../services/abandonedCartService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
-const statCard = (label: string, value: string, tone: 'ink' | 'success' | 'berry' = 'ink') => (
+const statCard = (label: string, value: string, tone: 'ink' | 'success' | 'warning' = 'ink') => (
   <div className="p-3 bg-rose-50/60 rounded-[12px] border border-border">
     <p className="text-[10px] font-bold text-status-neutral uppercase">{label}</p>
-    <p className={`font-mono-num font-bold mt-0.5 ${tone === 'success' ? 'text-status-success' : tone === 'berry' ? 'text-brand-berry' : 'text-ink'}`}>
+    <p className={`font-mono-num font-bold mt-0.5 ${tone === 'success' ? 'text-status-success' : tone === 'warning' ? 'text-status-warning' : 'text-ink'}`}>
       {value}
     </p>
   </div>
@@ -71,7 +71,7 @@ export const AbandonedCartsPanel: React.FC = () => {
         <p className="text-[11px] text-status-neutral">{row.userPhone}</p>
       </div>
     ) },
-    { header: 'Cart Value', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.cartValue.toFixed(2)}</span> },
+    { header: 'Cart Value', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.cartValue.toFixed(2)}</span> },
     { header: 'Items', cell: (row) => <span>{row.itemCount} ({row.totalQuantity} qty)</span> },
     { header: 'Priority', cell: (row) => <span className="font-mono-num">{row.priorityScore.toFixed(1)}</span> },
     { header: 'Abandoned At', cell: (row) => <span className="text-[11px] text-status-neutral">{new Date(row.abandonedAt).toLocaleString('en-IN')}</span> },
@@ -85,10 +85,10 @@ export const AbandonedCartsPanel: React.FC = () => {
   ];
 
   return (
-    <Card title="Abandoned Cart Recovery Engine" action={<Badge variant="brand" icon={<ShoppingCart className="w-3 h-3" />}>{summary?.openCount ?? 0} Open</Badge>}>
+    <Card title="Abandoned Cart Recovery Engine" action={<Badge variant="warning" icon={<ShoppingCart className="w-3 h-3" />}>{summary?.openCount ?? 0} Open</Badge>}>
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-          {statCard('Open Value', `₹${summary.openValue.toFixed(0)}`, 'berry')}
+          {statCard('Open Value', `₹${summary.openValue.toFixed(0)}`, 'warning')}
           {statCard('Avg Cart Value', `₹${summary.avgCartValue.toFixed(0)}`)}
           {statCard('Recovered Today', String(summary.recoveredToday), 'success')}
           {statCard('7-Day Recovery Rate', `${(summary.recoveryRate7d * 100).toFixed(1)}%`, 'success')}

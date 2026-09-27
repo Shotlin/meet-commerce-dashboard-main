@@ -83,7 +83,7 @@ export default function SupplyOrdersPage() {
       <PageHeader
         title="Supply Orders"
         subtitle="Active vendor fulfilment — processing, evidence, dispatch and receipt"
-        badge={<Badge variant="brand">{data?.total ?? 0} total</Badge>}
+        badge={<Badge variant="neutral">{data?.total ?? 0} total</Badge>}
       />
 
       <FilterBar

@@ -62,7 +62,7 @@ export const RidersPage: React.FC = () => {
         title="Rider Management"
         subtitle="Roster, eligibility, COD collections and settlement controls."
         badge={
-          <Badge variant="brand" icon={<Users className="w-3.5 h-3.5" />}>
+          <Badge variant="neutral" icon={<Users className="w-3.5 h-3.5" />}>
             {total} Riders
           </Badge>
         }
@@ -154,8 +154,8 @@ export const RidersPage: React.FC = () => {
                         <Badge variant={r.is_approved ? 'success' : 'neutral'}>
                           {r.is_approved ? 'Approved' : 'Pending'}
                         </Badge>
-                        {r.is_online && <Badge variant="brand">Online</Badge>}
-                        {r.is_busy && <Badge variant="brand">Busy</Badge>}
+                        {r.is_online && <Badge variant="success">Online</Badge>}
+                        {r.is_busy && <Badge variant="warning">Busy</Badge>}
                         {!r.is_active && <Badge variant="danger">Suspended</Badge>}
                       </div>
                     </td>

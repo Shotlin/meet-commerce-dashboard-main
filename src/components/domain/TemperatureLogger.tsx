@@ -22,7 +22,7 @@ export const TemperatureLogger: React.FC<TemperatureLoggerProps> = ({
     <div className="bg-surface border border-border rounded-[12px] p-5 shadow-card">
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <Thermometer className="w-5 h-5 text-brand-berry" />
+          <Thermometer className="w-5 h-5 text-ink-2" />
           <div>
             <h3 className="text-sm font-bold text-ink">Cold Chain IoT Sensor Log</h3>
             <p className="text-xs text-status-neutral">{locationName}</p>
@@ -43,7 +43,7 @@ export const TemperatureLogger: React.FC<TemperatureLoggerProps> = ({
 
         <div className="text-right">
           <span className="text-xs text-status-neutral">SLA Target Range:</span>
-          <p className="font-mono-num text-sm font-semibold text-brand-berry">
+          <p className="font-mono-num text-sm font-semibold text-ink-2">
             {minTempThreshold.toFixed(1)}°C — {maxTempThreshold.toFixed(1)}°C
           </p>
         </div>

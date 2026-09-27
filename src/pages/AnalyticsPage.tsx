@@ -99,7 +99,7 @@ export const AnalyticsPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3">
-        <RefreshCw className="w-8 h-8 text-brand-berry animate-spin mx-auto" />
+        <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
         <p className="text-xs font-bold text-ink">Fetching Analytics & Executive Intelligence API (/api/v1/reports/summary)...</p>
       </div>
     );
@@ -123,7 +123,7 @@ export const AnalyticsPage: React.FC = () => {
       <PageHeader
         title="Analytics & Executive Intelligence"
         subtitle="Category demand mix, customer cohort retention, quality metrics, and regional revenue forecasts."
-        badge={<Badge variant="brand" icon={<BarChart3 className="w-3.5 h-3.5" />}>Live API Reports</Badge>}
+        badge={<Badge variant="neutral" icon={<BarChart3 className="w-3.5 h-3.5" />}>Live API Reports</Badge>}
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={fetchAnalyticsData}>
@@ -148,10 +148,10 @@ export const AnalyticsPage: React.FC = () => {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.categoryDemand || []}>
-                <XAxis dataKey="category" stroke="#667085" fontSize={11} />
-                <YAxis stroke="#667085" fontSize={11} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />
+                <XAxis dataKey="category" stroke="#9297A1" fontSize={11} />
+                <YAxis stroke="#9297A1" fontSize={11} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />
                 <Tooltip formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, 'Revenue']} />
-                <Bar dataKey="revenue" fill="#E31E64" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="revenue" fill="#2563EB" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -162,9 +162,9 @@ export const AnalyticsPage: React.FC = () => {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data?.cohortRetention || []} margin={{ top: 15, right: 30, left: 10, bottom: 5 }}>
-                <XAxis dataKey="month" stroke="#667085" fontSize={11} padding={{ left: 20, right: 20 }} />
+                <XAxis dataKey="month" stroke="#9297A1" fontSize={11} padding={{ left: 20, right: 20 }} />
                 <YAxis
-                  stroke="#667085"
+                  stroke="#9297A1"
                   fontSize={11}
                   domain={[0, 100]}
                   ticks={[0, 20, 40, 60, 80, 100]}
@@ -174,9 +174,9 @@ export const AnalyticsPage: React.FC = () => {
                 <Line
                   type="monotone"
                   dataKey="retentionPct"
-                  stroke="#179B73"
+                  stroke="#0B7A3B"
                   strokeWidth={3}
-                  dot={{ r: 5, fill: '#179B73' }}
+                  dot={{ r: 5, fill: '#0B7A3B' }}
                   activeDot={{ r: 7 }}
                 />
               </LineChart>

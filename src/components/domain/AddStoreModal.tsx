@@ -9,7 +9,7 @@ import { useShopScope } from '../../context/ShopScopeContext';
 import { describeInvalidPincodes, parsePincodeInput } from '../../utils/pincodes';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 // Default pin: New Delhi (matches the existing HQ store) so a brand-new

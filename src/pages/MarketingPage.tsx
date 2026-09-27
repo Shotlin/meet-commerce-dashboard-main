@@ -17,7 +17,7 @@ export const MarketingPage: React.FC = () => {
       <PageHeader
         title="Marketing & Campaign Guardrails"
         subtitle="Coupon rule builder, notification campaigns, and customer segments."
-        badge={<Badge variant="brand" icon={<Megaphone className="w-3.5 h-3.5" />}>Live API</Badge>}
+        badge={<Badge variant="neutral" icon={<Megaphone className="w-3.5 h-3.5" />}>Live API</Badge>}
       />
 
       <Tabs

@@ -7,7 +7,7 @@ import { Button } from '../common/Button';
 import { supportSettingsService } from '../../services/supportSettingsService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 interface SupportSettingsForm {
@@ -64,7 +64,7 @@ export const SupportSettingsPanel: React.FC = () => {
       subtitle="Brand name, helpline number, and support email — the single source every mobile Need Help / Contact Us screen reads from."
       action={
         <div className="flex items-center gap-2">
-          <Badge variant="brand" icon={<LifeBuoy className="w-3 h-3" />}>Live on mobile</Badge>
+          <Badge variant="success" icon={<LifeBuoy className="w-3 h-3" />}>Live on mobile</Badge>
           <Button variant="primary" size="sm" icon={<Save className="w-3.5 h-3.5" />} onClick={() => saveMutation.mutate()} isLoading={saveMutation.isPending}>
             Save
           </Button>

@@ -37,7 +37,7 @@ export const LoyaltyPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3">
-        <RefreshCw className="w-8 h-8 text-brand-berry animate-spin mx-auto" />
+        <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
         <p className="text-xs font-bold text-ink">Connecting to Live Loyalty & Wallet API (/api/v1/admin/customers)...</p>
       </div>
     );
@@ -67,7 +67,7 @@ export const LoyaltyPage: React.FC = () => {
       <PageHeader
         title="Loyalty & Points Program Ledger"
         subtitle="Customer points liability ledger, tier distributions (Silver/Gold/Platinum), and accrual/redemption rules."
-        badge={<Badge variant="brand" icon={<Gift className="w-3.5 h-3.5" />}>{formattedPoints} Active Points</Badge>}
+        badge={<Badge variant="neutral" icon={<Gift className="w-3.5 h-3.5" />}>{formattedPoints} Active Points</Badge>}
         actions={
           <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={fetchLoyaltyData}>
             Refresh API Data
@@ -77,8 +77,8 @@ export const LoyaltyPage: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono-num mb-6">
-        <Card title="Total Points Liability" action={<Badge variant="brand" icon={<Wallet className="w-3 h-3" />}>Live API</Badge>}>
-          <p className="text-2xl font-extrabold text-brand-berry">{formattedPoints} pts</p>
+        <Card title="Total Points Liability" action={<Badge variant="neutral" icon={<Wallet className="w-3 h-3" />}>Live API</Badge>}>
+          <p className="text-2xl font-extrabold text-ink-2">{formattedPoints} pts</p>
           <p className="text-xs font-sans text-status-neutral mt-1">₹{wallet.activeRewardsValue.toLocaleString()} Monetary Value</p>
         </Card>
 
@@ -111,13 +111,13 @@ export const LoyaltyPage: React.FC = () => {
                 <tr key={c.id} className="hover:bg-rose-50/40">
                   <td className="py-2.5 px-3 font-bold text-ink">{c.name}</td>
                   <td className="py-2.5 px-3">
-                    <Badge variant={c.tier === 'Platinum' ? 'brand' : c.tier === 'Gold' ? 'warning' : 'neutral'}>
+                    <Badge variant={c.tier === 'Platinum' ? 'violet' : c.tier === 'Gold' ? 'warning' : 'neutral'}>
                       {c.tier} Tier
                     </Badge>
                   </td>
                   <td className="py-2.5 px-3 font-mono-num font-bold text-ink">₹{c.spend.toLocaleString()}</td>
                   <td className="py-2.5 px-3 font-mono-num text-status-neutral">{c.ordersCount} orders</td>
-                  <td className="py-2.5 px-3 font-mono-num font-bold text-brand-berry">₹{c.walletBalance.toLocaleString()}</td>
+                  <td className="py-2.5 px-3 font-mono-num font-bold text-ink-2">₹{c.walletBalance.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

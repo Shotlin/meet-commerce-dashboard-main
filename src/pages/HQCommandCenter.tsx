@@ -153,10 +153,10 @@ export const HQCommandCenter: React.FC = () => {
         ];
 
   const orderStatusData = [
-    { name: 'Delivered', value: filteredOrders.filter((o) => o.status === 'Delivered').length || 420, color: '#179B73' },
-    { name: 'Out for Delivery', value: filteredOrders.filter((o) => o.status === 'Out for Delivery').length || 110, color: '#2769D7' },
-    { name: 'In QC / Cutting', value: filteredOrders.filter((o) => o.status === 'In QC' || o.status === 'Cutting Completed').length || 65, color: '#E31E64' },
-    { name: 'Pending / Confirmed', value: filteredOrders.filter((o) => o.status === 'Pending').length || 45, color: '#D98900' },
+    { name: 'Delivered', value: filteredOrders.filter((o) => o.status === 'Delivered').length || 420, color: '#0B7A3B' },
+    { name: 'Out for Delivery', value: filteredOrders.filter((o) => o.status === 'Out for Delivery').length || 110, color: '#2563EB' },
+    { name: 'In QC / Cutting', value: filteredOrders.filter((o) => o.status === 'In QC' || o.status === 'Cutting Completed').length || 65, color: '#7C3AED' },
+    { name: 'Pending / Confirmed', value: filteredOrders.filter((o) => o.status === 'Pending').length || 45, color: '#92600A' },
   ];
 
   // Resolve Exception Handler
@@ -183,12 +183,12 @@ export const HQCommandCenter: React.FC = () => {
     { header: 'Location', accessorKey: 'warehouseLocation' },
     {
       header: 'Amount',
-      cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.totalAmount.toFixed(2)}</span>,
+      cell: (row) => <span className="font-mono-num font-bold text-ink">₹{row.totalAmount.toFixed(2)}</span>,
     },
     {
       header: 'Status',
       cell: (row) => (
-        <Badge variant={row.status === 'Delivered' ? 'success' : row.status === 'In QC' ? 'brand' : 'info'}>
+        <Badge variant={row.status === 'Delivered' ? 'success' : row.status === 'In QC' ? 'violet' : 'info'}>
           {row.status}
         </Badge>
       ),
@@ -208,7 +208,7 @@ export const HQCommandCenter: React.FC = () => {
       <PageHeader
         title="HQ Operations Command Center"
         subtitle={`Real-time operational metrics for scope: ${location}.`}
-        badge={<Badge variant="brand" icon={<Flame className="w-3.5 h-3.5" />}>Live Telemetry</Badge>}
+        badge={<Badge variant="success" icon={<Flame className="w-3.5 h-3.5" />}>Live Telemetry</Badge>}
         actions={
           <div className="flex gap-2">
             <Button
@@ -268,18 +268,18 @@ export const HQCommandCenter: React.FC = () => {
               <AreaChart data={revenueTrendData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E31E64" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#E31E64" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.22} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" stroke="#667085" fontSize={11} />
-                <YAxis stroke="#667085" fontSize={11} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />
+                <XAxis dataKey="date" stroke="#9297A1" fontSize={11} />
+                <YAxis stroke="#9297A1" fontSize={11} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />
                 <Tooltip
                   formatter={(value: any) => [`₹${Number(value).toLocaleString()}`, 'Revenue']}
-                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#F1D7E1', borderRadius: '12px' }}
+                  contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E7E8EC', borderRadius: '12px' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#E31E64" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-                <Area type="monotone" dataKey="prior" stroke="#94A3B8" strokeWidth={2} strokeDasharray="4 4" fill="none" />
+                <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="prior" stroke="#CBCED6" strokeWidth={2} strokeDasharray="4 4" fill="none" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -335,11 +335,11 @@ export const HQCommandCenter: React.FC = () => {
                     </div>
                     <p className="text-[11px] text-status-neutral mt-1">{exc.actionRequired}</p>
                     <div className="mt-2 flex justify-between items-center">
-                      <span className="text-[10px] font-semibold text-brand-berry">{exc.location}</span>
+                      <span className="text-[10px] font-semibold text-ink-2">{exc.location}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs text-brand-raspberry font-bold hover:underline p-0 cursor-pointer"
+                        className="text-xs text-status-info font-bold hover:underline p-0 cursor-pointer"
                         onClick={() => setSelectedException(exc)}
                       >
                         Resolve Issue
@@ -384,7 +384,7 @@ export const HQCommandCenter: React.FC = () => {
                 value={resolutionNote}
                 onChange={(e) => setResolutionNote(e.target.value)}
                 placeholder="Describe resolution steps taken (e.g. Lab swab verified, temperature re-calibrated)..."
-                className="w-full p-2.5 border border-border rounded-[12px] bg-rose-50/50 focus:bg-white text-ink text-xs focus:outline-none focus:border-brand-raspberry h-20"
+                className="w-full p-2.5 border border-border rounded-[12px] bg-rose-50 focus:bg-white text-ink text-xs focus:outline-none focus:border-rose-400 h-20"
               />
             </div>
 

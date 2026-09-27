@@ -33,7 +33,7 @@ const emptyForm: PaymentOfferInput = {
 };
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 export const PaymentOffersPanel: React.FC = () => {
@@ -120,7 +120,7 @@ export const PaymentOffersPanel: React.FC = () => {
       </div>
     ) },
     { header: 'Cashback', cell: (row) => (
-      <span className="font-mono-num font-bold text-brand-berry">
+      <span className="font-mono-num font-bold text-ink-2">
         {row.cashbackPercent != null ? `${row.cashbackPercent}%` : `₹${row.cashbackAmount.toFixed(2)}`}
         {row.maxCashback != null && <span className="text-[10px] text-status-neutral"> (max ₹{row.maxCashback.toFixed(2)})</span>}
       </span>
@@ -147,7 +147,7 @@ export const PaymentOffersPanel: React.FC = () => {
       title="Payment Offers"
       action={
         <div className="flex items-center gap-2">
-          <Badge variant="brand" icon={<Tag className="w-3 h-3" />}>{offers.length} Active Rules</Badge>
+          <Badge variant="neutral" icon={<Tag className="w-3 h-3" />}>{offers.length} Active Rules</Badge>
           <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Offer</Button>
         </div>
       }

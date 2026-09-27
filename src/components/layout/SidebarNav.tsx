@@ -283,7 +283,7 @@ export const SidebarNav: React.FC = () => {
               <p className="text-[10px] text-muted-foreground font-medium truncate leading-tight mt-0.5">{userEmail}</p>
             </div>
           </div>
-          <Badge variant="brand" className="text-[9px] px-1.5 py-0.5 shrink-0 max-w-[80px] truncate">
+          <Badge variant="neutral" className="text-[9px] px-1.5 py-0.5 shrink-0 max-w-[80px] truncate">
             {role}
           </Badge>
         </div>

@@ -10,7 +10,7 @@ import { queryKeys } from '../../services/queryKeys';
 import { customerSegmentService, CustomerSegment, CustomerSegmentInput } from '../../services/customerSegmentService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const emptyForm: CustomerSegmentInput = { name: '', description: '' };
@@ -42,7 +42,7 @@ export const CustomerSegmentsPanel: React.FC = () => {
     { header: 'Segment', cell: (row) => (
       <div><p className="font-bold text-ink">{row.name}</p>{row.description && <p className="text-[11px] text-status-neutral">{row.description}</p>}</div>
     ) },
-    { header: 'Members', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">{row.member_count}</span> },
+    { header: 'Members', cell: (row) => <span className="font-mono-num font-bold text-ink-2">{row.member_count}</span> },
     { header: 'Created', cell: (row) => <span className="text-[11px] text-status-neutral">{new Date(row.created_at).toLocaleDateString('en-IN')}</span> },
     { header: 'Status', cell: (row) => <Badge variant={row.is_active ? 'success' : 'neutral'}>{row.is_active ? 'Active' : 'Inactive'}</Badge> },
     { header: 'Actions', cell: (row) => (
@@ -56,7 +56,7 @@ export const CustomerSegmentsPanel: React.FC = () => {
   return (
     <Card title="Customer Segments" action={
       <div className="flex items-center gap-2">
-        <Badge variant="brand" icon={<Users className="w-3 h-3" />}>{segments.length} Segments</Badge>
+        <Badge variant="neutral" icon={<Users className="w-3 h-3" />}>{segments.length} Segments</Badge>
         <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Segment</Button>
       </div>
     }>

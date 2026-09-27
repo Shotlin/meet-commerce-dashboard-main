@@ -61,7 +61,7 @@ export default function ProcurementPage() {
       {
         header: 'Mode',
         accessorKey: 'mode',
-        cell: (row) => <Badge variant={row.mode === 'FIXED_OFFER' ? 'brand' : 'info'}>{MODE_LABEL[row.mode]}</Badge>,
+        cell: (row) => <Badge variant={row.mode === 'FIXED_OFFER' ? 'violet' : 'info'}>{MODE_LABEL[row.mode]}</Badge>,
       },
       {
         header: 'Status',
@@ -88,7 +88,7 @@ export default function ProcurementPage() {
       <PageHeader
         title="Procurement"
         subtitle="Store purchase requirements, vendor quotes and supply tracking"
-        badge={<Badge variant="brand">{data?.total ?? 0} total</Badge>}
+        badge={<Badge variant="neutral">{data?.total ?? 0} total</Badge>}
         actions={
           <Button icon={<Plus className="w-4 h-4" />} onClick={() => navigate('/procurement/new')}>
             Create Requirement

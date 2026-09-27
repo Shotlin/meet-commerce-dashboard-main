@@ -8,7 +8,7 @@ import { queryKeys } from '../../services/queryKeys';
 import { returnRequestService, OrderLookup, ReturnScope, RefundDestination } from '../../services/returnRequestService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 export const CreateReturnModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
@@ -106,7 +106,7 @@ export const CreateReturnModal: React.FC<{ isOpen: boolean; onClose: () => void 
               <button
                 key={o.id}
                 onClick={() => setSelectedOrder(o)}
-                className="w-full text-left p-2.5 border border-border rounded-[10px] hover:border-brand-raspberry hover:bg-rose-50/50 transition-all"
+                className="w-full text-left p-2.5 border border-border rounded-[10px] hover:border-rose-400 hover:bg-rose-50/50 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-ink">{o.order_number}</span>
@@ -173,7 +173,7 @@ export const CreateReturnModal: React.FC<{ isOpen: boolean; onClose: () => void 
 
           <div className="p-3 bg-rose-50/70 border border-border rounded-[12px] flex items-center justify-between">
             <span className="text-xs font-bold text-ink">Estimated Refund Amount</span>
-            <span className="font-mono-num font-bold text-brand-berry text-sm">₹{estimatedAmount.toFixed(2)}</span>
+            <span className="font-mono-num font-bold text-ink text-sm">₹{estimatedAmount.toFixed(2)}</span>
           </div>
           <p className="text-[10px] text-status-neutral -mt-2">The server always recomputes the exact amount from the real order when this request is filed — this is an estimate.</p>
         </div>

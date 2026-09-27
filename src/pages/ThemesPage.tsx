@@ -31,7 +31,7 @@ export const ThemesPage: React.FC = () => {
       <PageHeader
         title="Theme Builder"
         subtitle="Manage store tabs and the section layout each one renders — reorder, edit, preview, version, and schedule changes."
-        badge={<Badge variant="brand" icon={<LayoutTemplate className="w-3.5 h-3.5" />}>{tabs.length} Tabs</Badge>}
+        badge={<Badge variant="neutral" icon={<LayoutTemplate className="w-3.5 h-3.5" />}>{tabs.length} Tabs</Badge>}
       />
 
       <Tabs

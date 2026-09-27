@@ -25,7 +25,7 @@ const VendorBatchTraceCard: React.FC<{ lot: InventoryLot }> = ({ lot }) => (
   <div className="bg-surface border border-border rounded-[12px] p-5 shadow-card">
     <div className="flex items-center justify-between pb-3 mb-4 border-b border-border">
       <div className="flex items-center gap-2">
-        <GitCommit className="w-5 h-5 text-brand-berry" />
+        <GitCommit className="w-5 h-5 text-ink-2" />
         <h3 className="text-sm font-bold text-ink">Vendor Batch & Quality Video</h3>
       </div>
       <Badge variant={lot.vendorTrace ? 'success' : 'neutral'}>
@@ -132,7 +132,7 @@ export const InventoryPage: React.FC = () => {
     {
       header: 'Available Stock',
       cell: (row) => (
-        <span className="font-mono-num font-bold text-brand-berry">
+        <span className="font-mono-num font-bold text-status-success">
           {row.availableWeightKg.toFixed(2)} kg
         </span>
       ),
@@ -145,7 +145,7 @@ export const InventoryPage: React.FC = () => {
             href={row.vendorTrace.videoUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-semibold text-brand-berry underline underline-offset-2"
+            className="text-xs font-semibold text-status-info underline underline-offset-2"
           >
             Watch
           </a>
@@ -193,7 +193,7 @@ export const InventoryPage: React.FC = () => {
       <PageHeader
         title="Inventory Ledger & Cold Storage Lots"
         subtitle="Ledger-based stock tracking, cold chain temperature compliance, reservation states, and batch lineage."
-        badge={<Badge variant="brand" icon={<Boxes className="w-3.5 h-3.5" />}>{lots.length} Active Lots</Badge>}
+        badge={<Badge variant="neutral" icon={<Boxes className="w-3.5 h-3.5" />}>{lots.length} Active Lots</Badge>}
       />
 
       <FilterBar
@@ -228,7 +228,7 @@ export const InventoryPage: React.FC = () => {
               <div className="grid grid-cols-3 gap-3 font-mono-num text-center">
                 <div className="p-3 bg-rose-50 border border-border rounded-[12px]">
                   <span className="text-xs text-status-neutral font-sans block">Available Stock:</span>
-                  <span className="text-lg font-extrabold text-brand-berry">{selectedLot.availableWeightKg} kg</span>
+                  <span className="text-lg font-extrabold text-status-success">{selectedLot.availableWeightKg} kg</span>
                 </div>
                 <div className="p-3 bg-rose-50 border border-border rounded-[12px]">
                   <span className="text-xs text-status-neutral font-sans block">Reserved (Cart/QC):</span>

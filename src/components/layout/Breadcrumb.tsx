@@ -37,7 +37,7 @@ export const Breadcrumb: React.FC = () => {
 
   return (
     <nav className="flex items-center space-x-1.5 text-xs text-status-neutral mb-3 select-none">
-      <Link to="/" className="flex items-center hover:text-brand-berry transition-colors">
+      <Link to="/" className="flex items-center hover:text-ink transition-colors">
         <Home className="w-3.5 h-3.5 mr-1" />
         <span>HQ Command</span>
       </Link>
@@ -53,7 +53,7 @@ export const Breadcrumb: React.FC = () => {
             {isLast ? (
               <span className="font-bold text-ink truncate">{displayName}</span>
             ) : (
-              <Link to={routeTo} className="hover:text-brand-berry transition-colors truncate">
+              <Link to={routeTo} className="hover:text-ink transition-colors truncate">
                 {displayName}
               </Link>
             )}

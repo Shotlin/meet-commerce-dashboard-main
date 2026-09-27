@@ -25,7 +25,7 @@ const STEPS = [
 ];
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 interface DraftState {
@@ -80,7 +80,7 @@ function ItemProductPicker({
           <span className="truncate font-semibold text-ink">{item.item_name}</span>
           <button
             type="button"
-            className="ml-2 shrink-0 text-[11px] font-semibold text-brand-raspberry"
+            className="ml-2 shrink-0 text-[11px] font-semibold text-status-info"
             onClick={onClear}
           >
             Change
@@ -427,7 +427,7 @@ export default function ProcurementCreatePage() {
               />
             </div>
             {draft.mode === 'FIXED_OFFER' && (
-              <div className="md:col-span-2 rounded-[12px] bg-brand-raspberry/5 border border-brand-raspberry/20 p-3">
+              <div className="md:col-span-2 rounded-[12px] bg-rose-50 border border-border p-3">
                 <span className="text-xs font-bold text-ink">Total offer value: </span>
                 <span className="text-xs text-ink">₹{(offerTotal ?? 0).toLocaleString('en-IN')}</span>
               </div>

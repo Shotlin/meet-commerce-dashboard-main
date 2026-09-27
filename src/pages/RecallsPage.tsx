@@ -85,7 +85,7 @@ export const RecallsPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-8 text-center space-y-3">
-        <RefreshCw className="w-8 h-8 text-brand-berry animate-spin mx-auto" />
+        <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
         <p className="text-xs font-bold text-ink">Connecting to Live Quality Recalls API (/api/v1/support/recalls)...</p>
       </div>
     );
@@ -154,7 +154,7 @@ export const RecallsPage: React.FC = () => {
               <AlertOctagon className="w-8 h-8 text-status-warning shrink-0 mt-1" />
               <div className="flex-1">
                 <p className="text-xs text-status-neutral">
-                  Affected Lot: <strong className="font-mono-num text-brand-berry">{r.lotNumber}</strong> • Units Impacted: <strong className="font-mono-num text-ink">{r.affectedUnits} units</strong> • Logged: <span className="font-mono-num">{r.createdAt}</span>
+                  Affected Lot: <strong className="font-mono-num text-ink-2">{r.lotNumber}</strong> • Units Impacted: <strong className="font-mono-num text-ink">{r.affectedUnits} units</strong> • Logged: <span className="font-mono-num">{r.createdAt}</span>
                 </p>
                 <div className="mt-4 flex gap-3">
                   {r.status !== 'Quarantined' ? (

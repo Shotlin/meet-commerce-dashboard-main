@@ -78,7 +78,7 @@ export const FinancePage: React.FC = () => {
     { header: 'Settlement Period', accessorKey: 'period' },
     {
       header: 'Payout Amount',
-      cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.amount.toLocaleString('en-IN')}</span>,
+      cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.amount.toLocaleString('en-IN')}</span>,
     },
     {
       header: 'Settlement Status',
@@ -107,7 +107,7 @@ export const FinancePage: React.FC = () => {
       <PageHeader
         title="Finance Overview & Vendor Settlements"
         subtitle="Gross Merchandise Value (GMV), platform rake fees, refund audit, and automated vendor payout reconciliation."
-        badge={<Badge variant="brand" icon={<IndianRupee className="w-3.5 h-3.5" />}>Payout Health: Optimal</Badge>}
+        badge={<Badge variant="success" icon={<IndianRupee className="w-3.5 h-3.5" />}>Payout Health: Optimal</Badge>}
         actions={
           <Button
             variant="primary"
@@ -133,7 +133,7 @@ export const FinancePage: React.FC = () => {
 
         <Card padding="md">
           <span className="text-xs font-bold text-status-neutral">Net Platform Revenue (15% Rake)</span>
-          <p className="font-mono-num text-2xl font-extrabold text-brand-berry mt-2">
+          <p className="font-mono-num text-2xl font-extrabold text-ink mt-2">
             ₹{finance ? (finance.netRevenue / 100000).toFixed(2) : '0.00'} Lakhs
           </p>
           <p className="text-[11px] text-status-neutral mt-1">Direct Commission</p>

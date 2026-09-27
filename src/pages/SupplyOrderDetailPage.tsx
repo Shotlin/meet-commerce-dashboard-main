@@ -150,7 +150,7 @@ export default function SupplyOrderDetailPage() {
                     href={item.media_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] font-bold text-brand-raspberry hover:underline"
+                    className="text-[11px] font-bold text-status-info hover:underline"
                   >
                     View
                   </a>
@@ -169,7 +169,7 @@ export default function SupplyOrderDetailPage() {
             <ol className="space-y-3">
               {supply.events.map((event) => (
                 <li key={event.id} className="flex gap-3">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-brand-raspberry shrink-0" />
+                  <div className="mt-1 w-2 h-2 rounded-full bg-ink-2 shrink-0" />
                   <div>
                     <div className="text-xs font-bold text-ink">{String(event.to_status).replace(/_/g, ' ')}</div>
                     <div className="text-[11px] text-muted">

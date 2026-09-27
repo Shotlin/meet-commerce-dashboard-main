@@ -11,7 +11,7 @@ export const PlatformPage: React.FC = () => {
       <PageHeader
         title="Platform Operations & Feature Flags"
         subtitle="App version rollout manager, store status toggle, delivery slot manager, and feature flags."
-        badge={<Badge variant="brand" icon={<Settings className="w-3.5 h-3.5" />}>v2.4.1 Production</Badge>}
+        badge={<Badge variant="neutral" icon={<Settings className="w-3.5 h-3.5" />}>v2.4.1 Production</Badge>}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">

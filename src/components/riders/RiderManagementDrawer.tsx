@@ -191,8 +191,8 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
               <Badge variant={rider.is_active ? 'neutral' : 'danger'}>
                 {rider.is_active ? 'Active' : 'Suspended'}
               </Badge>
-              {rider.is_online && <Badge variant="brand">Online</Badge>}
-              {rider.is_busy && <Badge variant="brand">Busy</Badge>}
+              {rider.is_online && <Badge variant="success">Online</Badge>}
+              {rider.is_busy && <Badge variant="warning">Busy</Badge>}
             </div>
           </div>
           <button
@@ -267,7 +267,7 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
                           type="checkbox"
                           checked={choice.active}
                           onChange={() => toggleAssignment(choice.shopId)}
-                          className="accent-brand-berry"
+                          className="accent-ink"
                         />
                         <span className="text-xs text-ink">{choice.shopName}</span>
                         <span className="ml-auto text-[10px] font-mono-num text-status-neutral">

@@ -10,7 +10,7 @@ import { queryKeys } from '../../services/queryKeys';
 import { pincodeMappingService, PincodeMapping, PincodeMappingInput } from '../../services/pincodeMappingService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const emptyForm: PincodeMappingInput = { pincode: '', city: '', area: '', state: '', isActive: true };
@@ -53,7 +53,7 @@ export const PincodeMappingsPanel: React.FC = () => {
   const saveError = createMutation.error || updateMutation.error;
 
   const columns: Column<PincodeMapping>[] = [
-    { header: 'Pincode', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">{row.pincode}</span> },
+    { header: 'Pincode', cell: (row) => <span className="font-mono-num font-bold text-ink-2">{row.pincode}</span> },
     { header: 'City', accessorKey: 'city' },
     { header: 'Area', cell: (row) => row.area || '—' },
     { header: 'State', accessorKey: 'state' },
@@ -71,7 +71,7 @@ export const PincodeMappingsPanel: React.FC = () => {
       title="Pincode Serviceability Mapping"
       action={
         <div className="flex items-center gap-2">
-          <Badge variant="brand" icon={<MapPin className="w-3 h-3" />}>{mappings.length} Mapped</Badge>
+          <Badge variant="neutral" icon={<MapPin className="w-3 h-3" />}>{mappings.length} Mapped</Badge>
           <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openCreate}>Add Pincode</Button>
         </div>
       }

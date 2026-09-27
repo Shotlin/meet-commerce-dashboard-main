@@ -34,7 +34,7 @@ const emptyForm: BannerInput = {
 };
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 const SortableBannerCard: React.FC<{ banner: Banner; onEdit: () => void; onDelete: () => void }> = ({
@@ -51,7 +51,7 @@ const SortableBannerCard: React.FC<{ banner: Banner; onEdit: () => void; onDelet
     <div
       ref={setNodeRef}
       style={style}
-      className="border border-border rounded-[12px] overflow-hidden bg-rose-50/50 group hover:border-brand-raspberry transition-all shadow-xs"
+      className="border border-border rounded-[12px] overflow-hidden bg-rose-50/50 group hover:border-rose-400 transition-all shadow-xs"
     >
       <div className="relative aspect-video overflow-hidden bg-rose-100">
         {banner.imageUrl ? (
@@ -64,7 +64,7 @@ const SortableBannerCard: React.FC<{ banner: Banner; onEdit: () => void; onDelet
         <button
           {...attributes}
           {...listeners}
-          className="absolute top-2 left-2 p-1.5 rounded-full bg-white/90 text-status-neutral cursor-grab active:cursor-grabbing hover:text-brand-berry"
+          className="absolute top-2 left-2 p-1.5 rounded-full bg-white/90 text-status-neutral cursor-grab active:cursor-grabbing hover:text-ink"
           title="Drag to reorder"
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -76,7 +76,7 @@ const SortableBannerCard: React.FC<{ banner: Banner; onEdit: () => void; onDelet
         </div>
       </div>
       <div className="p-3">
-        <span className="text-[11px] font-bold text-brand-berry uppercase tracking-wider">{banner.bannerType}</span>
+        <span className="text-[11px] font-bold text-ink-2 uppercase tracking-wider">{banner.bannerType}</span>
         <p className="text-xs font-bold text-ink mt-0.5">{banner.title}</p>
         <div className="flex gap-2 mt-2">
           <Button variant="ghost" size="sm" icon={<Pencil className="w-3.5 h-3.5" />} onClick={onEdit}>Edit</Button>
@@ -182,7 +182,7 @@ export const BannerGallery: React.FC = () => {
     <div className="bg-surface border border-border rounded-[12px] p-5 shadow-card">
       <div className="flex items-center justify-between pb-3 mb-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <ImageIcon className="w-5 h-5 text-brand-berry" />
+          <ImageIcon className="w-5 h-5 text-ink-2" />
           <h3 className="text-sm font-bold text-ink">Campaign Banner Asset Library</h3>
           <span className="text-xs font-semibold text-status-neutral">
             {activeShop ? `For ${activeShop.name}` : 'Global banners'}

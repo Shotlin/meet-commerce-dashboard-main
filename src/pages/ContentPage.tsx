@@ -10,7 +10,7 @@ export const ContentPage: React.FC = () => {
       <PageHeader
         title="Banners"
         subtitle="Promotional artwork shown on the storefront carousel — create, edit, and reorder live banners."
-        badge={<Badge variant="brand" icon={<Palette className="w-3.5 h-3.5" />}>Live API</Badge>}
+        badge={<Badge variant="neutral" icon={<Palette className="w-3.5 h-3.5" />}>Live API</Badge>}
       />
 
       <BannerGallery />

@@ -20,7 +20,7 @@ import {
 } from '../services/shopManagementService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 const num = (v: string | number | null | undefined) => (v == null ? 0 : Number(v));
 
@@ -68,7 +68,7 @@ export const StoreDetailPage: React.FC = () => {
   if (error || !shop) {
     return (
       <div>
-        <Link to="/shops" className="inline-flex items-center gap-1.5 text-xs text-brand-berry font-bold mb-4">
+        <Link to="/shops" className="inline-flex items-center gap-1.5 text-xs text-ink-2 font-bold mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Shops
         </Link>
         <p className="text-xs text-status-danger">{error ? (error as Error).message : 'Store not found.'}</p>
@@ -78,7 +78,7 @@ export const StoreDetailPage: React.FC = () => {
 
   return (
     <div>
-      <Link to="/shops" className="inline-flex items-center gap-1.5 text-xs text-brand-berry font-bold mb-3 hover:underline">
+      <Link to="/shops" className="inline-flex items-center gap-1.5 text-xs text-ink-2 font-bold mb-3 hover:underline">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Shops
       </Link>
 
@@ -100,7 +100,7 @@ export const StoreDetailPage: React.FC = () => {
         </div>
         <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
           <p className="text-[10px] font-bold text-status-neutral uppercase">Total Revenue</p>
-          <p className="font-mono-num font-bold text-brand-berry">₹{num(shop.total_revenue).toFixed(2)}</p>
+          <p className="font-mono-num font-bold text-ink">₹{num(shop.total_revenue).toFixed(2)}</p>
         </div>
         <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
           <p className="text-[10px] font-bold text-status-neutral uppercase">Commission</p>
@@ -550,7 +550,7 @@ const FinancialsTab: React.FC<{ shopId: string }> = ({ shopId }) => {
           </div>
           <div className="flex justify-between mt-1.5 font-mono-num">
             <span className="text-status-neutral">Gross ₹{num(f.gross_revenue).toFixed(2)}</span>
-            <span className="font-bold text-brand-berry">Payout ₹{num(f.payout_amount).toFixed(2)}</span>
+            <span className="font-bold text-status-success">Payout ₹{num(f.payout_amount).toFixed(2)}</span>
           </div>
         </div>
       ))}

@@ -21,7 +21,7 @@ import {
 const LINK_TYPES: BannerLinkType[] = ['category', 'product', 'url', 'none'];
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 function emptyForm(bannerType: BannerType): BannerInput {
@@ -52,12 +52,12 @@ const SortableRow: React.FC<{ banner: Banner; onEdit: () => void; onDelete: () =
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 border border-border rounded-[12px] p-2.5 bg-white hover:border-brand-raspberry transition-colors"
+      className="flex items-center gap-3 border border-border rounded-[12px] p-2.5 bg-white hover:border-rose-400 transition-colors"
     >
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 p-1 text-status-neutral cursor-grab active:cursor-grabbing hover:text-brand-berry"
+        className="flex-shrink-0 p-1 text-status-neutral cursor-grab active:cursor-grabbing hover:text-ink"
         title="Drag to reorder"
       >
         <GripVertical className="w-4 h-4" />

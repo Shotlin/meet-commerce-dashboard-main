@@ -41,13 +41,13 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full pl-9 pr-3 py-1.5 text-xs md:text-sm bg-rose-50/50 border border-border rounded-[12px] focus:outline-none focus:border-brand-raspberry focus:bg-white text-ink transition-all placeholder:text-status-neutral/60 font-medium"
+            className="w-full pl-9 pr-3 py-1.5 text-xs md:text-sm bg-rose-50/50 border border-border rounded-[12px] focus:outline-none focus:border-rose-400 focus:bg-white text-ink transition-all placeholder:text-status-neutral/60 font-medium"
           />
         </div>
 
         {onStatusChange && statusOptions.length > 0 && (
           <div className="flex items-center gap-1 bg-rose-50 border border-border px-2 py-1 rounded-[12px]">
-            <Filter className="w-3.5 h-3.5 text-brand-berry shrink-0" />
+            <Filter className="w-3.5 h-3.5 text-ink-2 shrink-0" />
             <select
               value={statusFilter || ''}
               onChange={(e) => onStatusChange(e.target.value)}
@@ -68,7 +68,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       <div className="flex items-center justify-end gap-2 shrink-0">
         {onRefresh && (
           <Button variant="ghost" size="sm" onClick={onRefresh} title="Refresh data">
-            <RefreshCw className="w-4 h-4 text-status-neutral hover:text-brand-berry" />
+            <RefreshCw className="w-4 h-4 text-status-neutral hover:text-ink" />
           </Button>
         )}
         {extraActions}

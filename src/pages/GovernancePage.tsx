@@ -31,7 +31,7 @@ export const GovernancePage: React.FC = () => {
       <PageHeader
         title="Governance, RBAC Matrix & System Audit Explorer"
         subtitle="Immutable audit trail of all role actions, state mutations, and access control permissions."
-        badge={<Badge variant="brand" icon={<Shield className="w-3.5 h-3.5" />}>Audit Log Active</Badge>}
+        badge={<Badge variant="success" icon={<Shield className="w-3.5 h-3.5" />}>Audit Log Active</Badge>}
       />
 
       <div className="space-y-4">

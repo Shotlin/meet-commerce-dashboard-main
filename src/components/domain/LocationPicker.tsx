@@ -71,7 +71,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           }}
         />
         {radiusKm != null && radiusKm > 0 && (
-          <Circle center={position} radius={radiusKm * 1000} pathOptions={{ color: '#E31E64', fillColor: '#E31E64', fillOpacity: 0.08 }} />
+          <Circle center={position} radius={radiusKm * 1000} pathOptions={{ color: '#2563EB', fillColor: '#2563EB', fillOpacity: 0.08 }} />
         )}
         <ClickHandler onChange={onChange} />
       </MapContainer>

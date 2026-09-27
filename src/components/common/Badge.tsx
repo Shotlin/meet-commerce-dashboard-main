@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CheckCircle2, AlertTriangle, AlertCircle, Info, Clock } from 'lucide-react';
 
-export type BadgeVariant = 'success' | 'info' | 'warning' | 'danger' | 'neutral' | 'brand';
+export type BadgeVariant = 'success' | 'info' | 'warning' | 'danger' | 'neutral' | 'brand' | 'violet';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -27,6 +27,7 @@ export const Badge: React.FC<BadgeProps> = ({
     danger: 'bg-[#FDECEE] text-[#D63B4D] border-[#F8B6BE]',
     neutral: 'bg-[#F2F4F7] text-[#667085] border-[#D0D5DD]',
     brand: 'bg-rose-100 text-brand-berry border-brand-berry/30',
+    violet: 'bg-[#F1EDFC] text-[#6D3FC2] border-[#DACCF5]',
   };
 
   const defaultIcons = {
@@ -36,6 +37,7 @@ export const Badge: React.FC<BadgeProps> = ({
     danger: <AlertCircle className="w-3.5 h-3.5 shrink-0" />,
     neutral: <Clock className="w-3.5 h-3.5 shrink-0" />,
     brand: <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />,
+    violet: <Clock className="w-3.5 h-3.5 shrink-0" />,
   };
 
   const sizes = {

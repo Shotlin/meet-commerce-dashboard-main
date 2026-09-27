@@ -50,14 +50,14 @@ export const CRMPage: React.FC = () => {
   const allColumns: Column<CustomerListRow>[] = [
     { header: 'Customer', cell: (row) => <div><p className="font-bold text-ink">{row.name}</p><p className="text-[11px] text-status-neutral">{row.phone}</p></div> },
     { header: 'Orders', accessorKey: 'order_count', isMono: true },
-    { header: 'Spend', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.total_spent.toFixed(2)}</span> },
+    { header: 'Spend', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.total_spent.toFixed(2)}</span> },
     { header: 'Wallet', cell: (row) => <span className="font-mono-num">₹{row.wallet_balance.toFixed(2)}</span> },
     { header: 'Status', cell: (row) => <Badge variant={row.is_blocked ? 'danger' : row.is_active ? 'success' : 'neutral'}>{row.is_blocked ? 'Blocked' : row.is_active ? 'Active' : 'Inactive'}</Badge> },
   ];
 
   const ltvColumns: Column<LtvRow>[] = [
     { header: 'Customer', cell: (row) => <div><p className="font-bold text-ink">{row.name}</p><p className="text-[11px] text-status-neutral">{row.phone}</p></div> },
-    { header: 'LTV', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.ltv.toFixed(2)}</span> },
+    { header: 'LTV', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.ltv.toFixed(2)}</span> },
     { header: 'Orders', accessorKey: 'order_count', isMono: true },
     { header: 'Avg Order', cell: (row) => <span className="font-mono-num">₹{row.avg_order_value.toFixed(2)}</span> },
     { header: 'Customer Since', cell: (row) => <span className="font-mono-num">{row.days_since_signup}d ago</span> },
@@ -66,7 +66,7 @@ export const CRMPage: React.FC = () => {
   const vipColumns: Column<VipRow>[] = [
     { header: 'Customer', cell: (row) => <div><p className="font-bold text-ink">{row.name}</p><p className="text-[11px] text-status-neutral">{row.phone}</p></div> },
     { header: 'Orders', accessorKey: 'order_count', isMono: true },
-    { header: 'Spend', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.total_spent.toFixed(2)}</span> },
+    { header: 'Spend', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.total_spent.toFixed(2)}</span> },
     { header: 'Loyalty Points', accessorKey: 'loyalty_points', isMono: true },
     { header: 'Wallet', cell: (row) => <span className="font-mono-num">₹{row.wallet_balance.toFixed(2)}</span> },
   ];
@@ -74,7 +74,7 @@ export const CRMPage: React.FC = () => {
   const churnedColumns: Column<ChurnedRow>[] = [
     { header: 'Customer', cell: (row) => <div><p className="font-bold text-ink">{row.name}</p><p className="text-[11px] text-status-neutral">{row.phone}</p></div> },
     { header: 'Past Orders', accessorKey: 'order_count', isMono: true },
-    { header: 'Total Spent', cell: (row) => <span className="font-mono-num font-bold text-brand-berry">₹{row.total_spent.toFixed(2)}</span> },
+    { header: 'Total Spent', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{row.total_spent.toFixed(2)}</span> },
     { header: 'Last Order', cell: (row) => <span className="text-[11px] text-status-neutral">{new Date(row.last_order_at).toLocaleDateString('en-IN')}</span> },
   ];
 
@@ -86,7 +86,7 @@ export const CRMPage: React.FC = () => {
       <PageHeader
         title="CRM & Customer Accounts"
         subtitle="Customer cohorts, order histories, wallet balances, and lifetime value."
-        badge={<Badge variant="brand" icon={<Users className="w-3.5 h-3.5" />}>{count} Customers</Badge>}
+        badge={<Badge variant="neutral" icon={<Users className="w-3.5 h-3.5" />}>{count} Customers</Badge>}
       />
 
       <Tabs

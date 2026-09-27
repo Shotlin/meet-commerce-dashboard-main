@@ -10,7 +10,7 @@ import { queryKeys } from '../../services/queryKeys';
 import { customerService } from '../../services/customerService';
 
 const inputClass =
-  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-raspberry/30 focus:border-brand-raspberry/50';
+  'w-full px-3 py-2 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400';
 const labelClass = 'block text-[11px] font-bold text-ink mb-1';
 
 type DrawerTab = 'orders' | 'addresses' | 'activity';
@@ -77,7 +77,7 @@ export const CustomerDetailDrawer: React.FC<{ customerId: string | null; onClose
             <div className="grid grid-cols-3 gap-2">
               <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
                 <p className="text-[10px] font-bold text-status-neutral uppercase">Wallet</p>
-                <p className="font-mono-num font-bold text-brand-berry">₹{customer.wallet_balance.toFixed(2)}</p>
+                <p className="font-mono-num font-bold text-ink-2">₹{customer.wallet_balance.toFixed(2)}</p>
               </div>
               <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
                 <p className="text-[10px] font-bold text-status-neutral uppercase">Lifetime Spend</p>
@@ -120,7 +120,7 @@ export const CustomerDetailDrawer: React.FC<{ customerId: string | null; onClose
                       <p className="text-[11px] text-status-neutral">{new Date(o.created_at).toLocaleDateString('en-IN')} · {o.payment_method}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono-num font-bold text-brand-berry">₹{Number(o.total_payable).toFixed(2)}</p>
+                      <p className="font-mono-num font-bold text-ink-2">₹{Number(o.total_payable).toFixed(2)}</p>
                       <Badge variant="info" size="sm">{o.status}</Badge>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export const CustomerDetailDrawer: React.FC<{ customerId: string | null; onClose
               <div className="space-y-2">
                 {addresses.length === 0 ? <p className="text-xs text-status-neutral">No saved addresses.</p> : addresses.map((a) => (
                   <div key={a.id} className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-ink"><MapPin className="w-3 h-3 text-brand-berry" /> {a.label} {a.is_default && <Badge variant="brand" size="sm">Default</Badge>}</div>
+                    <div className="flex items-center gap-1.5 font-bold text-ink"><MapPin className="w-3 h-3 text-ink-2" /> {a.label} {a.is_default && <Badge variant="neutral" size="sm">Default</Badge>}</div>
                     <p className="text-[11px] text-status-neutral mt-0.5">{a.address_line1}{a.address_line2 ? `, ${a.address_line2}` : ''}, {a.city}, {a.state} {a.pincode}</p>
                   </div>
                 ))}
@@ -143,7 +143,7 @@ export const CustomerDetailDrawer: React.FC<{ customerId: string | null; onClose
               <div className="space-y-2">
                 {timeline.length === 0 ? <p className="text-xs text-status-neutral">No activity recorded.</p> : timeline.map((e, i) => (
                   <div key={i} className="flex gap-2 p-2.5 bg-rose-50/60 rounded-[10px] border border-border text-xs">
-                    <Clock className="w-3.5 h-3.5 text-brand-berry shrink-0 mt-0.5" />
+                    <Clock className="w-3.5 h-3.5 text-ink-2 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-ink">{e.eventType.replace(/_/g, ' ')}</p>
                       <p className="text-[11px] text-status-neutral">{new Date(e.eventAt).toLocaleString('en-IN')}</p>
