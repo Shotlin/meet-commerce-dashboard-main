@@ -35,7 +35,6 @@ import ThemeLibraryPage from './pages/ThemeLibraryPage';
 import NewThemePage from './pages/NewThemePage';
 import EditThemePage from './pages/EditThemePage';
 import ThemeBuilderPage from './pages/ThemeBuilderPage';
-import ThemeTabsManagementPage from './pages/ThemeTabsManagementPage';
 import { LoyaltyPage } from './pages/LoyaltyPage';
 import { GovernancePage } from './pages/GovernancePage';
 import { RetentionPage } from './pages/RetentionPage';
@@ -106,7 +105,6 @@ export const App: React.FC = () => {
                   <Route path="themes/new" element={<NewThemePage />} />
                   <Route path="themes/builder" element={<ThemeBuilderPage />} />
                   <Route path="themes/:id" element={<EditThemePage />} />
-                  <Route path="theme-tabs" element={<ThemeTabsManagementPage />} />
                   <Route path="loyalty" element={<LoyaltyPage />} />
                   <Route path="governance" element={<GovernancePage />} />
                   <Route path="retention" element={<RetentionPage />} />

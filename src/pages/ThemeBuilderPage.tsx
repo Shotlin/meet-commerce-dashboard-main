@@ -1268,12 +1268,6 @@ function ThemeBuilderPageContent() {
             Create a theme tab first so the builder has a manifest target to edit.
           </p>
           <div className="mt-6 flex justify-center gap-3">
-            <Button asChild variant="outline">
-              <Link to="/theme-tabs">
-                <ArrowLeft className="h-4 w-4" />
-                Manage Tabs
-              </Link>
-            </Button>
             <Button onClick={handleCreateTab}>Create First Tab</Button>
           </div>
         </div>

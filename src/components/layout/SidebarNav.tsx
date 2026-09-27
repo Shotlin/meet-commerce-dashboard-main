@@ -120,7 +120,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
         { to: '/marketing', label: 'Campaigns & Coupons', icon: <Megaphone className="w-4 h-4" /> },
         { to: '/content', label: 'Banners', icon: <Palette className="w-4 h-4" /> },
         { to: '/themes', label: 'Theme Builder', icon: <LayoutTemplate className="w-4 h-4" /> },
-        { to: '/theme-tabs', label: 'Theme Tabs', icon: <LayoutTemplate className="w-4 h-4" /> },
         { to: '/loyalty', label: 'Wallet & Loyalty', icon: <Gift className="w-4 h-4" /> },
         { to: '/merchandising', label: 'Merchandising Hierarchy', icon: <Sliders className="w-4 h-4" /> },
         { to: '/first-time-offers', label: 'First-Time Offers', icon: <Gift className="w-4 h-4" /> },

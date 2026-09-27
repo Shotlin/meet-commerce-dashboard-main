@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import { Clock, XCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -156,19 +155,13 @@ export function TabSettingsCard({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Select a managed tab from the Theme Tabs dashboard, or leave this
-                theme unlinked while drafting.
+                Select a managed tab, or leave this theme unlinked while drafting.
               </p>
             )}
           </div>
-          <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>
-              The selected tab controls key, label, order, icon, and store.
-            </span>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/theme-tabs">Manage Theme Tabs</Link>
-            </Button>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            The selected tab controls key, label, order, icon, and store.
+          </p>
         </div>
       </CardContent>
     </Card>

@@ -4,7 +4,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'HQ Admin': [
     '/', '/orders', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
     '/delivery', '/shops', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
-    '/content', '/themes', '/themes/new', '/themes/builder', '/theme-tabs', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay'
+    '/content', '/themes', '/themes/new', '/themes/builder', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay'
   ],
   'Warehouse Manager': [
     '/', '/orders', '/inventory', '/delivery', '/shops', '/recalls', '/catalogue', '/procurement', '/procurement/new', '/procurement/supplies'

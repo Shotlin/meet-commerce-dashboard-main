@@ -242,14 +242,7 @@ export default function NewThemePage() {
             )}
 
             <p className="text-xs text-muted-foreground md:col-span-2">
-              You can change the tab assignment later in{" "}
-              <Link
-                to="/theme-tabs"
-                className="underline underline-offset-2 hover:text-foreground"
-              >
-                Theme Tabs
-              </Link>
-              .
+              You can change the tab assignment later from the theme editor.
             </p>
           </CardContent>
         </Card>
