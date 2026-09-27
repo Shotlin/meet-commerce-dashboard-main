@@ -225,7 +225,7 @@ export const InventoryPage: React.FC = () => {
           <div className="space-y-6">
             {/* Stock Quantities breakdown */}
             <Card title="Stock Allocation Ledger Breakdown">
-              <div className="grid grid-cols-3 gap-3 font-mono-num text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-num text-center">
                 <div className="p-3 bg-rose-50 border border-border rounded-[12px]">
                   <span className="text-xs text-status-neutral font-sans block">Available Stock:</span>
                   <span className="text-lg font-extrabold text-status-success">{selectedLot.availableWeightKg} kg</span>

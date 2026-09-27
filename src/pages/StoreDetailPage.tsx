@@ -93,7 +93,7 @@ export const StoreDetailPage: React.FC = () => {
         }
       />
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
         <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
           <p className="text-[10px] font-bold text-status-neutral uppercase">Total Orders</p>
           <p className="font-mono-num font-bold text-ink">{shop.total_orders}</p>

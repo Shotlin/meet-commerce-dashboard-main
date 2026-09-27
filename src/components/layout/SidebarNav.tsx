@@ -34,7 +34,8 @@ import {
   History,
   Bell,
   Tags,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
@@ -56,7 +57,13 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export const SidebarNav: React.FC = () => {
+interface SidebarNavProps {
+  /** Whether the off-canvas drawer is open — only meaningful below the `lg` breakpoint. */
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose }) => {
   const { role, userName, userEmail, userPhone, userDesignation, updateProfile, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -186,7 +193,14 @@ export const SidebarNav: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 bg-sidebar border-r border-border text-ink-2 flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden">
+    <aside
+      className={clsx(
+        'w-72 sm:w-64 bg-sidebar border-r border-border text-ink-2 flex flex-col shrink-0 h-screen overflow-hidden',
+        'fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-out',
+        'lg:static lg:translate-x-0',
+        isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      )}
+    >
       {/* Brand Header — the one place red lives outside a selection state */}
       <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -198,9 +212,19 @@ export const SidebarNav: React.FC = () => {
             <p className="text-[10px] text-muted-foreground font-semibold mt-0.5 tracking-wider truncate">ENTERPRISE HQ</p>
           </div>
         </div>
-        <span className="text-[10px] bg-rose-100 text-ink-2 font-mono-num font-bold px-2 py-0.5 rounded-full border border-border shrink-0">
-          v2.4
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[10px] bg-rose-100 text-ink-2 font-mono-num font-bold px-2 py-0.5 rounded-full border border-border">
+            v2.4
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close navigation"
+            className="lg:hidden p-1 rounded-[8px] text-ink-2 hover:bg-rose-100 hover:text-ink transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Navigation Sections */}

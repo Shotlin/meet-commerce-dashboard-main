@@ -36,12 +36,12 @@ export const ShopSwitcher: React.FC = () => {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-border rounded-[12px] text-xs font-bold text-ink transition-colors hover:bg-rose-100/60 cursor-pointer max-w-[220px]"
-        title="Switch shop scope (X-Shop-Id)"
+        className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-rose-50 border border-border rounded-[12px] text-xs font-bold text-ink transition-colors hover:bg-rose-100/60 cursor-pointer max-w-[40px] sm:max-w-[220px]"
+        title={`Switch shop scope (X-Shop-Id) — currently ${triggerLabel}`}
       >
         <Store className="w-3.5 h-3.5 text-ink-2 shrink-0" />
-        <span className="truncate">{triggerLabel}</span>
-        <ChevronDown className="w-3 h-3 ml-0.5 shrink-0" />
+        <span className="truncate hidden sm:inline">{triggerLabel}</span>
+        <ChevronDown className="w-3 h-3 ml-0.5 shrink-0 hidden sm:inline" />
       </button>
 
       {isOpen && (

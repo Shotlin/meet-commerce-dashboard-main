@@ -417,7 +417,7 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                     {order.customerName || 'Unknown Customer'}
                   </button>
                   <p className="text-xs text-muted-foreground">{order.customerPhone || '—'}{order.customerEmail ? ` · ${order.customerEmail}` : ''}</p>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {customerLoading ? (
                       <>
                         <Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" />

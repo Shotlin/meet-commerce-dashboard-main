@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, MapPin, Shield, Check, CheckCircle2, ChevronDown, ShoppingBag, Store, Boxes, Warehouse, X } from 'lucide-react';
+import { Search, Bell, MapPin, Shield, Check, CheckCircle2, ChevronDown, ShoppingBag, Store, Boxes, Warehouse, X, Menu, Flame } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
 import { ScopeLocation, UserRole } from '../../types';
@@ -9,7 +9,12 @@ import { Modal } from '../common/Modal';
 import { apiClient } from '../../services/apiClient';
 import { ShopSwitcher } from './ShopSwitcher';
 
-export const TopHeaderBar: React.FC = () => {
+interface TopHeaderBarProps {
+  /** Opens the mobile off-canvas nav drawer — only rendered/used below `lg`. */
+  onOpenMenu?: () => void;
+}
+
+export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
   const { role, setRole } = useAuth();
   const { location, setLocation, exceptionCount } = useScope();
@@ -153,9 +158,24 @@ export const TopHeaderBar: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-surface border-b border-border px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs shrink-0">
-      {/* Global Search Bar */}
-      <div className="flex items-center gap-4 flex-1 max-w-md relative" ref={searchContainerRef}>
+    <header className="h-16 bg-surface border-b border-border px-3 sm:px-6 flex items-center gap-2 sm:gap-4 justify-between sticky top-0 z-30 shadow-2xs shrink-0">
+      {/* Mobile-only: menu toggle + compact brand mark (the full sidebar header is off-canvas below `lg`) */}
+      <div className="flex items-center gap-2 shrink-0 lg:hidden">
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label="Open navigation"
+          className="p-2 -ml-1 rounded-[10px] text-ink-2 hover:bg-rose-50 hover:text-ink transition-colors cursor-pointer"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="w-7 h-7 rounded-[8px] bg-brand-500 flex items-center justify-center text-white shrink-0">
+          <Flame className="w-4 h-4 fill-current" />
+        </div>
+      </div>
+
+      {/* Global Search Bar — hidden on phones; every list page has its own search field too */}
+      <div className="hidden md:flex items-center gap-4 flex-1 max-w-md relative" ref={searchContainerRef}>
         <form onSubmit={handleSearchSubmit} className="relative w-full">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-status-neutral" />
           <input
@@ -291,12 +311,12 @@ export const TopHeaderBar: React.FC = () => {
       </div>
 
       {/* Right Tools: Scope Selector, Role Badge, Notifications */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Shop Switcher — real X-Shop-Id scope, distinct from the cosmetic Location Scope Switcher below */}
         <ShopSwitcher />
 
-        {/* Location Scope Switcher Dropdown */}
-        <div className="flex items-center gap-1.5 bg-rose-50 border border-border px-3 py-1.5 rounded-[12px]">
+        {/* Location Scope Switcher Dropdown — a cosmetic testing tool, not essential on a phone */}
+        <div className="hidden xl:flex items-center gap-1.5 bg-rose-50 border border-border px-3 py-1.5 rounded-[12px]">
           <MapPin className="w-4 h-4 text-ink-2 shrink-0" />
           <select
             value={location}
@@ -311,18 +331,18 @@ export const TopHeaderBar: React.FC = () => {
           </select>
         </div>
 
-        {/* Role Switcher Trigger Button */}
+        {/* Role Switcher Trigger Button — a testing tool for role-gated access; icon-only on phones */}
         <button
           onClick={() => {
             setIsRoleModalOpen(true);
             setIsNotificationOpen(false);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-ink border border-border rounded-[12px] text-xs font-bold transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-ink border border-border rounded-[12px] text-xs font-bold transition-colors cursor-pointer"
           title="Change active user role scope"
         >
           <Shield className="w-3.5 h-3.5" />
-          <span>{role}</span>
-          <ChevronDown className="w-3 h-3 ml-0.5" />
+          <span className="hidden sm:inline">{role}</span>
+          <ChevronDown className="w-3 h-3 ml-0.5 hidden sm:inline" />
         </button>
 
         {/* Notification Bell Container */}

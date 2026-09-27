@@ -50,7 +50,7 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-rose-50/40 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-rose-50/40 shrink-0">
           <div>
             <h3 className="text-base font-bold text-ink tracking-tight">{title}</h3>
             {subtitle && <p className="text-xs text-status-neutral mt-0.5">{subtitle}</p>}
@@ -61,10 +61,10 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1">{children}</div>
 
         {/* Footer */}
-        {footer && <div className="px-6 py-3 border-t border-border bg-rose-50/30 flex justify-end gap-3 shrink-0">{footer}</div>}
+        {footer && <div className="px-4 sm:px-6 py-3 border-t border-border bg-rose-50/30 flex flex-wrap justify-end gap-2 sm:gap-3 shrink-0">{footer}</div>}
       </div>
     </div>
   );

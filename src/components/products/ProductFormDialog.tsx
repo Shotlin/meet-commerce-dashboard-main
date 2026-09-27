@@ -217,7 +217,7 @@ export function ProductFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Tabs defaultValue={initialFamilyId ? "family" : "general"}>
-            <TabsList className="grid grid-cols-5 w-full">
+            <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full h-auto">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="meat">Meat Details</TabsTrigger>
               <TabsTrigger value="family">Family</TabsTrigger>
@@ -297,7 +297,7 @@ export function ProductFormDialog({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="p-sale-price">Sale Price (₹)</Label>
                   <Input

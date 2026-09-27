@@ -196,7 +196,7 @@ export function CustomerProfileDrawer({ customerId, open, onClose }: CustomerPro
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <StatBox icon={<ShoppingBag className="h-4 w-4" />} label="Orders" value={customer.order_count.toString()} />
                     <StatBox icon={<Wallet className="h-4 w-4" />} label="Spent" value={formatINR(customer.total_spent)} />
                     <StatBox icon={<Wallet className="h-4 w-4" />} label="Wallet" value={formatINR(customer.wallet_balance)} />
@@ -524,7 +524,7 @@ function ProfileSkeleton() {
           <Skeleton className="h-3 w-32" />
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-16 rounded-lg" />
         ))}

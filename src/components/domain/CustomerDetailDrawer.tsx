@@ -74,7 +74,7 @@ export const CustomerDetailDrawer: React.FC<{ customerId: string | null; onClose
       <DetailDrawer isOpen={!!customerId} onClose={onClose} title={customer?.name ?? 'Customer'} subtitle={customer?.phone} width="xl">
         {customer && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div className="p-2.5 bg-rose-50/60 rounded-[10px] border border-border">
                 <p className="text-[10px] font-bold text-status-neutral uppercase">Wallet</p>
                 <p className="font-mono-num font-bold text-ink-2">₹{customer.wallet_balance.toFixed(2)}</p>
