@@ -171,7 +171,7 @@ export const TopHeaderBar: React.FC = () => {
               setIsSearchOpen(true);
             }}
             placeholder="Search orders, lots, vendors, SKUs, or receipts (Ctrl + K)..."
-            className="w-full pl-9 pr-8 py-1.5 text-xs md:text-sm bg-rose-50/50 border border-border rounded-[12px] focus:outline-none focus:border-brand-raspberry focus:bg-white text-ink transition-all placeholder:text-status-neutral/60 font-medium"
+            className="w-full pl-9 pr-8 py-1.5 text-xs md:text-sm bg-rose-50 border border-border rounded-[12px] focus:outline-none focus:border-rose-400 focus:bg-white text-ink transition-all placeholder:text-status-neutral/60 font-medium"
           />
           {searchQuery && (
             <button
@@ -196,7 +196,7 @@ export const TopHeaderBar: React.FC = () => {
                 {/* Orders Category */}
                 {searchResults.orders.length > 0 && (
                   <div>
-                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-berry flex items-center gap-1.5 bg-rose-50 rounded mb-1">
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-status-info flex items-center gap-1.5 bg-status-info/10 rounded mb-1">
                       <ShoppingBag className="w-3 h-3" /> Orders ({searchResults.orders.length})
                     </div>
                     {searchResults.orders.slice(0, 3).map((ord) => (
@@ -209,7 +209,7 @@ export const TopHeaderBar: React.FC = () => {
                           <p className="font-bold text-ink font-mono-num">{ord.orderNumber} — {ord.customerName}</p>
                           <p className="text-[11px] text-status-neutral">{ord.warehouseLocation} • {ord.status}</p>
                         </div>
-                        <span className="font-mono-num font-bold text-brand-berry">₹{ord.totalAmount?.toFixed(2)}</span>
+                        <span className="font-mono-num font-bold text-ink">₹{ord.totalAmount?.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -218,7 +218,7 @@ export const TopHeaderBar: React.FC = () => {
                 {/* Vendors Category */}
                 {searchResults.vendors.length > 0 && (
                   <div>
-                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-berry flex items-center gap-1.5 bg-rose-50 rounded mb-1">
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-status-success flex items-center gap-1.5 bg-status-success/10 rounded mb-1">
                       <Store className="w-3 h-3" /> Vendors ({searchResults.vendors.length})
                     </div>
                     {searchResults.vendors.slice(0, 3).map((ven) => (
@@ -242,7 +242,7 @@ export const TopHeaderBar: React.FC = () => {
                 {/* Inventory Lots Category */}
                 {searchResults.lots.length > 0 && (
                   <div>
-                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-berry flex items-center gap-1.5 bg-rose-50 rounded mb-1">
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-700 flex items-center gap-1.5 bg-violet-50 rounded mb-1">
                       <Boxes className="w-3 h-3" /> Inventory Lots ({searchResults.lots.length})
                     </div>
                     {searchResults.lots.slice(0, 3).map((lot) => (
@@ -255,7 +255,7 @@ export const TopHeaderBar: React.FC = () => {
                           <p className="font-bold text-ink">{lot.productName}</p>
                           <p className="text-[11px] text-status-neutral font-mono-num">{lot.lotNumber} • SKU: {lot.sku}</p>
                         </div>
-                        <span className="font-mono-num font-bold text-brand-berry">{lot.availableWeightKg} kg</span>
+                        <span className="font-mono-num font-bold text-violet-700">{lot.availableWeightKg} kg</span>
                       </div>
                     ))}
                   </div>
@@ -264,7 +264,7 @@ export const TopHeaderBar: React.FC = () => {
                 {/* Warehouse Receipts Category */}
                 {searchResults.receipts.length > 0 && (
                   <div>
-                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-berry flex items-center gap-1.5 bg-rose-50 rounded mb-1">
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-status-warning flex items-center gap-1.5 bg-status-warning/10 rounded mb-1">
                       <Warehouse className="w-3 h-3" /> QC Receipts ({searchResults.receipts.length})
                     </div>
                     {searchResults.receipts.slice(0, 3).map((qc) => (
@@ -277,7 +277,7 @@ export const TopHeaderBar: React.FC = () => {
                           <p className="font-bold text-ink font-mono-num">{qc.receiptNumber} — {qc.vendorName}</p>
                           <p className="text-[11px] text-status-neutral">{qc.categoryName} • Temp: {qc.temperatureCelsius}°C</p>
                         </div>
-                        <span className="text-[10px] font-bold text-brand-berry bg-rose-100 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-status-warning bg-status-warning/10 px-2 py-0.5 rounded-full">
                           {qc.qcStatus}
                         </span>
                       </div>
@@ -297,7 +297,7 @@ export const TopHeaderBar: React.FC = () => {
 
         {/* Location Scope Switcher Dropdown */}
         <div className="flex items-center gap-1.5 bg-rose-50 border border-border px-3 py-1.5 rounded-[12px]">
-          <MapPin className="w-4 h-4 text-brand-berry shrink-0" />
+          <MapPin className="w-4 h-4 text-ink-2 shrink-0" />
           <select
             value={location}
             onChange={(e) => handleScopeChange(e.target.value as ScopeLocation)}
@@ -317,7 +317,7 @@ export const TopHeaderBar: React.FC = () => {
             setIsRoleModalOpen(true);
             setIsNotificationOpen(false);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-100/70 hover:bg-rose-100 text-brand-berry border border-brand-berry/20 rounded-[12px] text-xs font-bold transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-ink border border-border rounded-[12px] text-xs font-bold transition-colors cursor-pointer"
           title="Change active user role scope"
         >
           <Shield className="w-3.5 h-3.5" />
@@ -332,12 +332,12 @@ export const TopHeaderBar: React.FC = () => {
               setIsNotificationOpen(!isNotificationOpen);
               setIsSearchOpen(false);
             }}
-            className="relative p-2 text-status-neutral hover:text-brand-berry hover:bg-rose-50 rounded-[12px] transition-colors cursor-pointer"
+            className="relative p-2 text-status-neutral hover:text-ink hover:bg-rose-50 rounded-[12px] transition-colors cursor-pointer"
             title="HQ Exception Alerts"
           >
             <Bell className="w-5 h-5" />
             {exceptionCount > 0 && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-brand-raspberry rounded-full ring-2 ring-white animate-pulse" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-status-danger rounded-full ring-2 ring-white" />
             )}
           </button>
 
@@ -346,7 +346,7 @@ export const TopHeaderBar: React.FC = () => {
             <div className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-[12px] shadow-overlay p-4 z-50">
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-border">
                 <h4 className="text-xs font-bold text-ink">HQ Exception Queue</h4>
-                <span className="text-[10px] font-mono-num bg-rose-100 text-brand-berry font-bold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-mono-num bg-status-danger/10 text-status-danger font-bold px-2 py-0.5 rounded-full">
                   {exceptionCount} Alerts
                 </span>
               </div>

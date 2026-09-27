@@ -66,7 +66,7 @@ async function bootApp() {
 }
 
 const signIn = async (user: FakeUser) => {
-  fireEvent.change(screen.getByPlaceholderText('admin@bakaloo.com'), { target: { value: user.email } });
+  fireEvent.change(screen.getByPlaceholderText('admin@freshcuts.in'), { target: { value: user.email } });
   fireEvent.change(screen.getByPlaceholderText('Local password'), { target: { value: user.password } });
   fireEvent.click(screen.getByRole('button', { name: /enter hq console/i }));
 };

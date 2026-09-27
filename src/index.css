@@ -2,19 +2,39 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-ink: #351226;
-  --color-brand-berry: #9D174D;
-  --color-brand-raspberry: #E31E64;
-  --color-sidebar: #881337;
-  --color-rose-50: #FFF5F8;
-  --color-rose-100: #FCE7EF;
+  /* ---------------------------------------------------------------------
+     Design language (rebuilt): pure white / near-black neutrals everywhere,
+     with FreshCuts red (#C32D2E — the same red already used on the mobile
+     app's CTAs, matching OrderDetailPalette.primaryRed) reserved for the
+     brand mark and small "this is selected/active" accents only. Color
+     elsewhere is semantic (status-success/info/warning/danger) and used to
+     make data legible, never as decorative chrome. See CLAUDE.md §9 for the
+     full rationale — this replaces the old Bakaloo-era berry/raspberry
+     (#9D174D/#E31E64) tokens that every card, border, and button used to
+     route through, which is what made the whole app read as pink/red.
+     --------------------------------------------------------------------- */
+  --color-ink: #15161B;
+  --color-ink-2: #5B5F6A;
+  --color-brand-berry: #A82626;
+  --color-brand-raspberry: #C32D2E;
+  --color-sidebar: #FFFFFF;
+  --color-rose-50: #FAFAFB;
+  --color-rose-100: #F1F2F5;
+  --color-rose-200: #E4E6EB;
+  --color-rose-300: #CBCED6;
+  --color-rose-400: #A6AAB5;
+  --color-rose-500: #7B7F8B;
+  --color-rose-600: #5B5F6A;
+  --color-rose-700: #43464F;
+  --color-rose-800: #2E3037;
+  --color-rose-900: #1B1C21;
   --color-surface: #FFFFFF;
-  --color-border: #F1D7E1;
+  --color-border: #E7E8EC;
 
-  --color-status-success: #179B73;
-  --color-status-info: #2769D7;
-  --color-status-warning: #D98900;
-  --color-status-danger: #D63B4D;
+  --color-status-success: #0B7A3B;
+  --color-status-info: #14509E;
+  --color-status-warning: #92600A;
+  --color-status-danger: #A32323;
   --color-status-neutral: #667085;
 
   --font-sans: Manrope, Inter, ui-sans-serif, system-ui, sans-serif;
@@ -25,39 +45,43 @@
   /* shadcn/ui token set — the ported theme-builder + abandoned-carts +
      customers UI (bakaloo-dashboard-reference's components/ui/*) is written
      against these standard shadcn class names (bg-card, text-muted-foreground,
-     border-border, bg-popover, etc). Mapped to this app's own rose/maroon
-     brand rather than bakaloo's green palette, so ported components read as
-     native to this dashboard, not a visually foreign transplant. */
+     border-border, bg-popover, etc). Mapped to this app's own neutral
+     white/black chrome — primary/secondary/accent/muted/border/ring no
+     longer route through any red at all, so every component built against
+     these standard names (bg-primary, bg-muted, border-border…) inherits
+     the neutral palette automatically. */
   --color-background: #FFFFFF;
   --color-foreground: var(--color-ink);
   --color-card: #FFFFFF;
   --color-card-foreground: var(--color-ink);
   --color-popover: #FFFFFF;
   --color-popover-foreground: var(--color-ink);
-  --color-primary: var(--color-brand-berry);
+  --color-primary: var(--color-ink);
   --color-primary-foreground: #FFFFFF;
   --color-secondary: var(--color-rose-100);
-  --color-secondary-foreground: var(--color-brand-berry);
+  --color-secondary-foreground: var(--color-ink);
   --color-muted: var(--color-rose-50);
   --color-muted-foreground: var(--color-status-neutral);
   --color-accent: var(--color-rose-100);
-  --color-accent-foreground: var(--color-brand-berry);
+  --color-accent-foreground: var(--color-ink);
   --color-destructive: var(--color-status-danger);
   --color-destructive-foreground: #FFFFFF;
   --color-input: var(--color-border);
-  --color-ring: var(--color-brand-raspberry);
+  --color-ring: var(--color-rose-400);
 
-  /* Numbered brand scale (rose → maroon) — the ported UI uses bg-brand-50,
-     text-brand-500, border-brand-200, etc. throughout. */
-  --color-brand-100: #FCE7EF;
-  --color-brand-200: #F8C9DA;
-  --color-brand-300: #F09EC0;
-  --color-brand-400: #E56B9E;
-  --color-brand-500: #E31E64;
-  --color-brand-600: #C4185A;
-  --color-brand-700: #9D174D;
-  --color-brand-800: #7A1140;
-  --color-brand-900: #4A0A28;
+  /* Numbered brand scale — true FreshCuts red, one hue light->dark. Reserved
+     for the logo mark, ThemeBuilder's own storefront-brand color pickers,
+     and small "currently selected/active" accents (active nav item, the
+     picked shop in ShopSwitcher) — never a general panel/card background. */
+  --color-brand-100: #FBEAEA;
+  --color-brand-200: #F5CFCF;
+  --color-brand-300: #ECA8A8;
+  --color-brand-400: #DE7A7A;
+  --color-brand-500: #C32D2E;
+  --color-brand-600: #A82626;
+  --color-brand-700: #8C1F1F;
+  --color-brand-800: #6E1919;
+  --color-brand-900: #4A1010;
 
   /* Bare aliases of the existing status-* tokens — ported files use the
      shadcn convention (text-success, text-danger) without the status- prefix. */
@@ -93,14 +117,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #FFF5F8;
+    background: #FAFAFB;
   }
   ::-webkit-scrollbar-thumb {
-    background: #F1D7E1;
+    background: #D7D9E0;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #9D174D;
+    background: #9297A1;
   }
 }
 
@@ -121,7 +145,7 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #FFF5F8 25%, #FCE7EF 50%, #FFF5F8 75%);
+  background: linear-gradient(90deg, #F1F2F5 25%, #E4E6EB 50%, #F1F2F5 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

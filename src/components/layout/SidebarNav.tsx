@@ -186,19 +186,19 @@ export const SidebarNav: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 bg-sidebar border-r border-white/10 text-rose-100 flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden">
-      {/* Brand Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20">
+    <aside className="w-64 bg-sidebar border-r border-border text-ink-2 flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden">
+      {/* Brand Header — the one place red lives outside a selection state */}
+      <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-[12px] bg-gradient-to-br from-brand-raspberry to-brand-berry flex items-center justify-center text-white shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-500 flex items-center justify-center text-white shrink-0">
             <Flame className="w-5 h-5 fill-current" />
           </div>
           <div className="min-w-0 flex-1 truncate">
-            <h1 className="font-bold text-white text-sm tracking-tight leading-none truncate">MEET COMMERCE</h1>
-            <p className="text-[10px] text-rose-200 font-semibold mt-0.5 tracking-wider truncate">ENTERPRISE HQ</p>
+            <h1 className="font-extrabold text-ink text-sm tracking-tight leading-none truncate">FreshCuts</h1>
+            <p className="text-[10px] text-muted-foreground font-semibold mt-0.5 tracking-wider truncate">ENTERPRISE HQ</p>
           </div>
         </div>
-        <span className="text-[10px] bg-rose-100/20 text-white font-mono-num font-bold px-2 py-0.5 rounded-full border border-rose-100/30 shrink-0">
+        <span className="text-[10px] bg-rose-100 text-ink-2 font-mono-num font-bold px-2 py-0.5 rounded-full border border-border shrink-0">
           v2.4
         </span>
       </div>
@@ -207,7 +207,7 @@ export const SidebarNav: React.FC = () => {
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {groups.map((group, groupIdx) => (
           <div key={groupIdx}>
-            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-rose-200/90 uppercase truncate">
+            <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-muted-foreground uppercase truncate">
               {group.title}
             </div>
 
@@ -221,10 +221,10 @@ export const SidebarNav: React.FC = () => {
                     end={item.to === '/'}
                     className={({ isActive }) =>
                       clsx(
-                        'flex items-center justify-between px-3 py-2 rounded-[12px] text-xs font-semibold transition-all duration-150',
+                        'flex items-center justify-between px-3 py-2 rounded-[10px] text-xs font-semibold transition-all duration-150 border-l-[3px]',
                         isActive
-                          ? 'bg-gradient-to-r from-brand-raspberry to-brand-berry text-white shadow-xs font-bold'
-                          : 'text-rose-100 hover:text-white hover:bg-white/10',
+                          ? 'bg-brand-100 text-brand-700 font-bold border-l-brand-500'
+                          : 'text-ink-2 hover:text-ink hover:bg-rose-50 border-l-transparent',
                         !allowed && 'opacity-50 cursor-not-allowed'
                       )
                     }
@@ -245,8 +245,8 @@ export const SidebarNav: React.FC = () => {
                           className={clsx(
                             'px-2 py-0.5 rounded-full text-[10px] font-mono-num font-bold shrink-0',
                             typeof item.badge === 'number'
-                              ? 'bg-rose-100 text-brand-berry'
-                              : 'bg-status-warning text-ink'
+                              ? 'bg-status-info/10 text-status-info'
+                              : 'bg-status-warning/15 text-status-warning'
                           )}
                         >
                           {item.badge}
@@ -270,17 +270,17 @@ export const SidebarNav: React.FC = () => {
           setPhoneError(null);
           setIsProfileModalOpen(true);
         }}
-        className="p-3 border-t border-white/10 bg-black/20 text-xs shrink-0 cursor-pointer hover:bg-white/5 transition-colors overflow-hidden"
+        className="p-3 border-t border-border text-xs shrink-0 cursor-pointer hover:bg-rose-50 transition-colors overflow-hidden"
         title="Click to view and edit user profile & security credentials"
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-raspberry to-brand-berry text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-ink text-white font-bold flex items-center justify-center text-xs shrink-0">
               {getInitials(userName)}
             </div>
             <div className="min-w-0 flex-1 overflow-hidden">
-              <p className="font-bold text-white text-xs truncate leading-tight">{userName}</p>
-              <p className="text-[10px] text-rose-100 font-medium truncate leading-tight mt-0.5">{userEmail}</p>
+              <p className="font-bold text-ink text-xs truncate leading-tight">{userName}</p>
+              <p className="text-[10px] text-muted-foreground font-medium truncate leading-tight mt-0.5">{userEmail}</p>
             </div>
           </div>
           <Badge variant="brand" className="text-[9px] px-1.5 py-0.5 shrink-0 max-w-[80px] truncate">
@@ -290,11 +290,11 @@ export const SidebarNav: React.FC = () => {
       </div>
 
       {/* Sign out — outside the clickable profile card so it never opens the profile modal */}
-      <div className="px-3 pb-3 bg-black/20 shrink-0">
+      <div className="px-3 pb-3 shrink-0">
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 rounded-[10px] border border-white/15 px-3 py-2 text-xs font-bold text-rose-100 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 rounded-[10px] border border-border px-3 py-2 text-xs font-bold text-ink-2 hover:bg-rose-50 hover:text-ink transition-colors cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5 shrink-0" />
           Sign out
@@ -319,7 +319,7 @@ export const SidebarNav: React.FC = () => {
           {/* Profile Header Summary Card */}
           <div className="p-3 bg-rose-50 border border-border rounded-[12px] flex items-center justify-between gap-3 min-w-0 overflow-hidden">
             <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
-              <div className="w-10 h-10 rounded-full bg-brand-berry text-white font-bold flex items-center justify-center text-sm shrink-0 shadow-xs">
+              <div className="w-10 h-10 rounded-full bg-ink text-white font-bold flex items-center justify-center text-sm shrink-0">
                 {getInitials(editName)}
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
@@ -327,7 +327,7 @@ export const SidebarNav: React.FC = () => {
                 <p className="text-xs text-status-neutral truncate">{userDesignation}</p>
               </div>
             </div>
-            <span className="text-xs font-bold bg-brand-berry text-white px-2.5 py-1 rounded-full shrink-0 truncate max-w-[100px]">
+            <span className="text-xs font-bold bg-rose-200 text-ink px-2.5 py-1 rounded-full shrink-0 truncate max-w-[100px]">
               {role}
             </span>
           </div>
@@ -342,7 +342,7 @@ export const SidebarNav: React.FC = () => {
                   value={editName}
                   maxLength={60}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full max-w-full box-border min-w-0 pl-9 pr-3 py-2 bg-white border border-border rounded-[12px] focus:outline-none focus:border-brand-raspberry text-ink font-semibold text-xs overflow-hidden truncate"
+                  className="w-full max-w-full box-border min-w-0 pl-9 pr-3 py-2 bg-white border border-border rounded-[12px] focus:outline-none focus:border-rose-400 text-ink font-semibold text-xs overflow-hidden truncate"
                   required
                 />
               </div>
@@ -357,7 +357,7 @@ export const SidebarNav: React.FC = () => {
                   value={editEmail}
                   maxLength={80}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full max-w-full box-border min-w-0 pl-9 pr-3 py-2 bg-white border border-border rounded-[12px] focus:outline-none focus:border-brand-raspberry text-ink font-semibold text-xs overflow-hidden truncate"
+                  className="w-full max-w-full box-border min-w-0 pl-9 pr-3 py-2 bg-white border border-border rounded-[12px] focus:outline-none focus:border-rose-400 text-ink font-semibold text-xs overflow-hidden truncate"
                   required
                 />
               </div>
@@ -384,7 +384,7 @@ export const SidebarNav: React.FC = () => {
                     'w-full max-w-full box-border min-w-0 pl-9 pr-3 py-2 bg-white border rounded-[12px] focus:outline-none font-semibold text-xs overflow-hidden truncate transition-colors',
                     phoneError
                       ? 'border-status-danger text-status-danger focus:border-status-danger bg-status-danger/5'
-                      : 'border-border focus:border-brand-raspberry text-ink'
+                      : 'border-border focus:border-rose-400 text-ink'
                   )}
                 />
               </div>
@@ -399,7 +399,7 @@ export const SidebarNav: React.FC = () => {
             <div className="p-3 bg-rose-50/70 border border-border rounded-[12px] space-y-2 overflow-hidden">
               <div className="flex items-center justify-between text-xs gap-2 min-w-0">
                 <span className="font-bold text-ink flex items-center gap-1.5 min-w-0 truncate">
-                  <Key className="w-3.5 h-3.5 text-brand-berry shrink-0" /> Security Status
+                  <Key className="w-3.5 h-3.5 text-ink-2 shrink-0" /> Security Status
                 </span>
                 <span className="font-bold text-status-success bg-status-success/10 px-2 py-0.5 rounded-full shrink-0 text-[10px]">
                   MFA 2FA Active

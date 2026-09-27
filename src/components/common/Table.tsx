@@ -75,7 +75,7 @@ export function Table<T>({
                       key={cIdx}
                       className={clsx(
                         'px-4 py-3 text-ink text-xs md:text-sm',
-                        col.isMono && 'font-mono-num font-medium text-brand-berry',
+                        col.isMono && 'font-mono-num font-semibold text-ink',
                         col.className
                       )}
                     >

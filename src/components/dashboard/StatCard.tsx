@@ -22,7 +22,7 @@ export function StatCard({ label, value, icon, className }: StatCardProps) {
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
           {icon}
         </div>
       </div>
