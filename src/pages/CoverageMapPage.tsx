@@ -2,7 +2,17 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/maplibre';
 import type { LayerProps } from 'react-map-gl/maplibre';
+import { setWorkerUrl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// maplibre-gl resolves its worker chunk at runtime as `./maplibre-gl-worker.mjs`
+// relative to its own bundle URL (see maplibre-gl/dist/maplibre-gl.mjs#defaultWorkerUrl) —
+// a dynamic string Vite's static import analysis can't see, so the file never made it
+// into the build output and Vercel's SPA rewrite served index.html for it instead
+// (silently breaking every map on this page). Importing it with `?url` makes Vite treat
+// it as a real asset and emit it under /assets/, and setWorkerUrl points maplibre at it.
+// eslint-disable-next-line import/no-unresolved
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+setWorkerUrl(maplibreWorkerUrl);
 import { Users, MapPinned, ShieldCheck, RefreshCw, Bike, MapPin as MapPinIcon } from 'lucide-react';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Card } from '../components/common/Card';
