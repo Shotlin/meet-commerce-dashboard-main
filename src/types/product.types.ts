@@ -43,6 +43,10 @@ export interface AdminProduct {
   cut_type: string | null
   piece_count: string | null
   skin_type: SkinType | null
+  /** Customer-selectable "Choose Your Cut" options (e.g. Tikka, Curry Cut, Boneless) — empty/absent hides the picker on mobile. */
+  cut_options?: string[] | null
+  /** Customer-selectable size/piece options (e.g. Small, Medium, Large) — empty/absent hides the picker on mobile. */
+  piece_options?: string[] | null
   ingredients?: string | null
   allergen_info?: string | null
   shelf_life?: string | null
@@ -106,6 +110,8 @@ export interface ProductPayload {
   cutType?: string
   pieceCount?: string
   skinType?: SkinType
+  cutOptions?: string[]
+  pieceOptions?: string[]
 }
 
 export interface ProductFilters {

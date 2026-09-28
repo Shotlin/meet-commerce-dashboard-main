@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { ProductImageGalleryUploader } from "@/components/products/ProductImageGalleryUploader"
+import { TagInput } from "@/components/common/TagInput"
 import { ProductFamilySelector } from "@/components/products/ProductFamilySelector"
 import { useAdminCategories } from "@/hooks/useCategoriesAdmin"
 import { useCreateProduct, useUpdateProduct } from "@/hooks/useProductsAdmin"
@@ -80,6 +81,8 @@ function buildInitialForm(
       cutType: "",
       pieceCount: "",
       skinType: "NONE",
+      cutOptions: [],
+      pieceOptions: [],
       foodType: "NON_VEG",
       originTag: "NONE",
       customBadges: [],
@@ -122,6 +125,8 @@ function buildInitialForm(
     cutType: product.cut_type ?? "",
     pieceCount: product.piece_count ?? "",
     skinType: (product.skin_type as SkinType) ?? "NONE",
+    cutOptions: product.cut_options ?? [],
+    pieceOptions: product.piece_options ?? [],
     foodType: (product.food_type as FoodType) ?? "NON_VEG",
     originTag: (product.origin_tag as OriginTag) ?? "NONE",
     customBadges: product.custom_badges ?? [],
@@ -155,16 +160,13 @@ export function ProductFormDialog({
   const [form, setForm] = useState<FormState>(() =>
     buildInitialForm(product, initialFamilyId, initialOptionLabel)
   )
-  const [badgesInput, setBadgesInput] = useState("")
   const { data: categories } = useAdminCategories()
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
 
   useEffect(() => {
     if (open) {
-      const initial = buildInitialForm(product, initialFamilyId, initialOptionLabel)
-      setForm(initial)
-      setBadgesInput((initial.customBadges ?? []).join(", "))
+      setForm(buildInitialForm(product, initialFamilyId, initialOptionLabel))
     }
   }, [open, product, initialFamilyId, initialOptionLabel])
 
@@ -177,13 +179,7 @@ export function ProductFormDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const { isActive, ...rest } = form
-    const payload: ProductPayload = {
-      ...rest,
-      customBadges: badgesInput
-        .split(",")
-        .map((b) => b.trim())
-        .filter(Boolean),
-    }
+    const payload: ProductPayload = { ...rest }
     // The create endpoint's thumbnailUrl field isn't nullable (a brand-new
     // product with no images yet just omits it); only the update endpoint
     // accepts `null` to explicitly clear a previously-set thumbnail.
@@ -395,6 +391,20 @@ export function ProductFormDialog({
                   </Select>
                 </div>
               </div>
+              <div className="space-y-1.5">
+                <Label>Choose Your Cut — Customer Options</Label>
+                <TagInput
+                  value={form.cutOptions ?? []}
+                  onChange={(cutOptions) => patch({ cutOptions })}
+                  suggestions={CUT_TYPE_SUGGESTIONS}
+                  placeholder="Type a cut, e.g. Tikka, then press Enter…"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Shown to customers as a "Choose Your Cut" picker before they add this product to
+                  cart (e.g. Tikka, Curry Cut, Small Cubes, Fillet). Add as many as you like — leave
+                  empty to hide this picker entirely for this product.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Piece Count</Label>
@@ -412,6 +422,18 @@ export function ProductFormDialog({
                     placeholder="e.g. 500 g"
                   />
                 </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Available Pieces — Customer Options</Label>
+                <TagInput
+                  value={form.pieceOptions ?? []}
+                  onChange={(pieceOptions) => patch({ pieceOptions })}
+                  placeholder="Type a size, e.g. Small, then press Enter…"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Shown to customers as selectable sizes (e.g. Small, Medium, Large) — not limited to
+                  3, add exactly the options that fit this product. Leave empty to hide this picker.
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -447,11 +469,11 @@ export function ProductFormDialog({
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Badges (comma-separated)</Label>
-                <Input
-                  value={badgesInput}
-                  onChange={(e) => setBadgesInput(e.target.value)}
-                  placeholder="Bestseller, Antibiotic-Free"
+                <Label>Badges</Label>
+                <TagInput
+                  value={form.customBadges ?? []}
+                  onChange={(customBadges) => patch({ customBadges })}
+                  placeholder="Type a badge, e.g. Bestseller, then press Enter…"
                 />
               </div>
             </TabsContent>
