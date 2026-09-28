@@ -4,6 +4,8 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { RiderManagementDrawer } from '../components/riders/RiderManagementDrawer';
+import { AddRiderToShopPanel } from '../components/riders/AddRiderToShopPanel';
+import { useAuth } from '../context/AuthContext';
 import {
   riderMgmtService,
   type AdminRider,
@@ -18,6 +20,7 @@ type StatusFilter = '' | 'online' | 'offline' | 'pending' | 'suspended';
  * search/status filters, and a per-rider management drawer.
  */
 export const RidersPage: React.FC = () => {
+  const { myShopId, myShopName } = useAuth();
   const [riders, setRiders] = useState<AdminRider[]>([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
@@ -60,7 +63,11 @@ export const RidersPage: React.FC = () => {
     <div>
       <PageHeader
         title="Rider Management"
-        subtitle="Roster, eligibility, COD collections and settlement controls."
+        subtitle={
+          myShopId
+            ? `${myShopName || 'Your shop'}’s roster, eligibility, COD collections and settlement controls.`
+            : 'Roster, eligibility, COD collections and settlement controls.'
+        }
         badge={
           <Badge variant="neutral" icon={<Users className="w-3.5 h-3.5" />}>
             {total} Riders
@@ -77,6 +84,15 @@ export const RidersPage: React.FC = () => {
           </Button>
         }
       />
+
+      {/* Shop-scoped sessions get a direct "find + assign" flow — see
+          AddRiderToShopPanel's own doc comment for why this isn't shown
+          to HQ (who already have the full roster + drawer for this). */}
+      {myShopId && (
+        <div className="mb-4">
+          <AddRiderToShopPanel shopName={myShopName} onAssigned={() => fetchRiders(true)} />
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">

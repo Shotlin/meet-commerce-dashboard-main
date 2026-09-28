@@ -58,6 +58,40 @@ export interface RiderSettlement {
   created_at: string;
 }
 
+/** One day's earnings, from `GET /admin/riders/:id/earnings`. */
+export interface RiderDailyEarning {
+  date: string;
+  total: number;
+  deliveries: number;
+}
+
+/** Earnings summary + up-to-30-day daily breakdown for a rider. */
+export interface RiderEarnings {
+  summary: {
+    total: number;
+    delivery_count: number;
+    avg_per_delivery: number;
+  };
+  daily: RiderDailyEarning[];
+}
+
+/** Result of the shop-side "add a rider" phone search. */
+export interface RiderSearchResult {
+  id: string;
+  name: string | null;
+  phone: string;
+  avatar_url: string | null;
+  is_active: boolean;
+  vehicle_type: string | null;
+  vehicle_number: string | null;
+  is_approved: boolean;
+  is_online: boolean;
+  /** true/false for a shop-scoped caller (already assigned to MY shop
+   * or not); null for an HQ (no-shop) search, where the question is
+   * meaningless. */
+  assigned_to_my_shop: boolean | null;
+}
+
 /** A KYC document the rider uploaded from the app (rider_documents). */
 export interface RiderDocument {
   id: string;
@@ -119,7 +153,53 @@ export const riderMgmtService = {
     return (res.success && Array.isArray(res.data)) ? res.data : [];
   },
 
-  /** Replaces the rider's active store set (idempotent PUT). */
+  /** Earnings summary + daily breakdown. Pass matching ISO dates
+   * (`YYYY-MM-DD`) for `startDate`/`endDate` to scope to "today"; omit
+   * both for all-time. */
+  async getEarnings(
+    riderId: string,
+    range?: { startDate?: string; endDate?: string },
+  ): Promise<RiderEarnings> {
+    const res = await apiClient.get<RiderEarnings>(
+      `/api/v1/admin/riders/${riderId}/earnings`,
+      range as Record<string, any> | undefined,
+    );
+    if (res.success && res.data) return res.data;
+    return { summary: { total: 0, delivery_count: 0, avg_per_delivery: 0 }, daily: [] };
+  },
+
+  /**
+   * The "add a rider" lookup — bounded to one exact phone number, never
+   * a roster browse. Returns null when nothing matches (a 404, not an
+   * error — the caller shows "no rider found", not a toast).
+   */
+  async searchByPhone(phone: string): Promise<RiderSearchResult | null> {
+    const res = await apiClient.get<RiderSearchResult>(
+      '/api/v1/admin/riders/search-by-phone',
+      { phone },
+    );
+    return (res.success && res.data) ? res.data : null;
+  },
+
+  /**
+   * Assigns/unassigns a rider to/from the CALLER'S OWN shop only — the
+   * shop-scoped counterpart to `replaceStoreAssignments`, which a
+   * shop-staff session must never call (it can replace a DIFFERENT
+   * shop's assignment). No `shopId` parameter here on purpose: the
+   * backend resolves it from the caller's own JWT/X-Shop-Id, never a
+   * client-supplied value.
+   */
+  async setMyShopAssignment(riderId: string, active: boolean): Promise<RiderStoreAssignment> {
+    const res = await apiClient.put<RiderStoreAssignment>(
+      `/api/v1/admin/riders/${riderId}/my-shop-assignment`,
+      { active },
+    );
+    if (res.success && res.data) return res.data;
+    throw new Error(res.message || 'Failed to update the rider’s shop assignment');
+  },
+
+  /** Replaces the rider's active store set (idempotent PUT). HQ only —
+   * a shop-scoped caller must use `setMyShopAssignment` instead. */
   async replaceStoreAssignments(riderId: string, shopIds: string[]): Promise<void> {
     await apiClient.put(`/api/v1/admin/riders/${riderId}/assignments`, {
       shopIds,

@@ -29,6 +29,24 @@ export interface SessionUser {
   email: string;
   phone: string;
   designation: string;
+  /**
+   * Set only for a real shop-staff session (from the login/`/me`
+   * response's `shops[0]` / `active_shop` — never the URL, never a
+   * client-chosen value). `null` for an HQ session. This is what tells
+   * the UI "you're scoped to one shop" — the backend itself never needs
+   * this from the client at all for a shop-staff JWT (it reads the
+   * shop id directly off the token), this is purely for rendering the
+   * right UI variant (e.g. RiderManagementDrawer's single-shop toggle
+   * instead of HQ's multi-shop editor).
+   *
+   * Optional (not just nullable) so every pre-existing `SessionUser`
+   * fixture across the test suite — none of which cared about shop
+   * scope — keeps type-checking without being touched; real
+   * construction (`toSessionUser`) always sets all three explicitly.
+   */
+  shopId?: string | null;
+  shopRole?: string | null;
+  shopName?: string | null;
 }
 
 export interface SessionSnapshot {
@@ -70,6 +88,8 @@ const VALID_ROLES: readonly UserRole[] = [
   'Fulfilment Agent',
   'Finance Lead',
   'Governance Auditor',
+  'Shop Manager',
+  'Shop Staff',
 ];
 
 export const isUserRole = (value: unknown): value is UserRole =>

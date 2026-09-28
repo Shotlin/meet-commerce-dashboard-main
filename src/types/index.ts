@@ -1,10 +1,17 @@
-export type UserRole = 
-  | 'HQ Admin' 
-  | 'Warehouse Manager' 
-  | 'Vendor' 
-  | 'Fulfilment Agent' 
-  | 'Finance Lead' 
-  | 'Governance Auditor';
+export type UserRole =
+  | 'HQ Admin'
+  | 'Warehouse Manager'
+  | 'Vendor'
+  | 'Fulfilment Agent'
+  | 'Finance Lead'
+  | 'Governance Auditor'
+  // Real shop-staff sessions (SHOP_ADMIN/SHOP_MANAGER, and SHOP_STAFF/
+  // SHOP_VIEWER respectively) — added 2026-09-28 alongside shop-scoped
+  // Rider Management. Before this, any shop-staff login was mislabeled
+  // 'HQ Admin' on the frontend (the backend still correctly enforced real
+  // permissions per request; this only fixes what nav/routes render).
+  | 'Shop Manager'
+  | 'Shop Staff';
 
 export type ScopeLocation = 
   | 'All Hubs (HQ Global)' 

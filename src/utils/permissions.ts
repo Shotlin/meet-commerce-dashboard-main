@@ -21,6 +21,25 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'Governance Auditor': [
     '/', '/governance', '/analytics', '/recalls', '/orders', '/inventory'
   ],
+  // Real shop-staff sessions (SHOP_ADMIN/SHOP_MANAGER on the backend —
+  // both map to this one cosmetic label, since real authorization is
+  // still enforced per-request off the actual shopRole JWT claim, not
+  // this frontend label). Deliberately scoped to ONLY what this session
+  // actually verified as shop-scope-safe end to end (riders.routes.js's
+  // own shop-scoping, this same task) — other pages (orders, shops,
+  // etc.) were not audited for shop-staff safety here and are left off
+  // this list rather than guessed at; widen it in a future task once
+  // each page is actually checked, the same way this one was.
+  'Shop Manager': [
+    '/', '/riders'
+  ],
+  // SHOP_STAFF/SHOP_VIEWER — no rider-management access at all (that
+  // permission tier starts at SHOP_ADMIN/SHOP_MANAGER; see
+  // SHOP_ROLE_DEFAULT_PERMISSIONS on the backend), and nothing else was
+  // audited for this label either.
+  'Shop Staff': [
+    '/'
+  ],
 };
 
 export const ROLE_LANDING_PAGES: Record<UserRole, string> = {
@@ -30,6 +49,8 @@ export const ROLE_LANDING_PAGES: Record<UserRole, string> = {
   'Fulfilment Agent': '/delivery',
   'Finance Lead': '/finance',
   'Governance Auditor': '/governance',
+  'Shop Manager': '/riders',
+  'Shop Staff': '/',
 };
 
 export function isRouteAllowed(routePath: string, role: UserRole): boolean {

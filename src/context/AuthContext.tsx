@@ -22,6 +22,12 @@ interface AuthContextType {
   userEmail: string;
   userPhone: string;
   userDesignation: string;
+  /** Set only for a real shop-staff session — see `SessionUser`'s own doc
+   * comment. `null` for HQ (including one currently "viewing" a shop via
+   * the X-Shop-Id switcher, which is a ScopeContext concern, not this). */
+  myShopId: string | null;
+  myShopRole: string | null;
+  myShopName: string | null;
   isMfaActive: boolean;
   login: (email: string, pass: string) => Promise<LoginResult>;
   logout: () => void;
@@ -55,6 +61,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userEmail: snapshot.user?.email ?? '',
       userPhone: snapshot.user?.phone ?? '',
       userDesignation: snapshot.user?.designation ?? '',
+      myShopId: snapshot.user?.shopId ?? null,
+      myShopRole: snapshot.user?.shopRole ?? null,
+      myShopName: snapshot.user?.shopName ?? null,
       isMfaActive: true,
       login: loginWithPassword,
       logout,

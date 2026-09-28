@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
+import { useAuth } from '../../context/AuthContext';
+import { shopManagementService, type Shop } from '../../services/shopManagementService';
 import {
   riderMgmtService,
   type AdminRider,
   type RiderCollection,
   type RiderDocument,
+  type RiderEarnings,
   type RiderSettlement,
   type RiderStoreAssignment,
 } from '../../services/riderMgmtService';
+
+const todayIso = (): string => new Date().toISOString().slice(0, 10);
 
 const DOCUMENT_LABELS: Record<string, string> = {
   aadhaar: 'Aadhaar (front)',
@@ -35,21 +40,37 @@ interface Props {
  * Phases 6 and 14 — no mocks.
  */
 export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
+  // A shop-scoped session (real SHOP_ADMIN/SHOP_MANAGER login — see
+  // AuthContext/sessionManager's 2026-09-28 shop-scope fix) gets the
+  // single-shop toggle below instead of HQ's multi-shop editor; the
+  // backend enforces this exact same split server-side regardless of
+  // what this renders (a shop-staff JWT can never reach the full-replace
+  // endpoint at all).
+  const { myShopId, myShopName } = useAuth();
+
   const [assignments, setAssignments] = useState<RiderStoreAssignment[]>([]);
   const [collections, setCollections] = useState<RiderCollection[]>([]);
   const [settlements, setSettlements] = useState<RiderSettlement[]>([]);
   const [documents, setDocuments] = useState<RiderDocument[]>([]);
+  const [earnings, setEarnings] = useState<RiderEarnings | null>(null);
   const [reviewingDoc, setReviewingDoc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Assignment editor state: shop ids the toggles represent + the set
+  // HQ assignment editor state: shop ids the toggles represent + the set
   // currently marked active (dirty → Save bar appears).
   const [assignmentChoices, setAssignmentChoices] = useState<
     { shopId: string; shopName: string; active: boolean }[]
   >([]);
   const [assignmentsDirty, setAssignmentsDirty] = useState(false);
   const [savingAssignments, setSavingAssignments] = useState(false);
+  // Shop picker for HQ's "Add shop" control — replaces the old raw-UUID
+  // prompt() with a real dropdown of actual shop names.
+  const [allShops, setAllShops] = useState<Shop[]>([]);
+  const [shopToAdd, setShopToAdd] = useState('');
+
+  // Shop-scoped "my shop" toggle state.
+  const [savingMyShop, setSavingMyShop] = useState(false);
 
   // Settlement form state.
   const [pendingCash, setPendingCash] = useState(0);
@@ -64,11 +85,12 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
     setLoading(true);
     setError(null);
     try {
-      const [a, c, s, d] = await Promise.all([
+      const [a, c, s, d, e] = await Promise.all([
         riderMgmtService.getStoreAssignments(rider.id),
         riderMgmtService.getCollections(rider.id),
         riderMgmtService.getSettlements(rider.id),
         riderMgmtService.getDocuments(rider.id),
+        riderMgmtService.getEarnings(rider.id),
       ]);
       setDocuments(d);
       setAssignments(a);
@@ -81,17 +103,29 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
       );
       setCollections(c);
       setSettlements(s);
+      setEarnings(e);
       const cash = c
         .filter((row) => row.status === 'COLLECTED')
         .reduce((sum, row) => sum + (Number(row.cash_amount) || 0), 0);
       setPendingCash(cash);
       setAssignmentsDirty(false);
+      // HQ only: the shop picker needs the real roster. A shop-scoped
+      // session has nothing to pick from (it can only toggle its own
+      // shop) so this never fires for them.
+      if (!myShopId) {
+        try {
+          setAllShops(await shopManagementService.getShops());
+        } catch {
+          // Non-fatal — the picker just shows no options; every other
+          // section of the drawer still works.
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load rider detail');
     } finally {
       setLoading(false);
     }
-  }, [rider.id]);
+  }, [rider.id, myShopId]);
 
   useEffect(() => {
     load();
@@ -107,12 +141,15 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
   };
 
   const addAssignmentShop = () => {
-    const input = window.prompt('Shop UUID to assign this rider to:');
-    if (!input) return;
-    const shopId = input.trim();
+    const shopId = shopToAdd;
     if (!shopId || assignmentChoices.some((c) => c.shopId === shopId)) return;
-    setAssignmentChoices((prev) => [...prev, { shopId, shopName: shopId, active: true }]);
+    const shop = allShops.find((s) => s.id === shopId);
+    setAssignmentChoices((prev) => [
+      ...prev,
+      { shopId, shopName: shop?.name || shopId, active: true },
+    ]);
     setAssignmentsDirty(true);
+    setShopToAdd('');
   };
 
   const saveAssignments = async () => {
@@ -128,6 +165,25 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
       setError(err.message || 'Failed to save assignments');
     } finally {
       setSavingAssignments(false);
+    }
+  };
+
+  // Shop-scoped counterpart to the HQ editor above — touches only the
+  // caller's own shop (the backend never accepts a client-supplied shop
+  // id for this call at all, see riderMgmtService.setMyShopAssignment).
+  const myShopAssignment = myShopId
+    ? assignments.find((a) => a.shop_id === myShopId && a.is_active)
+    : undefined;
+  const toggleMyShopAssignment = async () => {
+    setSavingMyShop(true);
+    setError(null);
+    try {
+      await riderMgmtService.setMyShopAssignment(rider.id, !myShopAssignment);
+      await load();
+    } catch (err: any) {
+      setError(err.message || 'Failed to update assignment');
+    } finally {
+      setSavingMyShop(false);
     }
   };
 
@@ -354,7 +410,9 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
                 )}
               </section>
 
-              {/* Store assignments */}
+              {/* Store assignments — shop-scoped sessions get a single
+                  toggle for their own shop; HQ gets the full multi-shop
+                  editor (a real dropdown now, not a raw-UUID prompt). */}
               <section className="space-y-2">
                 <h4 className="text-[11px] font-bold text-status-neutral tracking-wide">
                   STORE ELIGIBILITY
@@ -363,46 +421,133 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
                   Riders with active assignments receive offers only for these stores
                   (when RIDER_STORE_SCOPING is enabled on the backend).
                 </p>
-                {assignmentChoices.length === 0 ? (
-                  <p className="text-xs text-status-neutral">
-                    No assignments — the rider is store-eligible nowhere.
-                  </p>
+
+                {myShopId ? (
+                  <div className="flex items-center gap-3 p-2.5 border border-border rounded-[12px]">
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-ink">{myShopName || 'Your shop'}</p>
+                      <p className="text-[11px] text-status-neutral">
+                        {myShopAssignment ? 'This rider is assigned to your shop.' : 'Not assigned to your shop yet.'}
+                      </p>
+                    </div>
+                    <Button
+                      variant={myShopAssignment ? 'outline' : 'primary'}
+                      size="sm"
+                      disabled={savingMyShop}
+                      onClick={toggleMyShopAssignment}
+                    >
+                      {savingMyShop
+                        ? 'Saving…'
+                        : myShopAssignment
+                          ? 'Unassign from my shop'
+                          : 'Assign to my shop'}
+                    </Button>
+                  </div>
                 ) : (
-                  <div className="space-y-1.5">
-                    {assignmentChoices.map((choice) => (
-                      <label
-                        key={choice.shopId}
-                        className="flex items-center gap-2 p-2.5 border border-border rounded-[12px] cursor-pointer"
+                  <>
+                    {assignmentChoices.length === 0 ? (
+                      <p className="text-xs text-status-neutral">
+                        No assignments — the rider is store-eligible nowhere.
+                      </p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {assignmentChoices.map((choice) => (
+                          <label
+                            key={choice.shopId}
+                            className="flex items-center gap-2 p-2.5 border border-border rounded-[12px] cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={choice.active}
+                              onChange={() => toggleAssignment(choice.shopId)}
+                              className="accent-ink"
+                            />
+                            <span className="text-xs text-ink">{choice.shopName}</span>
+                            <span className="ml-auto text-[10px] font-mono-num text-status-neutral">
+                              {choice.shopId.slice(0, 8)}…
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <select
+                        value={shopToAdd}
+                        onChange={(e) => setShopToAdd(e.target.value)}
+                        className="flex-1 p-2 text-xs border border-border rounded-[12px] bg-white"
                       >
-                        <input
-                          type="checkbox"
-                          checked={choice.active}
-                          onChange={() => toggleAssignment(choice.shopId)}
-                          className="accent-ink"
-                        />
-                        <span className="text-xs text-ink">{choice.shopName}</span>
-                        <span className="ml-auto text-[10px] font-mono-num text-status-neutral">
-                          {choice.shopId.slice(0, 8)}…
+                        <option value="">Add a shop…</option>
+                        {allShops
+                          .filter((s) => !assignmentChoices.some((c) => c.shopId === s.id))
+                          .map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                      </select>
+                      <Button variant="outline" size="sm" disabled={!shopToAdd} onClick={addAssignmentShop}>
+                        Add
+                      </Button>
+                      {assignmentsDirty && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={savingAssignments}
+                          onClick={saveAssignments}
+                        >
+                          {savingAssignments ? 'Saving…' : 'Save assignments'}
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </section>
+
+              {/* Earnings — so a shop can settle up with the rider */}
+              <section className="space-y-2">
+                <h4 className="text-[11px] font-bold text-status-neutral tracking-wide">
+                  EARNINGS
+                </h4>
+                {(() => {
+                  const today = earnings?.daily.find((d) => d.date === todayIso());
+                  return (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2.5 border border-border rounded-[12px]">
+                        <p className="text-[10px] text-status-neutral">Today</p>
+                        <p className="text-sm font-bold text-ink font-mono-num">
+                          ₹{(today?.total ?? 0).toFixed(2)}
+                        </p>
+                        <p className="text-[10px] text-status-neutral">
+                          {today?.deliveries ?? 0} deliver{(today?.deliveries ?? 0) === 1 ? 'y' : 'ies'}
+                        </p>
+                      </div>
+                      <div className="p-2.5 border border-border rounded-[12px]">
+                        <p className="text-[10px] text-status-neutral">All-time</p>
+                        <p className="text-sm font-bold text-ink font-mono-num">
+                          ₹{(earnings?.summary.total ?? 0).toFixed(2)}
+                        </p>
+                        <p className="text-[10px] text-status-neutral">
+                          {earnings?.summary.delivery_count ?? 0} deliveries
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+                {earnings && earnings.daily.length > 0 && (
+                  <div className="space-y-1">
+                    {earnings.daily.slice(0, 7).map((d) => (
+                      <div
+                        key={d.date}
+                        className="flex items-center justify-between px-2.5 py-1.5 text-[11px] text-status-neutral"
+                      >
+                        <span>{new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                        <span className="font-mono-num text-ink">
+                          ₹{Number(d.total).toFixed(2)} · {d.deliveries} deliver{d.deliveries === 1 ? 'y' : 'ies'}
                         </span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={addAssignmentShop}>
-                    Add shop id
-                  </Button>
-                  {assignmentsDirty && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      disabled={savingAssignments}
-                      onClick={saveAssignments}
-                    >
-                      {savingAssignments ? 'Saving…' : 'Save assignments'}
-                    </Button>
-                  )}
-                </div>
               </section>
 
               {/* Collections + settlements */}
