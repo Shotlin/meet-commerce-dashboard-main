@@ -20,6 +20,24 @@ export async function resolveCustomerActivityUser(
   }
 }
 
+/**
+ * Real-time search-as-you-type suggestions — the counterpart to
+ * `resolveCustomerActivityUser` above (which only ever matches a COMPLETE
+ * user id or a COMPLETE 10-digit phone number). Returns up to a handful of
+ * candidate users matching a partial phone number, a name, or a phone
+ * number with a +91/leading-zero prefix.
+ */
+export async function searchCustomerActivityUsers(
+  query: string
+): Promise<ResolvedActivityUser[]> {
+  try {
+    const res = await apiClient.get<ResolvedActivityUser[]>('/api/v1/admin/customer-activity/search-users', { query });
+    return res.success && Array.isArray(res.data) ? res.data : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Paginated, filterable activity timeline for one customer. */
 export async function getCustomerActivityTimeline(
   userId: string,

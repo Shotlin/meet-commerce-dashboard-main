@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   History,
   Search,
   Filter,
   CheckCircle2,
   AlertCircle,
+  Loader2,
+  X,
   ShoppingCart,
   RefreshCcw,
   Wallet,
@@ -40,7 +42,7 @@ import {
 import { PageHeader } from "@/components/shared/PageHeader"
 import { DateRangePicker } from "@/components/shared/DateRangePicker"
 import {
-  useResolveCustomerActivityUser,
+  useSearchCustomerActivityUsers,
   useCustomerActivityTimeline,
 } from "@/hooks/useCustomerActivity"
 import { useDebounce } from "@/hooks/useDebounce"
@@ -48,6 +50,7 @@ import { formatDateTime, formatRelativeTime, formatINR } from "@/lib/utils"
 import type {
   CustomerActivityEvent,
   CustomerActivityEventType,
+  ResolvedActivityUser,
 } from "@/types/customer-activity.types"
 
 const EVENT_TYPES: { value: CustomerActivityEventType | "all"; label: string }[] = [
@@ -101,15 +104,35 @@ const EVENT_LABELS: Record<CustomerActivityEventType, string> = {
 
 export default function CustomerActivityPage() {
   const [search, setSearch] = useState("")
+  const [selectedUser, setSelectedUser] = useState<ResolvedActivityUser | null>(null)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [eventType, setEventType] = useState<CustomerActivityEventType | "all">("all")
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({})
   const [page, setPage] = useState(1)
 
-  const debouncedSearch = useDebounce(search, 400)
-  const { data: user, isFetching: userLookupPending } =
-    useResolveCustomerActivityUser(debouncedSearch)
+  const searchBoxRef = useRef<HTMLDivElement>(null)
 
-  const { data, isLoading } = useCustomerActivityTimeline(user?.id ?? null, {
+  const debouncedSearch = useDebounce(search, 300)
+  const { data: suggestions = [], isFetching: suggestionsLoading } =
+    useSearchCustomerActivityUsers(debouncedSearch)
+
+  const showDropdown = isDropdownOpen && debouncedSearch.trim().length >= 2
+
+  // Close the suggestions dropdown on a click outside the search box —
+  // items themselves are selected via onMouseDown (which fires before
+  // blur), so this only ever needs to handle a genuine click elsewhere.
+  useEffect(() => {
+    if (!showDropdown) return
+    function handleClickOutside(e: MouseEvent) {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [showDropdown])
+
+  const { data, isLoading } = useCustomerActivityTimeline(selectedUser?.id ?? null, {
     page,
     limit: 20,
     ...(eventType !== "all" && { eventType }),
@@ -121,6 +144,20 @@ export default function CustomerActivityPage() {
   const pagination = data?.pagination
   const totalPages = pagination?.totalPages ?? 1
 
+  function handleSelectUser(u: ResolvedActivityUser) {
+    setSelectedUser(u)
+    setSearch(u.name ? `${u.name} · ${u.phone}` : u.phone)
+    setIsDropdownOpen(false)
+    setPage(1)
+  }
+
+  function handleClearSearch() {
+    setSearch("")
+    setSelectedUser(null)
+    setIsDropdownOpen(false)
+    setPage(1)
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -128,24 +165,84 @@ export default function CustomerActivityPage() {
         subtitle="Look up a customer's full activity history — orders, wallet, cart, and more — to see what happened and why"
       />
 
-      <Card className="p-4 space-y-2">
-        <div className="relative max-w-md">
+      <Card className="p-4 space-y-2 overflow-visible">
+        <div className="relative max-w-md" ref={searchBoxRef}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            aria-label="User ID or phone number"
-            placeholder="Enter User ID or phone number..."
-            className="pl-9 font-mono text-xs"
+            aria-label="Search by name, phone number, or user ID"
+            placeholder="Search by name, phone number, or user ID..."
+            className="pl-9 pr-8 text-sm"
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value)
+              const value = e.target.value
+              setSearch(value)
+              setIsDropdownOpen(true)
+              if (selectedUser) setSelectedUser(null)
               setPage(1)
             }}
+            onFocus={() => setIsDropdownOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsDropdownOpen(false)
+              else if (e.key === "Enter" && suggestions[0]) handleSelectUser(suggestions[0])
+            }}
           />
+          {search && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleClearSearch}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+
+          {showDropdown && (
+            <div className="absolute z-20 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md max-h-72 overflow-y-auto">
+              {suggestionsLoading && suggestions.length === 0 ? (
+                <div className="p-3 text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching...
+                </div>
+              ) : suggestions.length === 0 ? (
+                <div className="p-3 text-xs text-muted-foreground flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5" /> No matching customers found
+                </div>
+              ) : (
+                <ul className="py-1">
+                  {suggestions.map((u) => (
+                    <li key={u.id}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => handleSelectUser(u)}
+                        className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
+                      >
+                        <p className="text-sm font-medium text-ink">{u.name || "Unnamed customer"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {u.phone}
+                          {u.role ? ` · ${u.role}` : ""} · Last seen{" "}
+                          {u.last_active_at ? formatRelativeTime(u.last_active_at) : "never"}
+                        </p>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
-        <UserLookupCaption query={debouncedSearch} user={user} isFetching={userLookupPending} />
+
+        {selectedUser && (
+          <p className="text-xs text-green-600 flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+            {selectedUser.name || "Unnamed customer"} · {selectedUser.phone} · Last seen{" "}
+            {selectedUser.last_active_at ? formatRelativeTime(selectedUser.last_active_at) : "never"}
+          </p>
+        )}
       </Card>
 
-      {!user ? (
+      {!selectedUser ? (
         <Card className="p-12 text-center">
           <History className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-sm text-muted-foreground">
@@ -285,39 +382,6 @@ export default function CustomerActivityPage() {
         </>
       )}
     </div>
-  )
-}
-
-function UserLookupCaption({
-  query,
-  user,
-  isFetching,
-}: {
-  query: string
-  user: { name: string | null; phone: string; last_active_at: string | null } | null | undefined
-  isFetching: boolean
-}) {
-  if (query.trim().length < 3) return null
-
-  if (isFetching) {
-    return <p className="text-xs text-muted-foreground">Looking up user...</p>
-  }
-
-  if (user) {
-    return (
-      <p className="text-xs text-green-600 flex items-center gap-1">
-        <CheckCircle2 className="h-3.5 w-3.5" />
-        {user.name || "Unnamed customer"} · {user.phone} · Last seen{" "}
-        {user.last_active_at ? formatRelativeTime(user.last_active_at) : "never"}
-      </p>
-    )
-  }
-
-  return (
-    <p className="text-xs text-muted-foreground flex items-center gap-1">
-      <AlertCircle className="h-3.5 w-3.5" />
-      No user found for this ID or phone number
-    </p>
   )
 }
 

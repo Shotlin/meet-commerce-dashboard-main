@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import {
   resolveCustomerActivityUser,
+  searchCustomerActivityUsers,
   getCustomerActivityTimeline,
 } from '../services/customer-activity.service';
 import type { CustomerActivityFilters } from '../types/customer-activity.types';
@@ -13,6 +14,18 @@ export function useResolveCustomerActivityUser(query: string) {
     enabled: query.trim().length >= 3,
     staleTime: 30_000,
     retry: false,
+  });
+}
+
+/** Real-time search-as-you-type suggestions shown in the lookup dropdown. */
+export function useSearchCustomerActivityUsers(query: string) {
+  return useQuery({
+    queryKey: ['customer-activity', 'search-users', query] as const,
+    queryFn: () => searchCustomerActivityUsers(query),
+    enabled: query.trim().length >= 2,
+    staleTime: 15_000,
+    retry: false,
+    placeholderData: (prev) => prev,
   });
 }
 
