@@ -26,6 +26,8 @@ interface Props {
   deepLink?: string
   /** Right-side sticky layout (CampaignDialog) vs. compact inline (TemplateDialog). */
   variant?: "sticky" | "inline"
+  /** Shown in the notification header; defaults to the customer app name. */
+  appName?: string
 }
 
 /**
@@ -38,7 +40,7 @@ interface Props {
  * dummy — see mobile CLAUDE.md §10), so this deliberately doesn't try to
  * also simulate an iOS banner.
  */
-export function NotificationPushPreview({ title, body, imageUrl, deepLink, variant = "inline" }: Props) {
+export function NotificationPushPreview({ title, body, imageUrl, deepLink, variant = "inline", appName = "FreshCuts" }: Props) {
   const hasImage = !!imageUrl && imageUrl.startsWith("https://")
   const resolvedDeepLink = deepLink?.trim()
 
@@ -49,7 +51,7 @@ export function NotificationPushPreview({ title, body, imageUrl, deepLink, varia
         <div className="h-5 w-5 rounded-md bg-brand-500 flex items-center justify-center text-white shrink-0">
           <Flame className="h-3 w-3 fill-current" />
         </div>
-        <span className="text-[11px] font-medium text-muted-foreground">FreshCuts</span>
+        <span className="text-[11px] font-medium text-muted-foreground">{appName}</span>
         <span className="text-[10px] text-muted-foreground ml-auto">now</span>
       </div>
       <div className="px-3 pb-3 space-y-0.5">
@@ -79,7 +81,9 @@ export function NotificationPushPreview({ title, body, imageUrl, deepLink, varia
   return (
     <div className={variant === "sticky" ? "space-y-2.5" : "rounded-xl border bg-muted/50 p-3 space-y-2"}>
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-        {variant === "sticky" ? "On the customer's phone" : "Push Preview"}
+        {variant === "sticky"
+          ? appName === "FreshCuts" ? "On the customer's phone" : "On the vendor's phone"
+          : "Push Preview"}
       </p>
       {card}
       {resolvedDeepLink && (() => {
@@ -98,7 +102,7 @@ export function NotificationPushPreview({ title, body, imageUrl, deepLink, varia
       })()}
       {!resolvedDeepLink && variant === "sticky" && (
         <p className="text-[11px] text-muted-foreground">
-          No deep link set — tapping it just opens the app.
+          {appName === "FreshCuts" ? "No deep link set — " : ""}Tapping it just opens the app.
         </p>
       )}
     </div>

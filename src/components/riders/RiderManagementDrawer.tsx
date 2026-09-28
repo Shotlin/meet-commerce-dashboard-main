@@ -5,9 +5,20 @@ import {
   riderMgmtService,
   type AdminRider,
   type RiderCollection,
+  type RiderDocument,
   type RiderSettlement,
   type RiderStoreAssignment,
 } from '../../services/riderMgmtService';
+
+const DOCUMENT_LABELS: Record<string, string> = {
+  aadhaar: 'Aadhaar (front)',
+  aadhaar_back: 'Aadhaar (back)',
+  license: 'Driving licence',
+  vehicle_rc: 'Vehicle RC',
+  pan: 'PAN card',
+  photo: 'Profile photo',
+  bank_proof: 'Bank proof',
+};
 
 interface Props {
   rider: AdminRider;
@@ -27,6 +38,8 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
   const [assignments, setAssignments] = useState<RiderStoreAssignment[]>([]);
   const [collections, setCollections] = useState<RiderCollection[]>([]);
   const [settlements, setSettlements] = useState<RiderSettlement[]>([]);
+  const [documents, setDocuments] = useState<RiderDocument[]>([]);
+  const [reviewingDoc, setReviewingDoc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,11 +64,13 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
     setLoading(true);
     setError(null);
     try {
-      const [a, c, s] = await Promise.all([
+      const [a, c, s, d] = await Promise.all([
         riderMgmtService.getStoreAssignments(rider.id),
         riderMgmtService.getCollections(rider.id),
         riderMgmtService.getSettlements(rider.id),
+        riderMgmtService.getDocuments(rider.id),
       ]);
+      setDocuments(d);
       setAssignments(a);
       setAssignmentChoices(
         a.map((row) => ({
@@ -136,6 +151,27 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
       setError(err.message || 'Failed to record settlement');
     } finally {
       setSettling(false);
+    }
+  };
+
+  const reviewDocument = async (doc: RiderDocument, status: 'APPROVED' | 'REJECTED') => {
+    let note: string | undefined;
+    if (status === 'REJECTED') {
+      const reason = window.prompt(
+        'Why is this document rejected? The rider sees this and can upload a new one.',
+      );
+      if (reason === null) return;
+      note = reason.trim() || undefined;
+    }
+    setReviewingDoc(doc.id);
+    setError(null);
+    try {
+      await riderMgmtService.verifyDocument(rider.id, doc.id, status, note);
+      await load();
+    } catch (err: any) {
+      setError(err.message || 'Failed to update document');
+    } finally {
+      setReviewingDoc(null);
     }
   };
 
@@ -241,6 +277,81 @@ export const RiderManagementDrawer: React.FC<Props> = ({ rider, onClose }) => {
                     {rider.is_active ? 'Suspend (forces offline)' : 'Unsuspend'}
                   </Button>
                 </div>
+              </section>
+
+              {/* KYC documents */}
+              <section className="space-y-2">
+                <h4 className="text-[11px] font-bold text-status-neutral tracking-wide">
+                  KYC DOCUMENTS
+                </h4>
+                {documents.length === 0 ? (
+                  <p className="text-xs text-status-neutral">
+                    The rider has not uploaded any documents yet.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {documents.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center gap-3 p-2.5 border border-border rounded-[12px]"
+                      >
+                        <a href={doc.url} target="_blank" rel="noreferrer" className="shrink-0">
+                          <img
+                            src={doc.url}
+                            alt={DOCUMENT_LABELS[doc.type] || doc.type}
+                            className="h-12 w-12 rounded-[8px] object-cover border border-border"
+                          />
+                        </a>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-ink">
+                            {DOCUMENT_LABELS[doc.type] || doc.type}
+                          </p>
+                          <p className="text-[10px] text-status-neutral">
+                            Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}
+                            {doc.status === 'REJECTED' && doc.rejection_reason
+                              ? ` · ${doc.rejection_reason}`
+                              : ''}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={
+                            doc.status === 'APPROVED'
+                              ? 'success'
+                              : doc.status === 'REJECTED'
+                                ? 'danger'
+                                : 'warning'
+                          }
+                        >
+                          {doc.status === 'APPROVED'
+                            ? 'Approved'
+                            : doc.status === 'REJECTED'
+                              ? 'Rejected'
+                              : 'Pending'}
+                        </Badge>
+                        {doc.status !== 'APPROVED' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={reviewingDoc === doc.id}
+                            onClick={() => reviewDocument(doc, 'APPROVED')}
+                          >
+                            Approve
+                          </Button>
+                        )}
+                        {doc.status !== 'REJECTED' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={reviewingDoc === doc.id}
+                            onClick={() => reviewDocument(doc, 'REJECTED')}
+                          >
+                            Reject
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               {/* Store assignments */}

@@ -58,6 +58,19 @@ export interface RiderSettlement {
   created_at: string;
 }
 
+/** A KYC document the rider uploaded from the app (rider_documents). */
+export interface RiderDocument {
+  id: string;
+  rider_id: string;
+  /** aadhaar | aadhaar_back | license | vehicle_rc | pan | photo | bank_proof */
+  type: string;
+  url: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejection_reason: string | null;
+  uploaded_at: string;
+  verified_at: string | null;
+}
+
 const num = (v: number | string | null | undefined): number | null => {
   if (v === null || v === undefined) return null;
   const n = Number(v);
@@ -147,6 +160,28 @@ export const riderMgmtService = {
     await apiClient.put(`/api/v1/admin/riders/${riderId}/business-upi`, {
       businessUpiId,
     });
+  },
+
+  /** KYC documents the rider has uploaded. */
+  async getDocuments(riderId: string): Promise<RiderDocument[]> {
+    const res = await apiClient.get<RiderDocument[]>(
+      `/api/v1/admin/riders/${riderId}/documents`,
+    );
+    return (res.success && Array.isArray(res.data)) ? res.data : [];
+  },
+
+  /** Approve or reject one document (a rejection carries the reason the rider sees). */
+  async verifyDocument(
+    riderId: string,
+    documentId: string,
+    status: 'APPROVED' | 'REJECTED',
+    note?: string,
+  ): Promise<void> {
+    const res = await apiClient.put(
+      `/api/v1/admin/riders/${riderId}/documents/${documentId}/verify`,
+      { status, ...(note ? { note } : {}) },
+    );
+    if (!res.success) throw new Error(res.message || 'Failed to update document');
   },
 
   /** Convenience: numeric coercion for display. */

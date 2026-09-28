@@ -29,10 +29,19 @@ const SEGMENTS: { value: CampaignSegment; label: string; description: string; ne
   { value: "custom_segment", label: "Customer Segment", description: "An admin-defined segment (see Customer Segments)", needsValue: true },
   { value: "inactive_customers", label: "Inactive Customers", description: "No orders in 30 days" },
   { value: "high_value", label: "High Value", description: "₹5,000+ total orders" },
-  { value: "specific_user", label: "Specific User", description: "Target by phone or user ID", needsValue: true, valuePlaceholder: "Phone number or User ID" },
+  { value: "specific_user", label: "Specific User", description: "Target by phone or user ID — customer app only", needsValue: true, valuePlaceholder: "Phone number or User ID" },
   { value: "store_customers", label: "Store Customers", description: "Customers who ordered from a specific store", needsValue: true, valuePlaceholder: "Shop ID" },
   { value: "cart_not_empty", label: "Cart Not Empty", description: "Users with items in cart", comingSoon: true },
 ]
+
+// Vendor-app audience. Delivered ONLY to the FreshCuts Vendor app — never to
+// the customer app, even for someone who uses the same phone number in both.
+const VENDOR_SEGMENTS: typeof SEGMENTS = [
+  { value: "all_vendors", label: "All Vendors", description: "Every active vendor signed into the vendor app" },
+  { value: "specific_vendor", label: "Specific Vendor", description: "One vendor, by vendor ID or a vendor user's phone", needsValue: true, valuePlaceholder: "Vendor ID or vendor phone number" },
+]
+
+const VENDOR_SEGMENT_VALUES = VENDOR_SEGMENTS.map((s) => s.value)
 
 // Every value here is a real, reachable in-app route (cross-checked against
 // the mobile app's actual GoRouter route tree, app_router.dart) — an
@@ -76,7 +85,18 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
   const sendMutation = useSendBulk()
   const scheduleMutation = useScheduleCampaign()
 
-  const selectedSeg = SEGMENTS.find(s => s.value === segment)
+  const isVendorAudience = VENDOR_SEGMENT_VALUES.includes(segment)
+  const segmentOptions = isVendorAudience ? VENDOR_SEGMENTS : SEGMENTS
+  const selectedSeg = segmentOptions.find(s => s.value === segment)
+
+  function switchAudience(vendors: boolean) {
+    setSegment(vendors ? "all_vendors" : "all_customers")
+    setSegmentValue("")
+    if (vendors) {
+      // Deep links are customer-app routes; the vendor app just opens.
+      setDeepLink(""); setDeepLinkPreset("")
+    }
+  }
 
   function applyTemplate(t: NotificationTemplate) {
     setTitle(t.title)
@@ -99,7 +119,7 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
       title, body, segment,
       ...(segmentValue && { segmentValue }),
       ...(imageUrl && { image_url: imageUrl }),
-      ...(effectiveDeepLink && { deep_link: effectiveDeepLink }),
+      ...(!isVendorAudience && effectiveDeepLink && { deep_link: effectiveDeepLink }),
       ...(expiresAt && { expires_at: new Date(expiresAt).toISOString() }),
       ...(selectedTemplateId && { template_id: selectedTemplateId }),
     }
@@ -164,13 +184,40 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
             <Textarea id="c-body" value={body} onChange={(e) => setBody(e.target.value)} placeholder="Type your message…" rows={3} required />
           </div>
 
+          {/* Audience: which app receives this. */}
+          <div className="space-y-1.5">
+            <Label>Send to *</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { vendors: false, label: "Customers", hint: "FreshCuts customer app" },
+                { vendors: true, label: "Vendors", hint: "FreshCuts Vendor app" },
+              ] as const).map((o) => (
+                <button
+                  key={o.label}
+                  type="button"
+                  onClick={() => switchAudience(o.vendors)}
+                  className={
+                    "rounded-lg border px-3 py-2 text-left transition-colors " +
+                    (isVendorAudience === o.vendors ? "border-ink bg-muted" : "hover:bg-muted/60")
+                  }
+                >
+                  <p className="text-sm font-medium">{o.label}</p>
+                  <p className="text-xs text-muted-foreground">{o.hint}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Each notification goes to one app only — customer messages never appear in the vendor app, and vendor messages never appear in the customer app.
+            </p>
+          </div>
+
           {/* Segment */}
           <div className="space-y-1.5">
-            <Label>Target Segment *</Label>
+            <Label>{isVendorAudience ? "Which vendors *" : "Target Segment *"}</Label>
             <Select value={segment} onValueChange={(v) => { setSegment(v as CampaignSegment); setSegmentValue("") }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {SEGMENTS.map((s) => (
+                {segmentOptions.map((s) => (
                   <SelectItem key={s.value} value={s.value} disabled={s.comingSoon}>
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{s.label}</span>
@@ -252,7 +299,8 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
             )}
           </div>
 
-          {/* Deep Link */}
+          {/* Deep Link — customer app only */}
+          {!isVendorAudience && (
           <div className="space-y-1.5">
             <Label>Deep Link</Label>
             <Select value={deepLinkPreset} onValueChange={handleDeepLinkPreset}>
@@ -270,6 +318,7 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
               className="mt-1.5"
             />
           </div>
+          )}
 
           {/* Campaign Expiry */}
           <div className="space-y-1.5">
@@ -310,8 +359,9 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
             title={title}
             body={body}
             imageUrl={imageUrl}
-            deepLink={effectiveDeepLink}
+            deepLink={isVendorAudience ? undefined : effectiveDeepLink}
             variant="sticky"
+            appName={isVendorAudience ? "FreshCuts Vendor" : undefined}
           />
         </div>
         </div>
