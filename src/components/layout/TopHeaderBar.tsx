@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, MapPin, Shield, Check, CheckCircle2, ChevronDown, ShoppingBag, Store, Boxes, Warehouse, X, Menu, Flame } from 'lucide-react';
+import { Search, Bell, MapPin, Shield, Check, CheckCircle2, ChevronDown, ShoppingBag, Store, Boxes, Warehouse, X, Menu } from 'lucide-react';
+import { BrandLogo } from '../common/BrandLogo';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
 import { ScopeLocation, UserRole } from '../../types';
@@ -170,9 +171,7 @@ export const TopHeaderBar: React.FC<TopHeaderBarProps> = ({ onOpenMenu }) => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="w-7 h-7 rounded-[8px] bg-brand-500 flex items-center justify-center text-white shrink-0">
-          <Flame className="w-4 h-4 fill-current" />
-        </div>
+        <BrandLogo className="h-6" />
       </div>
 
       {/* Global Search Bar — hidden on phones; every list page has its own search field too */}

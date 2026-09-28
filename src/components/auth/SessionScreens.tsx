@@ -1,13 +1,12 @@
 import React from 'react';
-import { Flame, Loader2, WifiOff } from 'lucide-react';
+import { Loader2, WifiOff } from 'lucide-react';
 import { Button } from '../common/Button';
+import { BrandLogo } from '../common/BrandLogo';
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <main className="min-h-screen w-screen bg-white text-ink flex items-center justify-center px-6">
     <div className="flex flex-col items-center text-center max-w-sm">
-      <div className="h-11 w-11 rounded-2xl bg-brand-500 flex items-center justify-center shadow-sm mb-6">
-        <Flame className="h-6 w-6 text-white fill-current" />
-      </div>
+      <BrandLogo className="h-12 mb-6" />
       {children}
     </div>
   </main>

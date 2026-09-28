@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import { LockKeyhole, Mail } from 'lucide-react';
+import { BrandLogo } from '../components/common/BrandLogo';
 import { Navigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
@@ -48,9 +49,7 @@ export const LoginPage: React.FC = () => {
         <section className="relative hidden lg:flex flex-col justify-between p-12 bg-rose-50 overflow-hidden">
           <div className="relative">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-brand-500 flex items-center justify-center shadow-sm">
-                <Flame className="h-6 w-6 text-white fill-current" />
-              </div>
+              <BrandLogo className="h-11" />
               <div>
                 <p className="text-sm font-black tracking-[0.2em] text-ink">FRESHCUTS</p>
                 <p className="text-[10px] font-bold tracking-[0.24em] text-muted-foreground">LOCAL HQ CONSOLE</p>
@@ -62,17 +61,11 @@ export const LoginPage: React.FC = () => {
               <p className="mt-6 text-sm leading-7 text-ink-2">Use the local seeded workspace to explore orders, warehouse QC, inventory lots, vendors, finance, and governance with real API-backed data.</p>
             </div>
           </div>
-          <div className="relative flex items-center gap-3 text-xs font-bold text-ink-2">
-            <ShieldCheck className="h-4 w-4 text-ink-2" />
-            Local development credentials only
-          </div>
         </section>
 
         <section className="p-8 sm:p-12 bg-white text-ink">
           <div className="lg:hidden flex items-center gap-3 mb-12">
-            <div className="h-10 w-10 rounded-2xl bg-brand-500 flex items-center justify-center">
-              <Flame className="h-5 w-5 text-white fill-current" />
-            </div>
+            <BrandLogo className="h-10" />
             <p className="text-sm font-black tracking-[0.18em]">FRESHCUTS</p>
           </div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-muted-foreground">HQ access</p>
@@ -102,8 +95,6 @@ export const LoginPage: React.FC = () => {
               {isSubmitting ? 'Authenticating…' : 'Enter HQ console'}
             </button>
           </form>
-
-          <p className="mt-8 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">API: http://localhost:4500 · Dashboard: http://localhost:4501</p>
         </section>
       </div>
     </main>
