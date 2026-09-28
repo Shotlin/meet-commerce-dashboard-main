@@ -12,6 +12,7 @@ import {
   FileText,
   Megaphone,
   AlertTriangle,
+  Workflow,
 } from "lucide-react"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
@@ -40,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { TemplateDialog } from "@/components/notifications/TemplateDialog"
 import { CampaignDialog } from "@/components/notifications/CampaignDialog"
+import { OrderLifecyclePanel } from "@/components/notifications/OrderLifecyclePanel"
 import {
   useTemplates,
   useDeleteTemplate,
@@ -47,7 +49,7 @@ import {
 } from "@/hooks/useNotifications"
 import type { NotificationCampaign, NotificationTemplate } from "@/types/notification.types"
 
-type ActiveTab = "templates" | "campaigns"
+type ActiveTab = "templates" | "campaigns" | "lifecycle"
 
 const STATUS_COLOR: Record<string, string> = {
   QUEUED: "bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300",
@@ -99,7 +101,7 @@ export default function NotificationsPage() {
         subtitle="Manage templates, send push notifications, and schedule campaigns"
       >
         <div className="flex items-center gap-2">
-          {tab === "templates" ? (
+          {tab === "lifecycle" ? null : tab === "templates" ? (
             <Button
               size="sm"
               onClick={() => {
@@ -130,8 +132,13 @@ export default function NotificationsPage() {
           <TabsTrigger value="campaigns" className="gap-1.5">
             <Megaphone className="h-3.5 w-3.5" /> Campaigns
           </TabsTrigger>
+          <TabsTrigger value="lifecycle" className="gap-1.5">
+            <Workflow className="h-3.5 w-3.5" /> Order Lifecycle
+          </TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {tab === "lifecycle" && <OrderLifecyclePanel />}
 
       {/* Templates Tab */}
       {tab === "templates" && (
