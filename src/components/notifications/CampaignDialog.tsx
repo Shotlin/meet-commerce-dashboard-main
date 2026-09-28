@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Users, AlertCircle } from "lucide-react"
 import { useSendBulk, useScheduleCampaign, useSegmentCount, useTemplates } from "@/hooks/useNotifications"
 import { useCustomerSegments } from "@/hooks/useCustomerSegments"
+import { NotificationPushPreview } from "@/components/notifications/NotificationPushPreview"
 import type { CampaignSegment, NotificationTemplate } from "@/types/notification.types"
 
 const SEGMENTS: { value: CampaignSegment; label: string; description: string; needsValue?: boolean; valuePlaceholder?: string; comingSoon?: boolean }[] = [
@@ -33,6 +34,13 @@ const SEGMENTS: { value: CampaignSegment; label: string; description: string; ne
   { value: "cart_not_empty", label: "Cart Not Empty", description: "Users with items in cart", comingSoon: true },
 ]
 
+// Every value here is a real, reachable in-app route (cross-checked against
+// the mobile app's actual GoRouter route tree, app_router.dart) — an
+// "Offers / Price Drop" preset used to point at `/categories?tab=price_drop`,
+// but CategoryLandingScreen never reads a `tab` query param and the app has
+// no discount/on-sale browsing screen anywhere, so it silently did nothing
+// different from plain Categories. Removed rather than ship a dead link —
+// see the mobile customer app's CLAUDE.md notification-navigation entry.
 const DEEP_LINK_PRESETS = [
   { label: "Home", value: "/home" },
   { label: "Notifications", value: "/profile/notifications" },
@@ -40,7 +48,6 @@ const DEEP_LINK_PRESETS = [
   { label: "Wallet", value: "/profile/wallet" },
   { label: "Orders", value: "/orders" },
   { label: "Categories", value: "/categories" },
-  { label: "Offers / Price Drop", value: "/categories?tab=price_drop" },
   { label: "Search", value: "/search" },
   { label: "Wishlist", value: "/profile/wishlist" },
 ]
@@ -119,13 +126,14 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v) }}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle>
             {mode === "send" ? "Send Bulk Notification" : "Schedule Campaign"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6 overflow-hidden flex-1 min-h-0 px-6 pb-6 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1 min-h-0">
 
           {/* Template selector */}
           {templates && templates.length > 0 && (
@@ -275,31 +283,6 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
             <p className="text-xs text-muted-foreground">If set, included in notification data for countdown display in app.</p>
           </div>
 
-          {/* Push Preview */}
-          {title && (
-            <div className="rounded-xl border bg-muted/50 p-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Push Preview</p>
-              <div className="rounded-lg bg-background border p-3 space-y-1 shadow-sm max-w-xs">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 rounded bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">M</div>
-                  <span className="text-[11px] text-muted-foreground">Meet Commerce</span>
-                  <span className="text-[10px] text-muted-foreground ml-auto">now</span>
-                </div>
-                <p className="text-sm font-semibold truncate">{title}</p>
-                <p className="text-xs text-muted-foreground line-clamp-2">{body}</p>
-                {imageUrl && imageUrl.startsWith('https://') && (
-                  <div className="h-24 rounded bg-muted overflow-hidden mt-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt="preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  </div>
-                )}
-                {effectiveDeepLink && (
-                  <p className="text-[10px] text-muted-foreground font-mono truncate">{effectiveDeepLink}</p>
-                )}
-              </div>
-            </div>
-          )}
-
           {mode === "send" && segmentData && (
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950 p-3">
               <p className="text-xs text-yellow-800 dark:text-yellow-200">
@@ -319,6 +302,19 @@ export function CampaignDialog({ open, onOpenChange, mode }: Props) {
             </Button>
           </DialogFooter>
         </form>
+
+        {/* Right-side simulation — always visible while filling the form,
+            no scrolling needed to see what the customer will actually see. */}
+        <div className="border-l pl-6 overflow-y-auto min-h-0">
+          <NotificationPushPreview
+            title={title}
+            body={body}
+            imageUrl={imageUrl}
+            deepLink={effectiveDeepLink}
+            variant="sticky"
+          />
+        </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

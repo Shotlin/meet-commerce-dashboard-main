@@ -21,6 +21,7 @@ import {
   useCreateTemplate,
   useUpdateTemplate,
 } from "@/hooks/useNotifications"
+import { NotificationPushPreview } from "@/components/notifications/NotificationPushPreview"
 import type { NotificationTemplate, CreateTemplatePayload } from "@/types/notification.types"
 
 const TEMPLATE_TYPES = ["PUSH", "SMS", "EMAIL", "IN_APP"] as const
@@ -188,24 +189,12 @@ export function TemplateDialog({ open, onOpenChange, template }: Props) {
 
           {/* Push Preview */}
           {form.type === "PUSH" && form.title && (
-            <div className="rounded-xl border bg-muted/50 p-3 space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Push Preview</p>
-              <div className="rounded-lg bg-background border p-3 space-y-1 shadow-sm max-w-xs">
-                <div className="flex items-center gap-2">
-                  <div className="h-5 w-5 rounded bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">M</div>
-                  <span className="text-[11px] text-muted-foreground">Meet Commerce</span>
-                  <span className="text-[10px] text-muted-foreground ml-auto">now</span>
-                </div>
-                <p className="text-sm font-semibold truncate">{form.title}</p>
-                <p className="text-xs text-muted-foreground line-clamp-2">{form.body}</p>
-                {form.image_url && (
-                  <div className="h-24 rounded bg-muted overflow-hidden mt-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={form.image_url} alt="preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  </div>
-                )}
-              </div>
-            </div>
+            <NotificationPushPreview
+              title={form.title}
+              body={form.body}
+              imageUrl={form.image_url}
+              deepLink={form.deep_link}
+            />
           )}
           <DialogFooter>
             <Button
