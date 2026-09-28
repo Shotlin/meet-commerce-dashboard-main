@@ -4,13 +4,35 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { deliveryService, LiveRider } from '../services/deliveryService';
-import { Truck, MapPin, RefreshCw, AlertCircle, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Truck, MapPin, RefreshCw, AlertCircle, Phone, Users } from 'lucide-react';
 
 const DELIVERY_STATUS_LABEL: Record<string, string> = {
   ASSIGNED: 'Assigned',
   ACCEPTED: 'Accepted',
   PICKED_UP: 'Picked Up',
   IN_TRANSIT: 'In Transit',
+};
+
+/** "just now" / "4 min ago" / "2 h ago" for a rider's last GPS fix. */
+function fixAge(iso: string | null | undefined): { label: string; stale: boolean } | null {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms)) return null;
+  const minutes = Math.max(0, Math.round(ms / 60000));
+  if (minutes < 1) return { label: 'just now', stale: false };
+  if (minutes < 60) return { label: `${minutes} min ago`, stale: minutes >= 10 };
+  return { label: `${Math.round(minutes / 60)} h ago`, stale: true };
+}
+
+const GpsFreshness: React.FC<{ iso: string | null | undefined }> = ({ iso }) => {
+  const age = fixAge(iso);
+  if (!age) return null;
+  return (
+    <p className={`mt-1.5 text-[11px] ${age.stale ? 'text-status-warning' : 'text-status-neutral'}`}>
+      Last GPS update {age.label}
+    </p>
+  );
 };
 
 export const DeliveryPage: React.FC = () => {
@@ -36,7 +58,7 @@ export const DeliveryPage: React.FC = () => {
     } catch (err: any) {
       console.error('[DeliveryPage] API error:', err);
       if (showLoading) {
-        setError(err.message || 'Unable to connect to live Delivery Fleet API (http://localhost:4500)');
+        setError(err.message || 'Unable to load the live rider roster. Check your connection and retry.');
       }
     } finally {
       if (showLoading) setIsLoading(false);
@@ -47,7 +69,7 @@ export const DeliveryPage: React.FC = () => {
     return (
       <div className="p-8 text-center space-y-3">
         <RefreshCw className="w-8 h-8 text-ink-2 animate-spin mx-auto" />
-        <p className="text-xs font-bold text-ink">Connecting to Live Delivery Fleet API (http://localhost:4500)...</p>
+        <p className="text-xs font-bold text-ink">Loading live rider roster…</p>
       </div>
     );
   }
@@ -75,9 +97,16 @@ export const DeliveryPage: React.FC = () => {
         subtitle="Live online-rider roster and active delivery assignments."
         badge={<Badge variant="success" icon={<Truck className="w-3.5 h-3.5" />}>{riders.length} Online Riders</Badge>}
         actions={
-          <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={() => fetchDeliveryData(true)}>
-            Refresh API Data
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/riders">
+              <Button variant="outline" size="sm" icon={<Users className="w-3.5 h-3.5" />}>
+                Rider Management
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={() => fetchDeliveryData(true)}>
+              Refresh
+            </Button>
+          </div>
         }
       />
 
@@ -109,7 +138,7 @@ export const DeliveryPage: React.FC = () => {
                     </p>
                   </div>
                   <Badge variant={r.delivery_status ? 'violet' : 'neutral'}>
-                    {r.delivery_status ? DELIVERY_STATUS_LABEL[r.delivery_status] : 'Idle'}
+                    {r.delivery_status ? (DELIVERY_STATUS_LABEL[r.delivery_status] ?? r.delivery_status) : 'Idle'}
                   </Badge>
                 </div>
 
@@ -126,6 +155,7 @@ export const DeliveryPage: React.FC = () => {
                     <span className="text-status-neutral">No GPS fix</span>
                   )}
                 </div>
+                <GpsFreshness iso={r.location_updated_at} />
               </div>
             ))}
           </div>

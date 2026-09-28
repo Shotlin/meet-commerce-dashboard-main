@@ -20,6 +20,7 @@ export const Breadcrumb: React.FC = () => {
     catalogue: 'Catalogue Management',
     fulfilment: 'Fulfilment & Packing',
     delivery: 'Delivery Command',
+    riders: 'Rider Management',
     crm: 'CRM & Customers',
     support: 'Support Inbox',
     recalls: 'Quality & Recalls',

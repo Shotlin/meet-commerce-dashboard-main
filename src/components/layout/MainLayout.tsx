@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { PageErrorBoundary } from '../common/PageErrorBoundary';
 import { SidebarNav } from './SidebarNav';
 import { TopHeaderBar } from './TopHeaderBar';
 import { Breadcrumb } from './Breadcrumb';
@@ -37,7 +38,9 @@ export const MainLayout: React.FC = () => {
         {/* Scrollable Main Content Canvas */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6">
           <Breadcrumb />
-          <Outlet />
+          <PageErrorBoundary key={location.pathname}>
+            <Outlet />
+          </PageErrorBoundary>
         </main>
       </div>
     </div>
