@@ -55,7 +55,7 @@ export function ShiprocketDeliverySection({ orderId, paymentMethod, paymentStatu
   });
 
   const sh = shipment.data;
-  const live = !!sh && LIVE.includes(sh.status);
+  const live = !!sh && LIVE.includes(sh.status) && !!sh.sr_shipment_id;
   const shiprocketMode = settings.data?.deliveryPartner === 'SHIPROCKET';
   if (!shiprocketMode && !sh) return null;
 
@@ -89,7 +89,7 @@ export function ShiprocketDeliverySection({ orderId, paymentMethod, paymentStatu
         </div>
       ) : (
         <div className="space-y-2">
-          {sh?.status === 'FAILED' && sh.last_error && <p className="text-xs text-red-600">Last attempt failed: {sh.last_error}</p>}
+          {sh?.last_error && sh.status !== 'CANCELLED' && <p className="text-xs text-red-600">Last attempt failed: {sh.last_error}</p>}
           {sh?.status === 'CANCELLED' && <p className="text-xs text-muted-foreground">Previous Shiprocket delivery was cancelled.</p>}
           {check && (
             <p className={`text-xs ${check.available ? '' : 'text-red-600'}`}>

@@ -47,6 +47,7 @@ export async function testShiprocketConnection(payload: {
 
 export interface ShiprocketShipment {
   order_id: string;
+  sr_shipment_id: number | string | null;
   status: 'CREATED' | 'ASSIGNING' | 'ASSIGNED' | 'PICKED_UP' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'FAILED';
   sr_status: string | null;
   awb_code: string | null;
