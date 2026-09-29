@@ -39,6 +39,7 @@ export default function ShiprocketSettingsPage() {
       setEmail('');
       setResult(null);
       toast.success('Shiprocket settings saved');
+      qc.invalidateQueries({ queryKey: ['admin', 'orders'] });
     },
     onError: (e) => toast.error(errMsg(e)),
   });
@@ -77,6 +78,32 @@ export default function ShiprocketSettingsPage() {
           ) : undefined
         }
       />
+
+      <Card className="p-5 space-y-3 max-w-2xl">
+        <p className="text-sm font-bold text-ink">Delivery partner</p>
+        <p className="text-xs text-status-neutral">
+          Choose who delivers new orders. While Shiprocket is selected, your own riders stop receiving new orders
+          (orders already given to them stay with them) and each paid order shows an “Assign to Shiprocket” button.
+          COD orders can’t be sent to Shiprocket.
+        </p>
+        <div className="flex gap-2">
+          {(['OWN_RIDERS', 'SHIPROCKET'] as const).map((p) => (
+            <Button key={p} size="sm"
+              variant={settings?.deliveryPartner === p ? 'primary' : 'outline'}
+              disabled={save.isPending || !settings || (p === 'SHIPROCKET' && !settings.configured)}
+              onClick={() => {
+                if (settings?.deliveryPartner === p) return;
+                if (p === 'SHIPROCKET' && !window.confirm('Pause your own riders and use Shiprocket Quick for new orders?')) return;
+                save.mutate({ deliveryPartner: p });
+              }}>
+              {p === 'OWN_RIDERS' ? 'Own riders' : 'Shiprocket Quick'}
+            </Button>
+          ))}
+        </div>
+        {settings && !settings.configured && (
+          <p className="text-[11px] text-status-warning">Save and test the API credentials below before switching to Shiprocket.</p>
+        )}
+      </Card>
 
       <Card className="p-5 space-y-4 max-w-2xl">
         {isLoading ? (

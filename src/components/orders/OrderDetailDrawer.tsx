@@ -45,6 +45,7 @@ import { adminOrdersService } from '../../services/adminOrdersService';
 import { deliveryService, AssignableRider } from '../../services/deliveryService';
 import { OrderDetail, SettlementEntry, RecordSettlementPayload } from '../../types/order.types';
 import { SettlementModal } from './SettlementModal';
+import { ShiprocketDeliverySection } from './ShiprocketDeliverySection';
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
   ORDER_PLACED: ['CONFIRMED', 'CANCELLED'],
@@ -511,6 +512,14 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                 </Section>
 
                 <Separator />
+
+                {/* SHIPROCKET QUICK — only shown while Shiprocket is the delivery partner */}
+                <ShiprocketDeliverySection
+                  orderId={order.id}
+                  paymentMethod={order.paymentMethod}
+                  paymentStatus={order.paymentStatus}
+                  orderStatus={order.status}
+                />
 
                 {/* H2. PAYMENT SETTLEMENT — manual cash/UPI collection recorded
                     by an admin/finance user, for orders delivered outside the
