@@ -250,8 +250,10 @@ const ServiceAreaTab: React.FC<{
   const [radius, setRadius] = useState(num(shop.delivery_radius_km));
   const [pincodeOnly, setPincodeOnly] = useState(shop.pincode_only);
   const [pincodesText, setPincodesText] = useState((shop.serviceable_pincodes ?? []).join(', '));
+  const [pin, setPin] = useState({ lat: num(shop.lat), lng: num(shop.lng) });
 
   useEffect(() => {
+    setPin({ lat: num(shop.lat), lng: num(shop.lng) });
     setRadius(num(shop.delivery_radius_km));
     setPincodeOnly(shop.pincode_only);
     setPincodesText((shop.serviceable_pincodes ?? []).join(', '));
@@ -268,7 +270,7 @@ const ServiceAreaTab: React.FC<{
     setPincodeError(error);
     if (error) return;
     setPincodesText(serviceable_pincodes.join(', '));
-    onSave({ delivery_radius_km: radius, pincode_only: pincodeOnly, serviceable_pincodes });
+    onSave({ delivery_radius_km: radius, pincode_only: pincodeOnly, serviceable_pincodes, lat: pin.lat, lng: pin.lng });
   };
 
   return (
@@ -296,7 +298,9 @@ const ServiceAreaTab: React.FC<{
           {pincodeError && <p className="text-xs text-status-danger mt-1">{pincodeError}</p>}
         </div>
         <div className="col-span-2">
-          <LocationPicker lat={num(shop.lat)} lng={num(shop.lng)} radiusKm={pincodeOnly ? undefined : radius} onChange={() => {}} />
+          <label className={labelClass}>Store Pin — use your current location, drag the pin, or click the map</label>
+          <LocationPicker lat={pin.lat} lng={pin.lng} radiusKm={pincodeOnly ? undefined : radius} onChange={(lat, lng) => setPin({ lat, lng })} />
+          <p className="text-[10px] text-status-neutral mt-1 font-mono-num">{pin.lat.toFixed(6)}, {pin.lng.toFixed(6)}</p>
         </div>
       </div>
 
