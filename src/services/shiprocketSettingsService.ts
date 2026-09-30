@@ -6,6 +6,7 @@ export interface ShiprocketSettings {
   hasPassword: boolean;
   pickupLocation: string | null;
   deliveryPartner: 'OWN_RIDERS' | 'SHIPROCKET';
+  simulationMode: boolean;
   lastTestedAt: string | null;
   lastTestStatus: 'SUCCESS' | 'FAILED' | null;
   lastTestMessage: string | null;
@@ -30,6 +31,7 @@ export async function saveShiprocketSettings(payload: {
   password?: string;
   pickupLocation?: string;
   deliveryPartner?: 'OWN_RIDERS' | 'SHIPROCKET';
+  simulationMode?: boolean;
 }): Promise<ShiprocketSettings> {
   const res = await apiClient.put<ShiprocketSettings>(`${BASE}/settings`, payload);
   if (res.success && res.data) return res.data;
@@ -48,6 +50,7 @@ export async function testShiprocketConnection(payload: {
 export interface ShiprocketShipment {
   order_id: string;
   sr_shipment_id: number | string | null;
+  is_simulated: boolean;
   status: 'CREATED' | 'ASSIGNING' | 'ASSIGNED' | 'PICKED_UP' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED' | 'FAILED';
   sr_status: string | null;
   awb_code: string | null;
@@ -64,6 +67,7 @@ export interface ShiprocketCheck {
   reason: string | null;
   rate: number | null;
   courierName?: string;
+  simulated?: boolean;
 }
 
 const orderUrl = (id: string, action = '') => `${BASE}/orders/${id}${action}`;
@@ -89,3 +93,4 @@ async function postShipment(orderId: string, action: string, fallback: string): 
 export const assignOrderToShiprocket = (id: string) => postShipment(id, '/assign', 'Could not assign to Shiprocket');
 export const refreshOrderShipment = (id: string) => postShipment(id, '/refresh', 'Refresh failed');
 export const cancelOrderShipment = (id: string) => postShipment(id, '/cancel', 'Could not cancel');
+export const advanceSimulatedShipment = (id: string) => postShipment(id, '/simulate-advance', 'Could not advance the demo');

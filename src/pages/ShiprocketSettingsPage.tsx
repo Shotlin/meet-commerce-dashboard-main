@@ -105,6 +105,19 @@ export default function ShiprocketSettingsPage() {
         )}
       </Card>
 
+      <Card className="p-5 space-y-3 max-w-2xl">
+        <p className="text-sm font-bold text-ink">Demo mode (simulation)</p>
+        <p className="text-xs text-status-neutral">
+          For testing only. While ON, “Assign to Shiprocket” never calls Shiprocket — no wallet money, no pickup address needed.
+          You move each demo order through Rider assigned → Picked up → Out for delivery → Delivered with the “Advance demo” button, and the
+          order status and rider details update exactly like the real thing. Use test orders only. Your own riders are not paused by demo mode.
+        </p>
+        <Button size="sm" variant={settings?.simulationMode ? 'primary' : 'outline'} disabled={save.isPending || !settings}
+          onClick={() => save.mutate({ simulationMode: !settings?.simulationMode })}>
+          {settings?.simulationMode ? 'Demo mode is ON — click to turn off' : 'Turn demo mode on'}
+        </Button>
+      </Card>
+
       <Card className="p-5 space-y-4 max-w-2xl">
         {isLoading ? (
           <p className="text-sm text-status-neutral">Loading…</p>

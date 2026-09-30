@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  assignOrderToShiprocket, cancelOrderShipment, checkOrderQuick, getOrderShipment,
+  advanceSimulatedShipment, assignOrderToShiprocket, cancelOrderShipment, checkOrderQuick, getOrderShipment,
   getShiprocketSettings, refreshOrderShipment, type ShiprocketCheck, type ShiprocketShipment,
 } from '../../services/shiprocketSettingsService';
 
@@ -48,6 +48,7 @@ export function ShiprocketDeliverySection({ orderId, paymentMethod, paymentStatu
   const checkM = useMutation({ mutationFn: () => checkOrderQuick(orderId), onSuccess: setCheck, onError: (e) => toast.error(errMsg(e)) });
   const assignM = useMutation({ mutationFn: () => assignOrderToShiprocket(orderId), onSuccess: done('Assigned to Shiprocket Quick'), onError: (e) => toast.error(errMsg(e)) });
   const refreshM = useMutation({ mutationFn: () => refreshOrderShipment(orderId), onSuccess: done('Status refreshed'), onError: (e) => toast.error(errMsg(e)) });
+  const advanceM = useMutation({ mutationFn: () => advanceSimulatedShipment(orderId), onSuccess: done('Demo moved one step'), onError: (e) => toast.error(errMsg(e)) });
   const cancelM = useMutation({
     mutationFn: () => cancelOrderShipment(orderId),
     onSuccess: done('Shiprocket delivery cancelled'),
@@ -56,7 +57,7 @@ export function ShiprocketDeliverySection({ orderId, paymentMethod, paymentStatu
 
   const sh = shipment.data;
   const live = !!sh && LIVE.includes(sh.status) && !!sh.sr_shipment_id;
-  const shiprocketMode = settings.data?.deliveryPartner === 'SHIPROCKET';
+  const shiprocketMode = settings.data?.deliveryPartner === 'SHIPROCKET' || Boolean(settings.data?.simulationMode);
   if (!shiprocketMode && !sh) return null;
 
   const isCod = paymentMethod === 'COD';
@@ -70,16 +71,24 @@ export function ShiprocketDeliverySection({ orderId, paymentMethod, paymentStatu
       {live || sh?.status === 'DELIVERED' ? (
         <div className="rounded-lg border p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-medium">Shiprocket Quick</span>
+            <span className="font-medium">Shiprocket Quick{sh!.is_simulated ? ' · Demo' : ''}</span>
             <Badge variant="outline">{LABEL[sh!.status]}</Badge>
           </div>
           {sh!.sr_status && <p className="text-xs text-muted-foreground">Latest: {sh!.sr_status}</p>}
           {sh!.agent_name && <p className="text-xs">Rider: <b>{sh!.agent_name}</b>{sh!.agent_phone ? ` · ${sh!.agent_phone}` : ''}</p>}
           {sh!.awb_code && <p className="text-xs">AWB: <span className="font-mono">{sh!.awb_code}</span></p>}
           {sh!.tracking_url && <a href={sh!.tracking_url} target="_blank" rel="noreferrer" className="text-xs underline">Track on Shiprocket</a>}
+          {live && sh!.is_simulated && (
+            <div className="space-y-1 pt-1">
+              <p className="text-[11px] text-amber-600">Demo only — nothing is sent to Shiprocket and no money is used. Advancing changes this order's real status, so use test orders.</p>
+              <Button size="sm" disabled={advanceM.isPending} onClick={() => advanceM.mutate()}>Advance demo → next step</Button>
+            </div>
+          )}
           {live && (
             <div className="flex gap-2 pt-1">
-              <Button size="sm" variant="outline" disabled={refreshM.isPending} onClick={() => refreshM.mutate()}>Refresh</Button>
+              {!sh!.is_simulated && (
+                <Button size="sm" variant="outline" disabled={refreshM.isPending} onClick={() => refreshM.mutate()}>Refresh</Button>
+              )}
               {!['PICKED_UP', 'OUT_FOR_DELIVERY'].includes(sh!.status) && (
                 <Button size="sm" variant="outline" disabled={cancelM.isPending}
                   onClick={() => window.confirm('Cancel this Shiprocket delivery?') && cancelM.mutate()}>Cancel Shiprocket</Button>
