@@ -1,23 +1,24 @@
 import React from 'react';
+import { CalendarDays, Lock, MapPin, RefreshCw, Store } from 'lucide-react';
 import { clsx } from 'clsx';
-import { Lock, RefreshCw } from 'lucide-react';
 import type { OverviewData, OverviewQuery, OverviewRangeKey } from '../../types/overview.types';
+import { SoftTabs, surface } from './parts';
 
 const RANGES: { key: OverviewRangeKey; label: string }[] = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
   { key: '7d', label: '7 Days' },
   { key: '30d', label: '30 Days' },
-  { key: 'custom', label: 'Custom' },
+  { key: 'custom', label: 'Pick dates' },
 ];
 
-const field = 'h-9 rounded-lg border bg-card px-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ring';
+const field =
+  'h-10 rounded-xl border border-[#E1E5EC] bg-white px-3 text-sm text-[#1B2437] shadow-sm outline-none transition focus:border-[#2F6BFF] focus:ring-4 focus:ring-[#2F6BFF]/10';
 
 interface Props {
   query: OverviewQuery;
   onChange: (q: OverviewQuery) => void;
   data: OverviewData | undefined;
-  /** Top-bar shop switcher is active, so the in-page store filter is fixed. */
   scopeLocked: boolean;
   isFetching: boolean;
   onRefresh: () => void;
@@ -30,56 +31,55 @@ export const OverviewFilters: React.FC<Props> = ({ query, onChange, data, scopeL
   const lockedName = shops.find((s) => s.id === data?.filters.shop_id)?.name;
 
   return (
-    <div className="mb-5 space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div role="tablist" aria-label="Date range" className="inline-flex max-w-full overflow-x-auto rounded-lg border bg-card p-0.5">
-          {RANGES.map((r) => (
-            <button key={r.key} role="tab" aria-selected={query.range === r.key}
-              onClick={() => onChange({ ...query, range: r.key })}
-              className={clsx('whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
-                query.range === r.key ? 'bg-ink text-white' : 'text-status-neutral hover:bg-muted')}>
-              {r.label}
-            </button>
-          ))}
+    <div className={clsx(surface, 'mb-5 p-3 sm:p-4')}>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[#344054]">
+          <CalendarDays className="h-4 w-4 text-[#2F6BFF]" /> Time
         </div>
+        <SoftTabs label="Date range" value={query.range} tabs={RANGES}
+          onChange={(k) => onChange({ ...query, range: k })} />
         {query.range === 'custom' && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <input type="date" aria-label="From date" className={field} value={query.from ?? ''}
               max={query.to || undefined} onChange={(e) => onChange({ ...query, from: e.target.value })} />
-            <span className="text-xs text-status-neutral">to</span>
+            <span className="text-sm text-[#667085]">to</span>
             <input type="date" aria-label="To date" className={field} value={query.to ?? ''}
               min={query.from || undefined} onChange={(e) => onChange({ ...query, to: e.target.value })} />
           </div>
         )}
-        <button onClick={onRefresh} aria-label="Refresh"
-          className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border bg-card px-3 text-xs font-semibold text-ink hover:bg-muted">
-          <RefreshCw className={clsx('h-3.5 w-3.5', isFetching && 'animate-spin')} /> Refresh
+        <button onClick={onRefresh} aria-label="Refresh numbers"
+          className="ml-auto inline-flex h-10 items-center gap-2 rounded-xl border border-[#E1E5EC] bg-white px-4 text-sm font-semibold text-[#344054] shadow-sm transition hover:bg-[#F6F8FC]">
+          <RefreshCw className={clsx('h-4 w-4 text-[#2F6BFF]', isFetching && 'animate-spin')} /> Refresh
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-[#EEF0F5] pt-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[#344054]">
+          <Store className="h-4 w-4 text-[#7C5CFC]" /> Where
+        </div>
         {locked ? (
-          <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-muted px-3 text-sm text-ink"
-            title="Change the store from the switcher in the top bar">
-            <Lock className="h-3.5 w-3.5 text-status-neutral" />
-            {lockedName ?? 'Selected store'}
+          <span className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#F1F3F9] px-3.5 text-sm font-medium text-[#1B2437]"
+            title="Change the store from the switcher at the top of the page">
+            <Lock className="h-3.5 w-3.5 text-[#667085]" />{lockedName ?? 'Selected store'}
           </span>
         ) : (
           <select aria-label="Store" className={field} value={query.shopId ?? ''}
-            onChange={(e) => onChange({ ...query, shopId: e.target.value || null, pincode: null })}
-            title="Each store has its own warehouse, so this also filters warehouse figures">
-            <option value="">All stores / warehouses</option>
+            onChange={(e) => onChange({ ...query, shopId: e.target.value || null, pincode: null })}>
+            <option value="">All stores</option>
             {shops.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         )}
-        <select aria-label="Area" className={field} value={query.pincode ?? ''}
-          onChange={(e) => onChange({ ...query, pincode: e.target.value || null })}>
-          <option value="">All areas (pincodes)</option>
-          {pincodes.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-[#0EA5A5]" />
+          <select aria-label="Area" className={field} value={query.pincode ?? ''}
+            onChange={(e) => onChange({ ...query, pincode: e.target.value || null })}>
+            <option value="">All areas</option>
+            {pincodes.map((p) => <option key={p} value={p}>Pincode {p}</option>)}
+          </select>
+        </div>
         {data && (
-          <span className="text-xs text-status-neutral">
-            {data.range.label} · compared with the previous {data.range.days} day{data.range.days > 1 ? 's' : ''}
+          <span className="text-sm text-[#667085]">
+            Showing <b className="text-[#344054]">{data.range.label.toLowerCase()}</b> · every “more / less” compares with the {data.range.days} day{data.range.days > 1 ? 's' : ''} before
           </span>
         )}
       </div>

@@ -1,73 +1,99 @@
 import React from 'react';
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Crown, Heart, Repeat, UserCheck, UserPlus, Users, Wallet } from 'lucide-react';
 import type { OverviewData } from '../../types/overview.types';
 import { inr, num, ratio } from '../../utils/overviewFormat';
-import { EmptyNote, NotTracked, SectionCard, SectionError, TableScroll, td, th } from './parts';
-
-const Stat: React.FC<{ label: string; value: string; hint?: string }> = ({ label, value, hint }) => (
-  <div className="rounded-lg border p-3">
-    <div className="text-[11px] font-semibold uppercase tracking-wide text-status-neutral">{label}</div>
-    <div className="mt-1 text-xl font-bold text-ink">{value}</div>
-    {hint && <div className="text-[11px] text-status-neutral">{hint}</div>}
-  </div>
-);
+import { Avatar, EmptyNote, KpiTile, NotTracked, Pill, SectionCard, SectionError, TONES } from './parts';
 
 export const CustomersPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
   const c = data.customers;
-  const newShare = c.active > 0 ? c.new / c.active : null;
+  const split = [
+    { name: 'New customers', value: c.new, color: TONES.blue.solid },
+    { name: 'Came back', value: c.repeat, color: TONES.green.solid },
+  ].filter((x) => x.value > 0);
   return (
-    <SectionCard className="mb-5" title="Customer intelligence" subtitle="Who is buying, who is coming back, and who has gone quiet">
+    <SectionCard className="mb-5" icon={<Users className="h-6 w-6" />} tone="violet" title="Your customers"
+      subtitle="Who is buying, who comes back, and who has stopped.">
       {data.section_errors.customers ? <SectionError show /> : (
         <>
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
-            <Stat label="Active customers" value={num(c.active)} />
-            <Stat label="New" value={num(c.new)} hint={newShare != null ? `${ratio(newShare, 0)} of active` : undefined} />
-            <Stat label="Returning" value={num(c.repeat)} hint="First order was earlier" />
-            <Stat label="Repeat-purchase rate" value={ratio(c.repeat_purchase_rate)} hint="Have ordered 2+ times ever" />
-            <Stat label="Orders per customer" value={c.avg_frequency == null ? '—' : c.avg_frequency.toFixed(1)} hint="In this period" />
-            <Stat label="Avg lifetime value" value={inr(c.avg_lifetime_value)} />
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[#EEF0F5] p-4">
+              <h3 className="text-sm font-bold text-[#1B2437]">New or coming back?</h3>
+              {split.length === 0 ? <EmptyNote>No customers in this period.</EmptyNote> : (
+                <>
+                  <div className="relative mx-auto mt-2 h-40 w-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={split} dataKey="value" nameKey="name" innerRadius={48} outerRadius={72} paddingAngle={3} stroke="none">
+                          {split.map((s) => <Cell key={s.name} fill={s.color} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: 12, fontSize: 13 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-extrabold text-[#1B2437]">{num(c.active)}</span>
+                      <span className="text-xs text-[#667085]">customers</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 space-y-1.5 text-sm">
+                    <div className="flex justify-between"><span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full" style={{ background: TONES.blue.solid }} />First-time buyers</span><b>{num(c.new)}</b></div>
+                    <div className="flex justify-between"><span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full" style={{ background: TONES.green.solid }} />Bought before</span><b>{num(c.repeat)}</b></div>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-2">
+              <KpiTile icon={<Repeat className="h-4 w-4" />} tone="green" label="Come back again" value={ratio(c.repeat_purchase_rate, 0)}
+                help="Out of 100 customers, this many have ordered more than once." />
+              <KpiTile icon={<UserCheck className="h-4 w-4" />} tone="blue" label="Orders per customer" value={c.avg_frequency == null ? '—' : c.avg_frequency.toFixed(1)}
+                help="How many times a customer ordered in this period, on average." />
+              <KpiTile icon={<Wallet className="h-4 w-4" />} tone="violet" label="Lifetime spend" value={inr(c.avg_lifetime_value)}
+                help="About how much one customer has spent with you in total." placeholder={c.avg_lifetime_value == null ? 'Needs 20+ customers' : undefined} />
+              <KpiTile icon={<UserPlus className="h-4 w-4" />} tone="teal" label="Brand-new customers" value={num(c.new)}
+                help="People who placed their very first order in this period." />
+            </div>
           </div>
-          {c.ltv_note && <div className="mt-2"><NotTracked>Lifetime value: {c.ltv_note}.</NotTracked></div>}
+          {c.ltv_note && <div className="mt-3"><NotTracked>Lifetime spend: {c.ltv_note}.</NotTracked></div>}
 
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
             <div>
-              <h3 className="mb-1 text-sm font-semibold text-ink">Top customers</h3>
+              <h3 className="mb-2 flex items-center gap-2 text-base font-bold text-[#1B2437]"><Crown className="h-4 w-4 text-[#F59E0B]" /> Best customers</h3>
               {c.top.length === 0 ? <EmptyNote>No customers in this period.</EmptyNote> : (
-                <TableScroll>
-                  <table className="w-full min-w-[360px]">
-                    <thead><tr><th className={th}>Customer</th><th className={th}>Orders</th><th className={th}>Spent</th></tr></thead>
-                    <tbody className="divide-y">
-                      {c.top.map((t) => (
-                        <tr key={t.customer_id}>
-                          <td className={td}><div className="font-medium">{t.name || 'Unnamed'}</div><div className="text-[11px] text-status-neutral">{t.phone}</div></td>
-                          <td className={td}>{num(t.orders)}</td>
-                          <td className={`${td} font-semibold`}>{inr(t.spend)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </TableScroll>
+                <ul className="space-y-2">
+                  {c.top.map((t) => (
+                    <li key={t.customer_id} className="flex items-center gap-3 rounded-xl border border-[#EEF0F5] p-3">
+                      <Avatar name={t.name} tone="amber" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-bold text-[#1B2437]">{t.name || 'Unnamed customer'}</div>
+                        <div className="text-xs text-[#667085]">{t.phone} · {t.orders} order{t.orders === 1 ? '' : 's'}</div>
+                      </div>
+                      <div className="text-base font-extrabold text-[#1B2437]">{inr(t.spend)}</div>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
             <div>
-              <h3 className="mb-1 text-sm font-semibold text-ink">
-                Lapsed regulars {c.lapsed.total > 0 && <span className="font-normal text-status-neutral">· {c.lapsed.total} customers · ≈ {inr(c.lapsed.monthly_value, { compact: true })}/month at their old pace</span>}
-              </h3>
-              {data.filters.store_wide_hidden ? <NotTracked>Lapsed customers are tracked per store, so they are hidden while an area is selected.</NotTracked> : c.lapsed.top.length === 0 ? <EmptyNote>No regular customers have gone quiet.</EmptyNote> : (
-                <TableScroll>
-                  <table className="w-full min-w-[360px]">
-                    <thead><tr><th className={th}>Customer</th><th className={th}>Last order</th><th className={th}>Used to spend</th></tr></thead>
-                    <tbody className="divide-y">
+              <h3 className="mb-1 flex items-center gap-2 text-base font-bold text-[#1B2437]"><Heart className="h-4 w-4 text-[#E5484D]" /> Win these customers back</h3>
+              <p className="mb-2 text-sm text-[#667085]">They used to order often but have gone quiet for 1–6 months.</p>
+              {data.filters.store_wide_hidden ? <NotTracked>This is tracked per store, so it is hidden while an area is selected.</NotTracked>
+                : c.lapsed.top.length === 0 ? <EmptyNote>Nobody regular has gone quiet. 👍</EmptyNote> : (
+                  <>
+                    <div className="mb-2"><Pill tone="amber">{c.lapsed.total} customers · about {inr(c.lapsed.monthly_value, { compact: true })} a month</Pill></div>
+                    <ul className="space-y-2">
                       {c.lapsed.top.map((t) => (
-                        <tr key={t.customer_id}>
-                          <td className={td}><div className="font-medium">{t.name || 'Unnamed'}</div><div className="text-[11px] text-status-neutral">{t.phone} · {t.orders} orders</div></td>
-                          <td className={td}>{new Date(t.last_order_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</td>
-                          <td className={`${td} font-semibold`}>{inr(t.monthly_value)}/mo</td>
-                        </tr>
+                        <li key={t.customer_id} className="flex items-center gap-3 rounded-xl border border-[#FBE3AE] bg-[#FFFBF0] p-3">
+                          <Avatar name={t.name} tone="amber" />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-bold text-[#1B2437]">{t.name || 'Unnamed customer'}</div>
+                            <div className="text-xs text-[#667085]">{t.phone} · last order {new Date(t.last_order_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
+                          </div>
+                          <div className="text-right"><div className="text-sm font-extrabold text-[#B26A00]">{inr(t.monthly_value)}</div><div className="text-[11px] text-[#667085]">per month before</div></div>
+                        </li>
                       ))}
-                    </tbody>
-                  </table>
-                </TableScroll>
-              )}
+                    </ul>
+                  </>
+                )}
             </div>
           </div>
         </>
