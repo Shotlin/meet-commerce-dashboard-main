@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Flame, PackageSearch, Rocket, ShoppingBag, Trophy, Undo2, Wallet } from 'lucide-react';
 import type { OverviewData, OverviewProductRow } from '../../types/overview.types';
 import { inr, num, ratio } from '../../utils/overviewFormat';
-import { ChangeChip, EmptyNote, MiniBar, NotTracked, Pill, SectionCard, SectionError, SoftTabs, rankBadge, type Tone } from './parts';
+import { ChangeChip, EmptyNote, MiniBar, NotTracked, Pill, SectionCard, SectionError, SoftTabs, ProductThumb, rankBadge, type Tone } from './parts';
 
 type TabKey = 'top_selling' | 'top_revenue' | 'top_profit' | 'trending' | 'slow_moving' | 'high_returns';
 
@@ -28,6 +28,7 @@ const Row: React.FC<{ rank: number; p: OverviewProductRow; tab: TabKey; max: num
     <li className="rounded-xl border border-[#EEF0F5] p-3.5">
       <div className="flex items-start gap-3">
         {rankBadge(rank)}
+        <ProductThumb src={p.image} name={p.name} size={56} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="truncate text-base font-bold text-[#1B2437]" title={p.name}>{p.name}</span>
@@ -70,6 +71,7 @@ export const ProductsPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
                 <li key={s.product_id} className="rounded-xl border border-[#EEF0F5] p-3.5">
                   <div className="flex items-start gap-3">
                     {rankBadge(i + 1)}
+                    <ProductThumb src={s.image} name={s.name} size={56} />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="truncate text-base font-bold text-[#1B2437]">{s.name}</span>

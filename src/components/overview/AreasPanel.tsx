@@ -2,7 +2,7 @@ import React from 'react';
 import { MapPin, ShoppingBag, Truck, Users } from 'lucide-react';
 import type { OverviewData } from '../../types/overview.types';
 import { inr, num } from '../../utils/overviewFormat';
-import { ChangeChip, EmptyNote, MiniBar, Pill, SectionCard, SectionError, TONES } from './parts';
+import { ChangeChip, EmptyNote, MiniBar, Pill, ProductThumb, SectionCard, SectionError, TONES } from './parts';
 
 export const AreasPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
   const rows = data.areas;
@@ -46,7 +46,11 @@ export const AreasPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
                   <div className="mt-3">
                     <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-[#98A2B3]">Customers here love</div>
                     <div className="flex flex-wrap gap-1.5">
-                      {a.top_products.map((p) => <span key={p.product_id} className="rounded-full bg-[#EAF1FF] px-2.5 py-1 text-xs font-medium text-[#2457D6]">{p.name}</span>)}
+                      {a.top_products.map((p) => (
+                        <span key={p.product_id} className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF1FF] py-1 pl-1 pr-2.5 text-xs font-medium text-[#2457D6]">
+                          <ProductThumb src={p.image} name={p.name} size={22} rounded="full" />{p.name}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 )}

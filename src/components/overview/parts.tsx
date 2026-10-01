@@ -1,6 +1,6 @@
 import React from 'react';
 import { clsx } from 'clsx';
-import { ArrowDownRight, ArrowUpRight, Info, Minus } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Info, Minus, Package } from 'lucide-react';
 
 /**
  * Design system for the Business Overview.
@@ -186,3 +186,21 @@ export const Avatar: React.FC<{ name: string | null; tone?: Tone }> = ({ name, t
 export const rankBadge = (n: number) => (
   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F1F3F9] text-xs font-bold text-[#475467]">{n}</span>
 );
+
+/** Product photo (already uploaded in the catalogue). Falls back to a neutral box icon. */
+export const ProductThumb: React.FC<{ src?: string | null; name: string; size?: number; rounded?: 'xl' | 'full' }> = ({ src, name, size = 52, rounded = 'xl' }) => {
+  const [broken, setBroken] = React.useState(false);
+  const cls = rounded === 'full' ? 'rounded-full' : 'rounded-xl';
+  const box = { width: size, height: size };
+  if (!src || broken) {
+    return (
+      <span className={clsx('flex shrink-0 items-center justify-center bg-[#F1F3F9] text-[#98A2B3]', cls)} style={box} aria-hidden>
+        <Package style={{ width: size * 0.45, height: size * 0.45 }} />
+      </span>
+    );
+  }
+  return (
+    <img src={src} alt={name} loading="lazy" onError={() => setBroken(true)}
+      className={clsx('shrink-0 border border-[#EEF0F5] bg-[#F6F8FC] object-cover', cls)} style={box} />
+  );
+};

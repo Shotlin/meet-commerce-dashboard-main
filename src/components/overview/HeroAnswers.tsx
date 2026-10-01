@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Droplets, PiggyBank, ShoppingBag, Sprout, Sparkles } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Droplets, PiggyBank, ShoppingBag, Sprout } from 'lucide-react';
 import type { OverviewData } from '../../types/overview.types';
 import { inr } from '../../utils/overviewFormat';
 import { ChangeChip, IconChip, Pill, TONES, surface, type Tone } from './parts';
@@ -48,12 +48,9 @@ export const HeroAnswers: React.FC<{ data: OverviewData }> = ({ data }) => {
     <div className="mb-5 space-y-4">
       <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-[0_10px_30px_-12px_rgba(47,107,255,0.55)] sm:p-6"
         style={{ background: 'linear-gradient(135deg,#2F6BFF 0%,#5B3FD0 100%)' }}>
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/20"><Sparkles className="h-5 w-5" /></span>
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-white/75">Quick summary</div>
-            <p className="mt-1 text-base leading-relaxed sm:text-lg">{summary}</p>
-          </div>
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-white/75">Quick summary</div>
+          <p className="mt-1.5 text-base leading-relaxed sm:text-lg">{summary}</p>
         </div>
         <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-white/80">
           <span><b className="text-white">K</b> = thousand (₹18K = ₹18,000)</span>

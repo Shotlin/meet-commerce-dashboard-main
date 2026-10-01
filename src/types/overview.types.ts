@@ -69,6 +69,7 @@ export interface OverviewOrderHealth {
 export interface OverviewProductRow {
   product_id: string;
   name: string;
+  image?: string | null;
   units: number;
   revenue: number;
   margin: number | null;
@@ -83,6 +84,7 @@ export interface OverviewProductRow {
 export interface OverviewSlowMover {
   product_id: string;
   name: string;
+  image?: string | null;
   stock: number;
   units_sold: number;
   stock_value: number | null;
@@ -108,7 +110,7 @@ export interface OverviewArea {
   delivery_cost: number;
   delivery_cost_per_order: number;
   revenue_change_pct: number | null;
-  top_products: { product_id: string; name: string; units: number }[];
+  top_products: { product_id: string; name: string; image?: string | null; units: number }[];
 }
 
 export interface OverviewCustomers {
@@ -137,8 +139,8 @@ export interface OverviewVendor {
   revenue_generated: number;
   margin_generated: number | null;
   margin_pct: number | null;
-  best_sku: { name: string; profit: number; margin: number } | null;
-  worst_sku: { name: string; profit: number; margin: number } | null;
+  best_sku: { name: string; image?: string | null; profit: number; margin: number } | null;
+  worst_sku: { name: string; image?: string | null; profit: number; margin: number } | null;
 }
 
 export interface OverviewDelivery {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Bike, CircleAlert, Clock, PackageCheck, Store, ThumbsDown, ThumbsUp, Timer, Truck, Wallet } from 'lucide-react';
 import type { OverviewData } from '../../types/overview.types';
 import { inr, minutes, num, ratio } from '../../utils/overviewFormat';
-import { EmptyNote, KpiTile, NotTracked, Pill, Ring, SectionCard, SectionError, TONES } from './parts';
+import { EmptyNote, KpiTile, NotTracked, ProductThumb, Ring, SectionCard, SectionError, TONES } from './parts';
 
 export const VendorsPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
   const rows = data.vendors;
@@ -40,9 +40,23 @@ export const VendorsPanel: React.FC<{ data: OverviewData }> = ({ data }) => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    {v.best_sku && <Pill tone="green">Best: {v.best_sku.name} · {ratio(v.best_sku.margin, 0)}</Pill>}
-                    {v.worst_sku && <Pill tone="red">Weakest: {v.worst_sku.name} · {ratio(v.worst_sku.margin, 0)}</Pill>}
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {v.best_sku && (
+                      <div className="flex items-center gap-2.5 rounded-lg bg-[#E4F6EC] p-2">
+                        <ProductThumb src={v.best_sku.image} name={v.best_sku.name} size={38} />
+                        <div className="min-w-0"><div className="text-[11px] font-semibold uppercase text-[#0B8A57]">Best product</div>
+                          <div className="truncate text-sm font-bold text-[#1B2437]">{v.best_sku.name}</div>
+                          <div className="text-xs text-[#0B8A57]">{ratio(v.best_sku.margin, 0)} profit</div></div>
+                      </div>
+                    )}
+                    {v.worst_sku && (
+                      <div className="flex items-center gap-2.5 rounded-lg bg-[#FDECEC] p-2">
+                        <ProductThumb src={v.worst_sku.image} name={v.worst_sku.name} size={38} />
+                        <div className="min-w-0"><div className="text-[11px] font-semibold uppercase text-[#C93036]">Weakest product</div>
+                          <div className="truncate text-sm font-bold text-[#1B2437]">{v.worst_sku.name}</div>
+                          <div className="text-xs text-[#C93036]">{ratio(v.worst_sku.margin, 0)} profit</div></div>
+                      </div>
+                    )}
                   </div>
                 </li>
               );
