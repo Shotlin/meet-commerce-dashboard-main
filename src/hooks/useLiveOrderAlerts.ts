@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { apiClient } from '../services/apiClient';
 import { sessionManager } from '../services/sessionManager';
 import { queryKeys } from '../services/queryKeys';
+import { createRealtimeGate } from '../utils/realtimeGate';
 
 /** Shape of `dashboard:new_order` — see backend `socketio.plugin.js#emitDashboardNewOrder`. */
 export interface NewOrderAlertPayload {
@@ -19,6 +20,30 @@ export interface NewOrderAlertPayload {
 
 /** Browser-wide signal for pages that don't use TanStack Query for their order data (e.g. HQCommandCenter's local `useState`+`fetch`), so they can refetch instantly too instead of waiting on their own polling interval. */
 export const NEW_ORDER_EVENT = 'dashboard:new-order';
+
+/** Same, for any order status change / refund update (pages on plain fetch). */
+export const ORDER_CHANGED_EVENT = 'dashboard:order-changed';
+
+/** Shape of `refund:status` — see backend `modules/orders/order-events.js`. */
+export interface RefundStatusPayload {
+  orderId: string;
+  orderNumber?: string;
+  refundRequestId: string;
+  status: string;
+  event?: string;
+  amount?: number;
+  seq?: number;
+  eventId?: string;
+}
+
+/** Shape of `order:status`. */
+export interface OrderStatusPayload {
+  orderId: string;
+  orderNumber?: string;
+  status: string;
+  seq?: number;
+  eventId?: string;
+}
 
 const ALERT_SOUND_URL = '/sounds/new-order-alert.mp3';
 // Cap how many order ids we remember, purely so a session left open for days
@@ -57,6 +82,7 @@ export function useLiveOrderAlerts() {
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const seenOrderIdsRef = useRef<string[]>([]);
+  const gateRef = useRef(createRealtimeGate());
 
   useEffect(() => {
     const token = sessionManager.getToken();
@@ -68,8 +94,41 @@ export function useLiveOrderAlerts() {
     });
     socketRef.current = socket;
 
-    socket.on('connect', () => setConnected(true));
+    // Events fired while the socket was down are never replayed, so every
+    // (re)connect re-reads the order + returns lists from REST.
+    const reconcile = () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminOrders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.returns.all });
+      window.dispatchEvent(new CustomEvent(ORDER_CHANGED_EVENT));
+    };
+    socket.on('connect', () => { setConnected(true); reconcile(); });
     socket.on('disconnect', () => setConnected(false));
+
+    // Any order status change — by a rider, the customer, another admin or
+    // Shiprocket — refreshes the order list/drawer instantly. One event per
+    // change (server de-dupes rooms); the gate drops stale/duplicate ones.
+    socket.on('order:status', (e: OrderStatusPayload) => {
+      if (!e?.orderId || !gateRef.current.accept(`order:${e.orderId}`, e.seq, e.eventId)) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminOrders.all });
+      window.dispatchEvent(new CustomEvent(ORDER_CHANGED_EVENT, { detail: e }));
+    });
+
+    // A customer refund request lands in the right store's queue live.
+    socket.on('refund:status', (e: RefundStatusPayload) => {
+      if (!e?.refundRequestId || !gateRef.current.accept(`refund:${e.refundRequestId}`, e.seq, e.eventId)) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.returns.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminOrders.all });
+      window.dispatchEvent(new CustomEvent(ORDER_CHANGED_EVENT, { detail: e }));
+
+      if (e.event === 'REFUND_REQUESTED') {
+        playAlertOnce();
+        toast.warning(`Refund request — ${e.orderNumber || 'order'}`, {
+          description: `${Number(e.amount || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })} requested by the customer`,
+          action: { label: 'Review', onClick: () => navigate(`/returns?id=${e.refundRequestId}`) },
+          duration: 10000,
+        });
+      }
+    });
 
     socket.on('dashboard:new_order', (order: NewOrderAlertPayload) => {
       if (!order?.id || seenOrderIdsRef.current.includes(order.id)) return;

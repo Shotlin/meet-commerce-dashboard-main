@@ -154,6 +154,18 @@ export interface OrderDetail extends OrderListRow {
   // a video.
   qualityEvidence: OrderQualityEvidenceItem[];
   settlement: SettlementInfo;
+  // Latest customer-raised refund request (customer app) — null when none.
+  refundRequest: OrderRefundRequest | null;
+}
+
+export interface OrderRefundRequest {
+  id: string;
+  status: 'PENDING' | 'PROCESSING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  scope: 'FULL_ORDER' | 'ITEMS';
+  amount: number;
+  reason: string;
+  source: 'CUSTOMER' | 'ADMIN';
+  createdAt: string;
 }
 
 /**

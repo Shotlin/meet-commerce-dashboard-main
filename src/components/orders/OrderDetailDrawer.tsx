@@ -337,6 +337,22 @@ export function OrderDetailDrawer({ orderId, onClose }: Props) {
                   </div>
                 )}
 
+                {order.refundRequest && ['PENDING', 'PROCESSING'].includes(order.refundRequest.status) && (
+                  <div className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-amber-900">
+                          Customer refund request — {order.refundRequest.scope === 'FULL_ORDER' ? 'full order' : 'selected items'}, {fmtCurrency(order.refundRequest.amount)}
+                        </p>
+                        <p className="mt-0.5 text-amber-800">"{order.refundRequest.reason}"</p>
+                      </div>
+                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => navigate(`/returns?id=${order.refundRequest!.id}`)}>
+                        Review
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 <Separator />
 
                 {/* B. RIDER */}

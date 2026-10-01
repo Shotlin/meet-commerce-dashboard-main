@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, RotateCcw } from 'lucide-react';
 import { PageHeader } from '../components/layout/PageHeader';
@@ -18,6 +19,16 @@ export const ReturnsPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Deep link from the order drawer ("Review in Returns") — /returns?id=<request>
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      setSelectedId(id);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.returns.list({ status: filter === 'ALL' ? undefined : filter }),
     queryFn: () => returnRequestService.list({ status: filter === 'ALL' ? undefined : filter, limit: 50 }),
@@ -32,12 +43,15 @@ export const ReturnsPage: React.FC = () => {
         <p className="text-[11px] text-status-neutral">{row.customer_name ?? row.customer_phone}</p>
       </div>
     ) },
+    { header: 'From', cell: (row) => (
+      <Badge variant={row.source === 'CUSTOMER' ? 'info' : 'neutral'} size="sm">{row.source === 'CUSTOMER' ? 'Customer app' : 'Admin'}</Badge>
+    ) },
     { header: 'Scope', cell: (row) => <Badge variant="neutral" size="sm">{row.scope === 'FULL_ORDER' ? 'Full Order' : 'Items'}</Badge> },
     { header: 'Amount', cell: (row) => <span className="font-mono-num font-bold text-ink-2">₹{Number(row.computed_amount).toFixed(2)}</span> },
     { header: 'Destination', cell: (row) => <span className="text-xs">{row.refund_destination === 'WALLET' ? 'Wallet' : 'Razorpay'}</span> },
     { header: 'Status', cell: (row) => (
       <Badge variant={row.status === 'APPROVED' ? 'success' : row.status === 'REJECTED' ? 'danger' : row.status === 'CANCELLED' ? 'neutral' : 'warning'} size="sm">
-        {row.status}
+        {row.status === 'PROCESSING' ? 'REFUNDING…' : row.status}
       </Badge>
     ) },
     { header: 'Filed', cell: (row) => <span className="text-[11px] text-status-neutral">{new Date(row.created_at).toLocaleDateString('en-IN')}</span> },
@@ -47,7 +61,7 @@ export const ReturnsPage: React.FC = () => {
     <div>
       <PageHeader
         title="Returns & Refunds"
-        subtitle="Admin-mediated return requests — file a return on a customer's behalf, then approve to trigger a real refund."
+        subtitle="Refund requests from the customer app (and ones you file on a customer's behalf) for your store — approve to trigger a real refund. New requests appear here live."
         badge={<Badge variant="neutral" icon={<RotateCcw className="w-3.5 h-3.5" />}>{data?.pagination.total ?? 0} Total</Badge>}
         actions={<Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => setCreateOpen(true)}>New Return</Button>}
       />

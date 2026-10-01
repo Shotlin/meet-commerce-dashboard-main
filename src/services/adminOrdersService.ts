@@ -213,6 +213,17 @@ export function mapOrderDetail(o: any): OrderDetail {
     // resolves one — a manually-stocked item, or an order that predates
     // this feature.
     qualityEvidence: Array.isArray(o.quality_evidence) ? o.quality_evidence.map(mapQualityEvidenceItem) : [],
+    refundRequest: o.refund_request
+      ? {
+          id: o.refund_request.id,
+          status: o.refund_request.status,
+          scope: o.refund_request.scope,
+          amount: Number(o.refund_request.resolved_amount ?? o.refund_request.computed_amount ?? 0),
+          reason: o.refund_request.reason ?? '',
+          source: o.refund_request.source ?? 'ADMIN',
+          createdAt: o.refund_request.created_at,
+        }
+      : null,
   };
 }
 

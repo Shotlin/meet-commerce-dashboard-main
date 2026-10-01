@@ -5,10 +5,11 @@ import { DetailDrawer } from '../layout/DetailDrawer';
 import { Badge, BadgeVariant } from '../common/Badge';
 import { Button } from '../common/Button';
 import { queryKeys } from '../../services/queryKeys';
-import { returnRequestService, ReturnStatus } from '../../services/returnRequestService';
+import { returnRequestService, ReturnStatus, RefundDestination } from '../../services/returnRequestService';
 
 const STATUS_BADGE: Record<ReturnStatus, BadgeVariant> = {
   PENDING: 'warning',
+  PROCESSING: 'warning',
   APPROVED: 'success',
   REJECTED: 'danger',
   CANCELLED: 'neutral',
@@ -21,6 +22,7 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
   const queryClient = useQueryClient();
   const [adminNotes, setAdminNotes] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [refundTo, setRefundTo] = useState<RefundDestination | ''>('');
 
   const { data: request } = useQuery({
     queryKey: queryKeys.returns.detail(returnId ?? ''),
@@ -33,7 +35,7 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
   };
 
   const approveMutation = useMutation({
-    mutationFn: () => returnRequestService.approve(returnId!, adminNotes || undefined),
+    mutationFn: () => returnRequestService.approve(returnId!, adminNotes || undefined, refundTo || undefined),
     onSuccess: () => { invalidate(); setActionError(null); setAdminNotes(''); },
     onError: (e) => setActionError((e as Error).message),
   });
@@ -51,6 +53,7 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
   });
 
   const isPending = request?.status === 'PENDING';
+  const isRefunding = request?.status === 'PROCESSING';
   const anyActionLoading = approveMutation.isPending || rejectMutation.isPending || cancelMutation.isPending;
 
   return (
@@ -61,6 +64,8 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
             <Badge variant={STATUS_BADGE[request.status]}>{request.status}</Badge>
             <Badge variant="neutral" size="sm">{request.scope === 'FULL_ORDER' ? 'Full Order' : 'Specific Items'}</Badge>
             <Badge variant="neutral" size="sm">{request.refund_destination === 'WALLET' ? 'Wallet' : 'Razorpay'}</Badge>
+            {request.source === 'CUSTOMER' && <Badge variant="info" size="sm">Customer app</Badge>}
+            {request.shop_name && <Badge variant="neutral" size="sm">{request.shop_name}</Badge>}
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -78,8 +83,8 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
             <div>
               <p className="text-[11px] font-bold text-ink mb-1">Items</p>
               <div className="space-y-1">
-                {request.items.map((item) => (
-                  <div key={item.itemIndex} className="flex justify-between text-xs p-2 bg-rose-50/60 rounded-[10px] border border-border">
+                {request.items.map((item, i) => (
+                  <div key={item.orderItemId ?? item.productId ?? item.itemIndex ?? i} className="flex justify-between text-xs p-2 bg-rose-50/60 rounded-[10px] border border-border">
                     <span>{item.name} × {item.quantity}</span>
                     <span className="font-mono-num font-bold">₹{item.lineTotal.toFixed(2)}</span>
                   </div>
@@ -100,6 +105,17 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
             </div>
           )}
 
+          {isRefunding && (
+            <p className="text-xs text-ink bg-amber-50 border border-amber-200 rounded-[10px] p-2.5">
+              The refund is being processed right now — this updates automatically when it completes.
+            </p>
+          )}
+          {request.last_error && isPending && (
+            <p className="text-xs text-status-danger bg-status-danger/10 border border-status-danger/30 rounded-[10px] p-2.5">
+              Last refund attempt failed: {request.last_error}
+            </p>
+          )}
+
           {isPending && (
             <div className="space-y-2 pt-2 border-t border-border">
               {actionError && (
@@ -110,6 +126,12 @@ export const ReturnDetailDrawer: React.FC<{ returnId: string | null; onClose: ()
                   )}
                 </p>
               )}
+              <label className="block text-[11px] font-bold text-ink">Refund to</label>
+              <select className={inputClass} value={refundTo} onChange={(e) => setRefundTo(e.target.value as RefundDestination | '')}>
+                <option value="">As requested ({request.refund_destination === 'WALLET' ? 'Wallet' : 'Original payment method'})</option>
+                <option value="WALLET">Wallet</option>
+                <option value="RAZORPAY">Original payment method (Razorpay)</option>
+              </select>
               <label className="block text-[11px] font-bold text-ink">Admin Notes (optional)</label>
               <textarea className={inputClass} rows={2} value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} placeholder="Any context for this decision…" />
               <div className="flex gap-2 pt-1">

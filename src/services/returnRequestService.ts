@@ -1,11 +1,15 @@
 import { apiClient } from './apiClient';
 
-export type ReturnStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+export type ReturnStatus = 'PENDING' | 'PROCESSING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 export type ReturnScope = 'FULL_ORDER' | 'ITEMS';
 export type RefundDestination = 'RAZORPAY' | 'WALLET';
 
 export interface ReturnItem {
-  itemIndex: number;
+  // Admin-filed requests index into the order's lines; customer-app requests
+  // carry the real order line / product ids instead.
+  itemIndex?: number;
+  orderItemId?: string;
+  productId?: string;
   name: string;
   quantity: number;
   unitPrice: number;
@@ -31,6 +35,12 @@ export interface ReturnRequest {
   resolved_at: string | null;
   created_at: string;
   updated_at: string;
+  // Added with the customer refund flow (migration 152).
+  shop_id?: string | null;
+  shop_name?: string | null;
+  source?: 'CUSTOMER' | 'ADMIN';
+  refund_reference?: string | null;
+  last_error?: string | null;
   order_number: string;
   order_total_payable: string;
   order_status: string;
@@ -83,8 +93,8 @@ export const returnRequestService = {
     throw new Error('Failed to create return request');
   },
 
-  async approve(id: string, adminNotes?: string): Promise<ReturnRequest> {
-    const res = await apiClient.post<ReturnRequest>(`/api/v1/admin/returns/${id}/approve`, { adminNotes });
+  async approve(id: string, adminNotes?: string, refundTo?: RefundDestination): Promise<ReturnRequest> {
+    const res = await apiClient.post<ReturnRequest>(`/api/v1/admin/returns/${id}/approve`, { adminNotes, refundTo });
     if (res.success && res.data) return res.data;
     throw new Error('Failed to approve return request');
   },
