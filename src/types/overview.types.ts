@@ -166,7 +166,7 @@ export interface OverviewInsight {
   title: string;
   detail: string;
   impact_inr: number | null;
-  entity: { type: string; id: string; name: string } | null;
+  entity: { type: string; id: string; name: string; image?: string | null } | null;
   link: string | null;
 }
 

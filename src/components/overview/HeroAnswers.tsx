@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, Droplets, PiggyBank, ShoppingBag, Sprout } from 'lucide-react';
 import type { OverviewData } from '../../types/overview.types';
 import { inr } from '../../utils/overviewFormat';
-import { ChangeChip, IconChip, Pill, TONES, surface, type Tone } from './parts';
+import { ChangeChip, IconChip, Pill, ProductThumb, TONES, surface, type Tone } from './parts';
 
 const Big: React.FC<{
   icon: React.ReactNode; tone: Tone; question: string; value: string; valueTone?: Tone; sentence: string; chip?: React.ReactNode;
@@ -98,6 +98,7 @@ export const HeroAnswers: React.FC<{ data: OverviewData }> = ({ data }) => {
             {insights.investigate_today.map((i, n) => (
               <li key={i.id} className="flex gap-3 rounded-xl border border-[#F8D2D4] bg-[#FFF8F8] p-3.5">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E5484D] text-sm font-bold text-white">{n + 1}</span>
+                {i.entity?.type === 'product' && <ProductThumb src={i.entity.image} name={i.entity.name} size={44} />}
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold leading-snug text-[#1B2437]">{i.title}</div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">

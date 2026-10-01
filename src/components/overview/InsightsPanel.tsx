@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import type { InsightKind, OverviewInsight, OverviewInsights } from '../../types/overview.types';
 import { inr } from '../../utils/overviewFormat';
-import { EmptyNote, IconChip, Pill, SectionCard, SoftTabs, type Tone } from './parts';
+import { EmptyNote, IconChip, Pill, ProductThumb, SectionCard, SoftTabs, type Tone } from './parts';
 
 const CATEGORY: Record<string, { icon: React.ReactNode; label: string }> = {
   product: { icon: <Package className="h-5 w-5" />, label: 'Product' },
@@ -30,7 +30,9 @@ const Row: React.FC<{ i: OverviewInsight }> = ({ i }) => {
   const tone: Tone = i.kind === 'opportunity' ? 'green' : i.kind === 'data' ? 'blue' : SEVERITY[i.severity].tone === 'slate' ? 'amber' : SEVERITY[i.severity].tone;
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-[#EEF0F5] p-4 transition hover:border-[#D9DEE7] hover:bg-[#FAFBFD] sm:flex-row sm:items-center">
-      <IconChip icon={cat.icon} tone={tone} size="lg" />
+      {i.entity?.type === 'product'
+        ? <ProductThumb src={i.entity.image} name={i.entity.name} size={56} />
+        : <IconChip icon={cat.icon} tone={tone} size="lg" />}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#98A2B3]">{cat.label}</span>
