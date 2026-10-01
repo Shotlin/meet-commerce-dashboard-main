@@ -12,6 +12,7 @@ import { VendorsPage } from './pages/VendorsPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { FinancePage } from './pages/FinancePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { BusinessOverviewPage } from './pages/BusinessOverviewPage';
 
 // Additional Feature Pages
 import ProductsPage from './pages/ProductsPage';
@@ -78,6 +79,7 @@ export const App: React.FC = () => {
                   <Route path="procurement/supplies/:supplyId" element={<SupplyOrderDetailPage />} />
                   <Route path="procurement/:id" element={<ProcurementDetailPage />} />
                   <Route path="finance" element={<FinancePage />} />
+                  <Route path="overview" element={<BusinessOverviewPage />} />
                   <Route path="analytics" element={<AnalyticsPage />} />
 
                   {/* Full Route Architecture Modules */}

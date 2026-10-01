@@ -16,6 +16,7 @@ export const Breadcrumb: React.FC = () => {
     supplies: 'Supply Orders',
     new: 'Create Requirement',
     finance: 'Finance Overview',
+    overview: 'Business Overview',
     analytics: 'Analytics & Reports',
     catalogue: 'Catalogue Management',
     fulfilment: 'Fulfilment & Packing',

@@ -2,7 +2,7 @@ import { UserRole } from '../types';
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'HQ Admin': [
-    '/', '/orders', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
+    '/', '/overview', '/orders', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
     '/delivery', '/riders', '/shops', '/coverage-map', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
     '/content', '/themes', '/themes/new', '/themes/builder', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay', '/configuration/shiprocket'
   ],
@@ -16,7 +16,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     '/', '/delivery', '/orders', '/shops'
   ],
   'Finance Lead': [
-    '/', '/finance', '/analytics', '/loyalty', '/orders', '/vendors'
+    '/', '/overview', '/finance', '/analytics', '/loyalty', '/orders', '/vendors'
   ],
   'Governance Auditor': [
     '/', '/governance', '/analytics', '/recalls', '/orders', '/inventory'

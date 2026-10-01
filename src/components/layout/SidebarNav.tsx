@@ -35,7 +35,8 @@ import {
   Tags,
   LogOut,
   X,
-  MapPinned
+  MapPinned,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
@@ -87,6 +88,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
       title: 'OPERATIONS CORE',
       items: [
         { to: '/', label: 'HQ Command', icon: <LayoutDashboard className="w-4 h-4" />, isCore: true },
+        { to: '/overview', label: 'Business Overview', icon: <TrendingUp className="w-4 h-4" />, isCore: true },
         { to: '/orders', label: 'Orders & Evidence', icon: <ShoppingBag className="w-4 h-4" />, badge: pendingOrdersCount, isCore: true },
         { to: '/inventory', label: 'Inventory & Lots', icon: <Boxes className="w-4 h-4" />, isCore: true },
         { to: '/vendors', label: 'Vendors & Procurement', icon: <Store className="w-4 h-4" />, isCore: true },

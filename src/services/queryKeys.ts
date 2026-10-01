@@ -8,6 +8,10 @@
 // more specific keys (e.g. summary, byShop) as that service needs them.
 
 export const queryKeys = {
+  overview: {
+    all: ['overview'] as const,
+    detail: (shopKey: string, query?: Record<string, unknown>) => ['overview', shopKey, query] as const,
+  },
   procurement: {
     all: ['procurement'] as const,
     list: (filters?: Record<string, unknown>) => [...queryKeys.procurement.all, 'list', filters] as const,
