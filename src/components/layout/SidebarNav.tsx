@@ -132,6 +132,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
         { to: '/customer-segments', label: 'Customer Segments', icon: <Users className="w-4 h-4" /> },
         { to: '/notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
         { to: '/whatsapp', label: 'WhatsApp', icon: <MessageCircle className="w-4 h-4" /> },
+        { to: '/whatsapp/inbox', label: 'WhatsApp Inbox', icon: <MessageCircle className="w-4 h-4" /> },
       ],
     },
     {

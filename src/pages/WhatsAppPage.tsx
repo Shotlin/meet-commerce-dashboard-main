@@ -431,6 +431,26 @@ function LimitsPanel({ settings }: { settings: WhatsAppSettings }) {
           <input className={inputClass} value={draft.countryCode} onChange={(e) => set('countryCode', e.target.value.replace(/\D/g, ''))} />)}
       </div>
 
+      <div className="rounded-lg border border-border p-3 space-y-2">
+        <p className="text-sm font-semibold text-ink">Keep chats in the inbox for</p>
+        <p className="text-xs text-status-neutral">
+          A chat is deleted this many days after its <b>last</b> message (sent or received). A new message starts the count again, so active chats are never removed.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {[1, 3, 7, 15, 30].map((d) => (
+            <Button key={d} size="sm" variant={draft.chatRetentionDays === d ? 'primary' : 'outline'} onClick={() => set('chatRetentionDays', d)}>
+              {d} {d === 1 ? 'day' : 'days'}
+            </Button>
+          ))}
+          <input
+            type="number" min={1} max={90} className={`${inputClass} w-24`}
+            value={draft.chatRetentionDays}
+            onChange={(e) => set('chatRetentionDays', Math.min(90, Math.max(1, Number(e.target.value) || 1)))}
+            aria-label="Custom number of days"
+          />
+        </div>
+      </div>
+
       <div className="space-y-3">
         {[
           ['typingSimulation', 'Show "typing…" before each message', 'Mimics a person typing; adds a few seconds per message.'],

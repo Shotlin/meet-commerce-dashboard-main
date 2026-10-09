@@ -4,7 +4,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   'HQ Admin': [
     '/', '/overview', '/orders', '/inventory', '/vendors', '/procurement', '/procurement/new', '/procurement/supplies', '/finance', '/analytics',
     '/delivery', '/riders', '/shops', '/coverage-map', '/crm', '/support', '/returns', '/recalls', '/catalogue', '/products/families', '/categories', '/marketing',
-    '/content', '/themes', '/themes/new', '/themes/builder', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/whatsapp', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay', '/configuration/shiprocket'
+    '/content', '/themes', '/themes/new', '/themes/builder', '/loyalty', '/merchandising', '/governance', '/retention', '/abandoned-carts', '/customer-activity', '/first-time-offers', '/cart-milestones', '/customer-segments', '/notifications', '/whatsapp', '/whatsapp/inbox', '/platform', '/configuration', '/configuration/maps', '/configuration/razorpay', '/configuration/shiprocket'
   ],
   'Warehouse Manager': [
     '/', '/orders', '/inventory', '/delivery', '/riders', '/shops', '/coverage-map', '/recalls', '/catalogue', '/procurement', '/procurement/new', '/procurement/supplies'

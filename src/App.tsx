@@ -55,6 +55,7 @@ import MapsSettingsPage from './pages/MapsSettingsPage';
 import RazorpaySettingsPage from './pages/RazorpaySettingsPage';
 import ShiprocketSettingsPage from './pages/ShiprocketSettingsPage';
 import WhatsAppPage from './pages/WhatsAppPage';
+import WhatsAppInboxPage from './pages/WhatsAppInboxPage';
 import { LoginPage } from './pages/LoginPage';
 
 export const App: React.FC = () => {
@@ -124,6 +125,7 @@ export const App: React.FC = () => {
                   <Route path="configuration/razorpay" element={<RazorpaySettingsPage />} />
                   <Route path="configuration/shiprocket" element={<ShiprocketSettingsPage />} />
                   <Route path="whatsapp" element={<WhatsAppPage />} />
+                  <Route path="whatsapp/inbox" element={<WhatsAppInboxPage />} />
                 </Route>
 
                 {/* Fallback */}

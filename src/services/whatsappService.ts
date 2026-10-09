@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import { uploadViaXhr } from './uploads.service';
 
 export type WhatsAppState = 'DISCONNECTED' | 'CONNECTING' | 'QR' | 'CONNECTED' | 'LOGGED_OUT' | 'ERROR';
 
@@ -26,6 +27,7 @@ export interface WhatsAppSettings {
   quietHoursEnabled: boolean;
   quietStartMin: number;
   quietEndMin: number;
+  chatRetentionDays: number;
   connectedPhone: string | null;
   connectedName: string | null;
   firstConnectedAt: string | null;
@@ -72,6 +74,32 @@ export interface WhatsAppMessageRow {
   created_at: string;
 }
 
+export interface WhatsAppConversation {
+  id: string;
+  jid: string;
+  phone: string | null;
+  display_name: string | null;
+  last_message_at: string;
+  last_message_preview: string | null;
+  last_direction: 'IN' | 'OUT' | null;
+  unread_count: number;
+  expires_at: string;
+}
+
+export interface WhatsAppChatMessage {
+  id: string;
+  conversation_id: string;
+  direction: 'IN' | 'OUT';
+  type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'sticker' | 'other';
+  body: string | null;
+  media_name: string | null;
+  media_mime: string | null;
+  media_size: number | null;
+  has_media: boolean;
+  source: 'MANUAL' | 'AUTOMATED' | 'CUSTOMER';
+  created_at: string;
+}
+
 const BASE = '/api/v1/admin/whatsapp';
 
 async function unwrap<T>(p: Promise<{ success: boolean; data?: T; message?: string }>, fallback: string): Promise<T> {
@@ -103,4 +131,35 @@ export const whatsappService = {
       'Failed to load messages'
     );
   },
+  // ── inbox ──
+  conversations: (params: { search?: string; unread?: boolean }) => {
+    const q = new URLSearchParams();
+    if (params.search) q.set('search', params.search);
+    if (params.unread) q.set('unread', 'true');
+    return unwrap(
+      apiClient.get<{ conversations: WhatsAppConversation[]; unreadTotal: number; retentionDays: number }>(
+        `${BASE}/inbox/conversations?${q.toString()}`
+      ),
+      'Failed to load conversations'
+    );
+  },
+  thread: (id: string, before?: string) =>
+    unwrap(
+      apiClient.get<{ conversation: WhatsAppConversation; messages: WhatsAppChatMessage[] }>(
+        `${BASE}/inbox/conversations/${id}/messages?limit=100${before ? `&before=${encodeURIComponent(before)}` : ''}`
+      ),
+      'Failed to load messages'
+    ),
+  markRead: (id: string) => unwrap(apiClient.post<null>(`${BASE}/inbox/conversations/${id}/read`, {}), 'Failed'),
+  sendText: (id: string, text: string) =>
+    unwrap(apiClient.post<WhatsAppChatMessage>(`${BASE}/inbox/conversations/${id}/messages`, { text }), 'Failed to send'),
+  sendFile: (id: string, file: File, caption: string, onProgress?: (p: number) => void) => {
+    const form = new FormData();
+    form.append('file', file);
+    const q = caption.trim() ? `?caption=${encodeURIComponent(caption.trim())}` : '';
+    return uploadViaXhr<WhatsAppChatMessage>(`${BASE}/inbox/conversations/${id}/media${q}`, form, onProgress);
+  },
+  deleteConversation: (id: string) =>
+    unwrap(apiClient.delete<null>(`${BASE}/inbox/conversations/${id}`), 'Failed to delete'),
+  mediaBlob: (messageId: string) => apiClient.getBlob(`${BASE}/inbox/media/${messageId}`),
 };
