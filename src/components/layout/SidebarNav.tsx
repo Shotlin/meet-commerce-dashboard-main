@@ -36,7 +36,8 @@ import {
   LogOut,
   X,
   MapPinned,
-  TrendingUp
+  TrendingUp,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useScope } from '../../context/ScopeContext';
@@ -130,6 +131,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
         { to: '/cart-milestones', label: 'Cart Milestones', icon: <Sliders className="w-4 h-4" /> },
         { to: '/customer-segments', label: 'Customer Segments', icon: <Users className="w-4 h-4" /> },
         { to: '/notifications', label: 'Notifications', icon: <Bell className="w-4 h-4" /> },
+        { to: '/whatsapp', label: 'WhatsApp', icon: <MessageCircle className="w-4 h-4" /> },
       ],
     },
     {
