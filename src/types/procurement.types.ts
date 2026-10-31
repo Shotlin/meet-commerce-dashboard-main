@@ -4,6 +4,11 @@
 
 export type ProcurementMode = 'FIXED_OFFER' | 'RFQ';
 
+/** Vendor-fulfilled vs an in-house purchase recorded by the store itself. */
+export type SupplySourceType = 'VENDOR' | 'IN_HOUSE';
+
+export type EvidenceAttachmentSource = 'UPLOAD' | 'EXTERNAL_LINK';
+
 export type ProcurementRequestStatus =
   | 'DRAFT'
   | 'PUBLISHED'
@@ -174,9 +179,11 @@ export interface SupplyEvent {
 export interface ProcurementEvidence {
   id: string;
   supply_order_id: string;
-  vendor_id: string;
+  /** Null for an in-house purchase. */
+  vendor_id: string | null;
   evidence_type: 'QUALITY_VIDEO' | 'QUALITY_IMAGE' | 'PACKING_IMAGE' | 'DISPATCH_PROOF' | 'OTHER';
-  media_public_id: string;
+  /** Null when the evidence is an external link rather than a Cloudinary upload. */
+  media_public_id: string | null;
   media_url: string;
   mime_type: string | null;
   duration_seconds: number | null;
@@ -184,17 +191,22 @@ export interface ProcurementEvidence {
   uploaded_by: string | null;
   review_status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | null;
   review_comment: string | null;
+  attachment_source: EvidenceAttachmentSource;
   created_at: string;
 }
 
 export interface SupplyOrder {
   id: string;
   supply_number: string;
-  request_id: string;
-  vendor_id: string;
+  /** Null for an in-house purchase. */
+  request_id: string | null;
+  /** Null for an in-house purchase. */
+  vendor_id: string | null;
   shop_id: string;
   quote_id: string | null;
-  source_mode: ProcurementMode;
+  source_mode: ProcurementMode | 'IN_HOUSE';
+  source_type: SupplySourceType;
+  in_house_supplier_name: string | null;
   status: SupplyStatus;
   award_amount: string | number;
   promised_delivery_at: string | null;
@@ -206,12 +218,14 @@ export interface SupplyOrder {
   received_at: string | null;
   closed_at: string | null;
   created_at: string;
-  request_number?: string;
+  request_number?: string | null;
   request_title?: string;
   quality_instructions?: string | null;
-  vendor_name?: string;
-  vendor_phone?: string;
-  vendor_email?: string;
+  vendor_name?: string | null;
+  vendor_phone?: string | null;
+  vendor_email?: string | null;
+  /** Vendor name, or the free-text in-house supplier when present. */
+  supplier_name?: string | null;
   shop_name?: string;
   shop_city?: string;
   shop_pincode?: string;
@@ -281,6 +295,31 @@ export interface SubmitQuoteInput {
   promised_delivery_at?: string;
   note?: string;
   validity_until?: string;
+}
+
+export interface InHouseSupplyItemInput {
+  product_id: string;
+  item_name?: string;
+  quantity: number;
+  unit: QuantityUnit;
+  unit_price: number;
+}
+
+export interface CreateInHouseSupplyInput {
+  shop_id: string;
+  in_house_supplier_name?: string;
+  promised_delivery_at?: string;
+  items: InHouseSupplyItemInput[];
+}
+
+export interface AttachInHouseEvidenceInput {
+  evidence_type?: 'QUALITY_VIDEO' | 'QUALITY_IMAGE' | 'PACKING_IMAGE' | 'DISPATCH_PROOF' | 'OTHER';
+  media_public_id?: string;
+  media_url: string;
+  mime_type?: string;
+  duration_seconds?: number;
+  size_bytes?: number;
+  attachment_source?: EvidenceAttachmentSource;
 }
 
 export interface ServiceProfileInput {

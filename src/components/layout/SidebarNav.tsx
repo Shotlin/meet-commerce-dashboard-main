@@ -33,6 +33,7 @@ import {
   History,
   Bell,
   Tags,
+  FileUp,
   LogOut,
   X,
   MapPinned,
@@ -94,6 +95,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
         { to: '/inventory', label: 'Inventory & Lots', icon: <Boxes className="w-4 h-4" />, isCore: true },
         { to: '/vendors', label: 'Vendors & Procurement', icon: <Store className="w-4 h-4" />, isCore: true },
         { to: '/procurement', label: 'Procurement Requests', icon: <PackageCheck className="w-4 h-4" />, isCore: true },
+        { to: '/procurement/supplies', label: 'Supply Orders', icon: <Truck className="w-4 h-4" />, isCore: true },
         { to: '/finance', label: 'Finance & Payouts', icon: <IndianRupee className="w-4 h-4" />, isCore: true },
         { to: '/analytics', label: 'Analytics & Reports', icon: <BarChart3 className="w-4 h-4" />, isCore: true },
       ],
@@ -102,6 +104,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ isOpen = false, onClose 
       title: 'SUPPLY & LOGISTICS',
       items: [
         { to: '/catalogue', label: 'Products', icon: <Boxes className="w-4 h-4" /> },
+        { to: '/products/bulk-import', label: 'Bulk Product Import', icon: <FileUp className="w-4 h-4" /> },
         { to: '/categories', label: 'Categories', icon: <Tags className="w-4 h-4" /> },
         { to: '/delivery', label: 'Riders & Dispatch', icon: <Truck className="w-4 h-4" /> },
         { to: '/riders', label: 'Rider Management', icon: <Users className="w-4 h-4" /> },

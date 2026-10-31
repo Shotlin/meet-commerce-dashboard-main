@@ -14,11 +14,14 @@ export const Breadcrumb: React.FC = () => {
     vendors: 'Vendors & Procurement',
     procurement: 'Procurement',
     supplies: 'Supply Orders',
+    'in-house': 'In-house Purchase',
     new: 'Create Requirement',
     finance: 'Finance Overview',
     overview: 'Business Overview',
     analytics: 'Analytics & Reports',
     catalogue: 'Catalogue Management',
+    products: 'Products',
+    'bulk-import': 'Bulk Product Import',
     fulfilment: 'Fulfilment & Packing',
     delivery: 'Delivery Command',
     riders: 'Rider Management',
@@ -47,7 +50,11 @@ export const Breadcrumb: React.FC = () => {
       {pathnames.map((name, index) => {
         const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
         const isLast = index === pathnames.length - 1;
-        const displayName = routeNameMap[name] || name;
+        const isInHouseNew =
+          location.pathname === '/procurement/in-house/new' && isLast && name === 'new';
+        const displayName = isInHouseNew
+          ? 'Record Purchase'
+          : routeNameMap[name] || name;
 
         return (
           <React.Fragment key={routeTo}>
@@ -55,7 +62,7 @@ export const Breadcrumb: React.FC = () => {
             {isLast ? (
               <span className="font-bold text-ink truncate">{displayName}</span>
             ) : (
-              <Link to={routeTo} className="hover:text-ink transition-colors truncate">
+              <Link to={routeTo === '/products' ? '/catalogue' : routeTo} className="hover:text-ink transition-colors truncate">
                 {displayName}
               </Link>
             )}

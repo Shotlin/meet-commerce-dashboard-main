@@ -16,6 +16,7 @@ import { BusinessOverviewPage } from './pages/BusinessOverviewPage';
 
 // Additional Feature Pages
 import ProductsPage from './pages/ProductsPage';
+import BulkImportPage from './pages/BulkImportPage';
 import ProductFamiliesPage from './pages/ProductFamiliesPage';
 import ProductFamilyDetailPage from './pages/ProductFamilyDetailPage';
 import CategoriesPage from './pages/CategoriesPage';
@@ -47,6 +48,7 @@ import { CoverageMapPage } from './pages/CoverageMapPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import ProcurementPage from './pages/ProcurementPage';
 import ProcurementCreatePage from './pages/ProcurementCreatePage';
+import InHousePurchaseCreatePage from './pages/InHousePurchaseCreatePage';
 import ProcurementDetailPage from './pages/ProcurementDetailPage';
 import SupplyOrdersPage from './pages/SupplyOrdersPage';
 import SupplyOrderDetailPage from './pages/SupplyOrderDetailPage';
@@ -77,6 +79,7 @@ export const App: React.FC = () => {
                   <Route path="vendors" element={<VendorsPage />} />
                   <Route path="procurement" element={<ProcurementPage />} />
                   <Route path="procurement/new" element={<ProcurementCreatePage />} />
+                  <Route path="procurement/in-house/new" element={<InHousePurchaseCreatePage />} />
                   <Route path="procurement/supplies" element={<SupplyOrdersPage />} />
                   <Route path="procurement/supplies/:supplyId" element={<SupplyOrderDetailPage />} />
                   <Route path="procurement/:id" element={<ProcurementDetailPage />} />
@@ -86,6 +89,7 @@ export const App: React.FC = () => {
 
                   {/* Full Route Architecture Modules */}
                   <Route path="catalogue" element={<ProductsPage />} />
+                  <Route path="products/bulk-import" element={<BulkImportPage />} />
                   <Route path="products/families" element={<ProductFamiliesPage />} />
                   <Route path="products/families/:id" element={<ProductFamilyDetailPage />} />
                   <Route path="categories" element={<CategoriesPage />} />

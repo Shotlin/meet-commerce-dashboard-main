@@ -1,7 +1,7 @@
 // Ported from bakaloo-dashboard's src/services/uploads.service.ts (image
 // upload subset only — bulkImportProducts/createManualOrder are unrelated
 // product/order features, out of scope for the theme builder port).
-import type { UploadedFile, UploadedImage } from '../types/upload.types';
+import type { UploadedFile, UploadedImage, UploadedVideo } from '../types/upload.types';
 import { sessionManager } from './sessionManager';
 import { SESSION_EXPIRED_MESSAGE } from './apiClient';
 
@@ -69,6 +69,13 @@ export async function uploadFile(file: File, onProgress?: UploadProgressHandler)
   const formData = new FormData();
   formData.append('file', file);
   return uploadViaXhr<UploadedFile>('/api/v1/uploads/file', formData, onProgress);
+}
+
+/** Upload a procurement quality-evidence video to Cloudinary via backend. */
+export async function uploadVideo(file: File, onProgress?: UploadProgressHandler): Promise<UploadedVideo> {
+  const formData = new FormData();
+  formData.append('video', file);
+  return uploadViaXhr<UploadedVideo>('/api/v1/uploads/video', formData, onProgress);
 }
 
 /** Upload multiple images in one request (backend defaults them into the shared `products/` Cloudinary folder). */

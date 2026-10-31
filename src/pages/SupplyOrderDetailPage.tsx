@@ -1,31 +1,52 @@
-import { useNavigate, useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft } from 'lucide-react';
 
 import { PageHeader } from '../components/layout/PageHeader';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { EmptyState } from '../components/states/EmptyState';
-import { useMarkSupplyDelivered, useSupplyOrderDetail } from '../hooks/useProcurement';
+import {
+  useMarkInHouseArrived,
+  useMarkSupplyDelivered,
+  useSupplyOrderDetail,
+} from '../hooks/useProcurement';
 import { getProducts } from '../services/productsAdminService';
 import { queryKeys } from '../services/queryKeys';
 import ReceiveSupplyModal from '../components/procurement/ReceiveSupplyModal';
+import { InHouseEvidencePanel } from '../components/procurement/InHouseEvidencePanel';
 import {
+  IN_HOUSE_STAGES,
   SUPPLY_STAGES,
   formatDateTime,
   formatMoney,
+  inHouseStageIndex,
+  supplySourceBadge,
   supplyStageIndex,
   supplyStatusBadge,
 } from '../utils/procurementStatus';
+import type { ProcurementEvidence } from '../types/procurement.types';
+
+function isVideoEvidence(item: ProcurementEvidence): boolean {
+  return item.evidence_type === 'QUALITY_VIDEO' || Boolean(item.mime_type?.startsWith('video/'));
+}
+
+function evidenceReviewBadge(status: ProcurementEvidence['review_status']) {
+  if (status === 'ACCEPTED') return <Badge variant="success" size="sm">Accepted</Badge>;
+  if (status === 'REJECTED') return <Badge variant="danger" size="sm">Rejected</Badge>;
+  return <Badge variant="warning" size="sm">Pending review</Badge>;
+}
 
 export default function SupplyOrderDetailPage() {
   const { supplyId } = useParams<{ supplyId: string }>();
   const navigate = useNavigate();
   const { data: supply, isLoading } = useSupplyOrderDetail(supplyId);
   const markDelivered = useMarkSupplyDelivered();
+  const markArrived = useMarkInHouseArrived();
   const [receiveOpen, setReceiveOpen] = useState(false);
+
   // Fetched once the receiving modal is actually needed — the catalog can be
   // sizeable and most supply-order views never open "Confirm Receipt".
   const productsQuery = useQuery({
@@ -40,70 +61,145 @@ export default function SupplyOrderDetailPage() {
   );
 
   if (isLoading) {
-    return <div className="p-6 text-xs text-muted">Loading supply order…</div>;
+    return <div className="p-6 text-xs text-status-neutral">Loading supply order…</div>;
   }
   if (!supply) {
     return (
       <div className="p-6">
-        <EmptyState title="Supply order not found" actionText="Back to Supply Orders" onAction={() => navigate('/procurement/supplies')} />
+        <EmptyState
+          title="Supply order not found"
+          actionText="Back to Supply Orders"
+          onAction={() => navigate('/procurement/supplies')}
+        />
       </div>
     );
   }
 
+  const isInHouse = supply.source_type === 'IN_HOUSE';
+  const hasVideo = (supply.evidence ?? []).some(
+    (item) => item.evidence_type === 'QUALITY_VIDEO' && item.review_status !== 'REJECTED'
+  );
   const badge = supplyStatusBadge(supply.status);
-  const currentIndex = supplyStageIndex(supply.status);
-  const isTerminal = ['CANCELLED', 'REJECTED_AT_RECEIPT'].includes(supply.status);
-  const canConfirmReceipt = ['DISPATCHED', 'DELIVERED_PENDING_RECEIPT'].includes(supply.status);
+  const sourceBadge = supplySourceBadge(supply.source_type);
+  const currentIndex = isInHouse
+    ? inHouseStageIndex(supply.status, hasVideo)
+    : supplyStageIndex(supply.status);
+  const stages = isInHouse ? IN_HOUSE_STAGES : SUPPLY_STAGES;
+  const isTerminal = !isInHouse && ['CANCELLED', 'REJECTED_AT_RECEIPT'].includes(supply.status);
+  const supplierLabel = isInHouse
+    ? supply.in_house_supplier_name || 'In-house'
+    : supply.vendor_name || 'Vendor';
+  const canConfirmVendorReceipt =
+    !isInHouse && ['DISPATCHED', 'DELIVERED_PENDING_RECEIPT'].includes(supply.status);
+  const canConfirmInHouseReceipt =
+    isInHouse && supply.status === 'DELIVERED_PENDING_RECEIPT' && hasVideo;
+  const evidenceEditable = isInHouse && ['ACCEPTED', 'DELIVERED_PENDING_RECEIPT'].includes(supply.status);
 
   return (
     <div>
       <PageHeader
         title={supply.supply_number}
-        subtitle={`${supply.vendor_name ?? ''} → ${supply.shop_name ?? ''}`}
-        badge={<Badge variant={badge.variant}>{badge.label}</Badge>}
+        subtitle={`${supplierLabel} → ${supply.shop_name ?? 'Store'}`}
+        badge={
+          <div className="flex items-center gap-2">
+            <Badge variant={badge.variant}>{badge.label}</Badge>
+            <Badge variant={sourceBadge.variant}>{sourceBadge.label}</Badge>
+          </div>
+        }
         actions={
           <>
-            <Button variant="ghost" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate('/procurement/supplies')}>
+            <Button
+              variant="ghost"
+              icon={<ArrowLeft className="w-4 h-4" />}
+              onClick={() =>
+                navigate(isInHouse ? '/procurement/supplies?source=IN_HOUSE' : '/procurement/supplies')
+              }
+            >
               Back to Supply Orders
             </Button>
-            {supply.status === 'DISPATCHED' && (
-              <Button
-                variant="secondary"
-                isLoading={markDelivered.isPending}
-                onClick={() => markDelivered.mutateAsync(supply.id)}
-              >
-                Mark Delivered
-              </Button>
-            )}
-            {canConfirmReceipt && (
-              <Button onClick={() => setReceiveOpen(true)} disabled={supply.status === 'DISPATCHED'}>
-                Confirm Receipt
-              </Button>
+            {isInHouse ? (
+              <>
+                {supply.status === 'ACCEPTED' && (
+                  <Button
+                    variant="secondary"
+                    isLoading={markArrived.isPending}
+                    onClick={() => {
+                      markArrived.mutateAsync(supply.id).catch(() => {});
+                    }}
+                  >
+                    Mark Arrived
+                  </Button>
+                )}
+                {supply.status === 'DELIVERED_PENDING_RECEIPT' && (
+                  <Button
+                    onClick={() => setReceiveOpen(true)}
+                    disabled={!canConfirmInHouseReceipt}
+                    title={!hasVideo ? 'Attach a quality video before confirming receipt' : undefined}
+                  >
+                    Confirm Receipt
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                {supply.status === 'DISPATCHED' && (
+                  <Button
+                    variant="secondary"
+                    isLoading={markDelivered.isPending}
+                    onClick={() => {
+                      markDelivered.mutateAsync(supply.id).catch(() => {});
+                    }}
+                  >
+                    Mark Delivered
+                  </Button>
+                )}
+                {canConfirmVendorReceipt && (
+                  <Button
+                    onClick={() => setReceiveOpen(true)}
+                    disabled={supply.status === 'DISPATCHED'}
+                  >
+                    Confirm Receipt
+                  </Button>
+                )}
+              </>
             )}
           </>
         }
       />
+
+      {isInHouse && supply.status === 'DELIVERED_PENDING_RECEIPT' && !hasVideo && (
+        <div className="mb-4 flex items-start gap-2 rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold">A quality video is required before receipt.</p>
+            <p className="mt-0.5 text-[11px]">
+              Attach an uploaded video or a direct video link below, then confirm receipt to move
+              accepted stock into inventory.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stage tracker */}
       <div className="w-full py-3 px-4 bg-surface border border-border rounded-[12px] mb-4 overflow-x-auto">
         {isTerminal ? (
           <div className="text-xs font-bold text-ink">This supply order was {badge.label.toLowerCase()}.</div>
         ) : (
-          <div className="flex items-center justify-between min-w-[700px]">
-            {SUPPLY_STAGES.map((stage, idx) => {
+          <div className={`flex items-center justify-between ${isInHouse ? 'min-w-[520px]' : 'min-w-[700px]'}`}>
+            {stages.map((stage, idx) => {
               const done = idx < currentIndex;
               const current = idx === currentIndex;
               return (
                 <div key={stage.id} className="flex items-center gap-2 select-none">
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                      done ? 'bg-status-success text-white' : current ? 'bg-brand-raspberry text-white' : 'bg-rose-100 text-muted'
+                      done ? 'bg-status-success text-white' : current ? 'bg-brand-raspberry text-white' : 'bg-rose-100 text-status-neutral'
                     }`}
                   >
-                    {idx + 1}
+                    {done ? '✓' : idx + 1}
                   </div>
-                  <span className={`text-[11px] ${current ? 'font-bold text-ink' : 'text-muted'}`}>{stage.label}</span>
-                  {idx < SUPPLY_STAGES.length - 1 && <div className="w-8 h-0.5 bg-border" />}
+                  <span className={`text-[11px] ${current ? 'font-bold text-ink' : 'text-status-neutral'}`}>{stage.label}</span>
+                  {idx < stages.length - 1 && <div className="w-8 h-0.5 bg-border" />}
                 </div>
               );
             })}
@@ -112,13 +208,27 @@ export default function SupplyOrderDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card title="Commercial summary" padding="md">
+        <Card title={isInHouse ? 'Purchase summary' : 'Commercial summary'} padding="md">
           <div className="space-y-2 text-xs">
-            <Row label="Award value" value={formatMoney(supply.award_amount)} />
-            <Row label="Source" value={supply.source_mode === 'FIXED_OFFER' ? 'Fixed Offer' : 'RFQ'} />
-            <Row label="Request" value={supply.request_number ?? '—'} />
+            <Row label={isInHouse ? 'Purchase value' : 'Award value'} value={formatMoney(supply.award_amount)} />
+            <Row
+              label="Source"
+              value={
+                isInHouse
+                  ? 'In-house purchase'
+                  : supply.source_mode === 'FIXED_OFFER'
+                    ? 'Fixed Offer'
+                    : 'RFQ'
+              }
+            />
+            {isInHouse ? (
+              <Row label="Supplier" value={supply.in_house_supplier_name || '—'} />
+            ) : (
+              <Row label="Request" value={supply.request_number ?? '—'} />
+            )}
             <Row label="Promised delivery" value={formatDateTime(supply.promised_delivery_at)} />
-            <Row label="Dispatched" value={formatDateTime(supply.dispatched_at)} />
+            {!isInHouse && <Row label="Dispatched" value={formatDateTime(supply.dispatched_at)} />}
+            <Row label="Arrived" value={formatDateTime(supply.delivered_at)} />
             <Row label="Received" value={formatDateTime(supply.received_at)} />
             <Row label="Destination" value={`${supply.shop_name ?? '—'} · ${supply.shop_pincode ?? ''}`} />
           </div>
@@ -137,30 +247,70 @@ export default function SupplyOrderDetailPage() {
           </div>
         </Card>
 
-        <Card title="Quality evidence" padding="md">
+        <Card
+          title="Quality evidence"
+          padding="md"
+          action={
+            <Badge variant={hasVideo ? 'success' : 'warning'} size="sm">
+              {hasVideo ? 'Video attached' : isInHouse ? 'Video required' : 'Awaiting vendor'}
+            </Badge>
+          }
+        >
           {supply.evidence?.length ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {supply.evidence.map((item) => (
-                <div key={item.id} className="rounded-[10px] border border-border px-3 py-2 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-bold text-ink">{String(item.evidence_type).replace(/_/g, ' ')}</div>
-                    <div className="text-[11px] text-muted">{formatDateTime(item.created_at)}</div>
+                <div key={item.id} className="rounded-[10px] border border-border p-2 space-y-2">
+                  {isVideoEvidence(item) ? (
+                    <video
+                      src={item.media_url}
+                      controls
+                      preload="metadata"
+                      className="w-full max-h-52 rounded-[8px] bg-black"
+                    />
+                  ) : (
+                    <img
+                      src={item.media_url}
+                      alt={String(item.evidence_type).replace(/_/g, ' ')}
+                      className="w-full max-h-60 rounded-[8px] object-contain bg-muted/30"
+                    />
+                  )}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-ink">
+                        {String(item.evidence_type).replace(/_/g, ' ')}
+                      </div>
+                      <div className="text-[11px] text-status-neutral">
+                        {item.attachment_source === 'EXTERNAL_LINK' ? 'External link' : 'Uploaded'} ·{' '}
+                        {formatDateTime(item.created_at)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {evidenceReviewBadge(item.review_status)}
+                      <a
+                        href={item.media_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] font-bold text-status-info hover:underline"
+                      >
+                        Open
+                      </a>
+                    </div>
                   </div>
-                  <a
-                    href={item.media_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] font-bold text-status-info hover:underline"
-                  >
-                    View
-                  </a>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[11px] text-muted">
-              No evidence yet. Vendors must upload a quality video before marking this supply packed.
+            <p className="text-[11px] text-status-neutral">
+              {isInHouse
+                ? 'No evidence yet. Attach a quality video below before confirming receipt.'
+                : 'No evidence yet. Vendors must upload a quality video before marking this supply packed.'}
             </p>
+          )}
+
+          {isInHouse && (
+            <div className="mt-3">
+              <InHouseEvidencePanel supply={supply} disabled={!evidenceEditable} hasVideo={hasVideo} />
+            </div>
           )}
         </Card>
 
@@ -172,7 +322,7 @@ export default function SupplyOrderDetailPage() {
                   <div className="mt-1 w-2 h-2 rounded-full bg-ink-2 shrink-0" />
                   <div>
                     <div className="text-xs font-bold text-ink">{String(event.to_status).replace(/_/g, ' ')}</div>
-                    <div className="text-[11px] text-muted">
+                    <div className="text-[11px] text-status-neutral">
                       {formatDateTime(event.created_at)}
                       {event.actor_role ? ` · ${event.actor_role}` : ''}
                       {event.note ? ` · ${event.note}` : ''}
@@ -182,7 +332,7 @@ export default function SupplyOrderDetailPage() {
               ))}
             </ol>
           ) : (
-            <p className="text-[11px] text-muted">No events recorded yet.</p>
+            <p className="text-[11px] text-status-neutral">No events recorded yet.</p>
           )}
         </Card>
       </div>
@@ -202,7 +352,7 @@ export default function SupplyOrderDetailPage() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-[11px] font-bold text-muted uppercase">{label}</dt>
+      <dt className="text-[11px] font-bold text-status-neutral uppercase">{label}</dt>
       <dd className="text-xs text-ink text-right">{value}</dd>
     </div>
   );

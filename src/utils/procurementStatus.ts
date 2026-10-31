@@ -6,6 +6,7 @@ import type {
   ProcurementQuote,
   ProcurementRequestStatus,
   RecipientStatus,
+  SupplySourceType,
   SupplyStatus,
 } from '../types/procurement.types';
 import type { BadgeVariant } from '../components/common/Badge';
@@ -62,6 +63,19 @@ export const MODE_LABEL: Record<ProcurementMode, string> = {
   RFQ: 'RFQ',
 };
 
+const SUPPLY_SOURCE_BADGE: Record<SupplySourceType, { variant: BadgeVariantName; label: string }> = {
+  VENDOR: { variant: 'violet', label: 'Vendor' },
+  IN_HOUSE: { variant: 'info', label: 'In-house' },
+};
+
+export function supplySourceBadge(source: SupplySourceType | null | undefined) {
+  return SUPPLY_SOURCE_BADGE[source ?? 'VENDOR'] ?? { variant: 'neutral' as const, label: source ?? 'Vendor' };
+}
+
+export function supplySourceLabel(source: SupplySourceType | null | undefined): string {
+  return supplySourceBadge(source).label;
+}
+
 export function requestStatusBadge(status: ProcurementRequestStatus) {
   return REQUEST_STATUS_BADGE[status] ?? { variant: 'neutral' as const, label: status };
 }
@@ -114,5 +128,20 @@ export function supplyStageIndex(status: SupplyStatus): number {
   if (status === 'READY_FOR_DISPATCH') return SUPPLY_STAGES.findIndex((s) => s.id === 'PACKED');
   if (status === 'DELIVERED_PENDING_RECEIPT') return SUPPLY_STAGES.findIndex((s) => s.id === 'DISPATCHED');
   if (status === 'REJECTED_AT_RECEIPT') return SUPPLY_STAGES.findIndex((s) => s.id === 'RECEIVED');
+  return 0;
+}
+
+/** In-house purchases skip cleaning/packing/dispatch entirely. */
+export const IN_HOUSE_STAGES: Array<{ id: string; label: string }> = [
+  { id: 'RECORDED', label: 'Recorded' },
+  { id: 'VIDEO', label: 'Video' },
+  { id: 'ARRIVED', label: 'Arrived' },
+  { id: 'RECEIVED', label: 'Received' },
+];
+
+export function inHouseStageIndex(status: SupplyStatus, hasVideo: boolean): number {
+  if (status === 'RECEIVED' || status === 'CLOSED' || status === 'REJECTED_AT_RECEIPT') return 3;
+  if (status === 'DELIVERED_PENDING_RECEIPT') return 2;
+  if (status === 'ACCEPTED') return hasVideo ? 2 : 1;
   return 0;
 }

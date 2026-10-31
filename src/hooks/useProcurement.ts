@@ -7,8 +7,10 @@ import { toast } from 'sonner';
 
 import { queryKeys } from '../services/queryKeys';
 import {
+  attachInHouseEvidence,
   awardQuote,
   cancelRequest,
+  createInHouseSupply,
   createRequest,
   expireRequest,
   getRequestDetail,
@@ -16,6 +18,7 @@ import {
   listQuotes,
   listRequests,
   listSupplyOrders,
+  markInHouseArrived,
   markSupplyDelivered,
   previewEligibleVendors,
   publishRequest,
@@ -25,6 +28,8 @@ import {
 import type { ReceiveInput } from '../services/procurementService';
 import type { ListParams } from '../services/procurementService';
 import type {
+  AttachInHouseEvidenceInput,
+  CreateInHouseSupplyInput,
   CreateRequestInput,
   SubmitQuoteInput,
   UpdateRequestInput,
@@ -162,6 +167,48 @@ export function useReceiveSupply() {
       invalidate();
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to confirm receipt'),
+  });
+}
+
+export function useCreateInHouseSupply() {
+  const invalidate = useInvalidateProcurement();
+  return useMutation({
+    mutationFn: (payload: CreateInHouseSupplyInput) => createInHouseSupply(payload),
+    onSuccess: (data) => {
+      toast.success(`In-house purchase ${data.supply_number} recorded`);
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to record in-house purchase'),
+  });
+}
+
+export function useAttachInHouseEvidence() {
+  const invalidate = useInvalidateProcurement();
+  return useMutation({
+    mutationFn: ({
+      supplyId,
+      payload,
+    }: {
+      supplyId: string;
+      payload: AttachInHouseEvidenceInput;
+    }) => attachInHouseEvidence(supplyId, payload),
+    onSuccess: () => {
+      toast.success('Quality video attached');
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to attach quality video'),
+  });
+}
+
+export function useMarkInHouseArrived() {
+  const invalidate = useInvalidateProcurement();
+  return useMutation({
+    mutationFn: (supplyId: string) => markInHouseArrived(supplyId),
+    onSuccess: () => {
+      toast.success('Marked arrived — attach a video before receipt');
+      invalidate();
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to mark arrived'),
   });
 }
 

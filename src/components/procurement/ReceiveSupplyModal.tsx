@@ -20,7 +20,7 @@ const ISSUE_CATEGORIES = [
 
 const inputClass =
   'w-full px-2.5 py-1.5 text-xs rounded-[10px] border border-border bg-white focus:outline-none focus:ring-2 focus:ring-rose-300';
-const labelClass = 'block text-[10px] font-bold text-muted mb-1 uppercase';
+const labelClass = 'block text-[10px] font-bold text-status-neutral mb-1 uppercase';
 
 interface Props {
   isOpen: boolean;
@@ -92,7 +92,7 @@ export default function ReceiveSupplyModal({ isOpen, onClose, supply, products }
       }
     >
       <div className="space-y-4">
-        <p className="text-[11px] text-muted">
+        <p className="text-[11px] text-status-neutral">
           Record actual quantities. Only accepted quantity enters inventory. Received may differ from
           requested — the variance is preserved.
         </p>
@@ -103,7 +103,7 @@ export default function ReceiveSupplyModal({ isOpen, onClose, supply, products }
               <div key={item.id} className="rounded-[12px] border border-border p-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-ink">{item.item_name}</span>
-                  <span className="text-[11px] text-muted">
+                  <span className="text-[11px] text-status-neutral">
                     Agreed: {Number(item.agreed_quantity)} {item.unit} × ₹{Number(item.agreed_unit_price)}
                   </span>
                 </div>
@@ -156,7 +156,7 @@ export default function ReceiveSupplyModal({ isOpen, onClose, supply, products }
                       ))}
                     </select>
                     {item.product_id && (
-                      <p className="mt-1 text-[10px] text-muted">Pre-filled from the request — change if wrong.</p>
+                      <p className="mt-1 text-[10px] text-status-neutral">Pre-filled from the request — change if wrong.</p>
                     )}
                   </div>
                 </div>

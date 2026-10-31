@@ -5,8 +5,11 @@
 
 import { apiClient } from './apiClient';
 import type {
+  AttachInHouseEvidenceInput,
+  CreateInHouseSupplyInput,
   CreateRequestInput,
   EligibleVendorPreviewResponse,
+  ProcurementEvidence,
   ProcurementQuote,
   ProcurementRequest,
   ProcurementRequestDetail,
@@ -15,6 +18,7 @@ import type {
   SubmitQuoteInput,
   SupplyOrder,
   SupplyOrderDetail,
+  SupplySourceType,
   UpdateRequestInput,
 } from '../types/procurement.types';
 
@@ -24,6 +28,7 @@ export interface ListParams {
   shop_id?: string;
   status?: string;
   mode?: string;
+  source_type?: SupplySourceType;
   search?: string;
   page?: number;
   limit?: number;
@@ -119,6 +124,26 @@ export async function listSupplyOrders(params: ListParams = {}): Promise<{ suppl
 
 export async function getSupplyOrderDetail(supplyId: string): Promise<SupplyOrderDetail> {
   const res = await apiClient.get<SupplyOrderDetail>(`${BASE}/supplies/${supplyId}`);
+  return res.data;
+}
+
+// ── In-house purchases (no vendor, no request) ──────────────────────────────
+
+export async function createInHouseSupply(payload: CreateInHouseSupplyInput): Promise<SupplyOrderDetail> {
+  const res = await apiClient.post<SupplyOrderDetail>(`${BASE}/in-house-supplies`, payload);
+  return res.data;
+}
+
+export async function attachInHouseEvidence(
+  supplyId: string,
+  payload: AttachInHouseEvidenceInput
+): Promise<ProcurementEvidence> {
+  const res = await apiClient.post<ProcurementEvidence>(`${BASE}/supplies/${supplyId}/evidence`, payload);
+  return res.data;
+}
+
+export async function markInHouseArrived(supplyId: string): Promise<SupplyOrder> {
+  const res = await apiClient.post<SupplyOrder>(`${BASE}/supplies/${supplyId}/mark-arrived`, {});
   return res.data;
 }
 

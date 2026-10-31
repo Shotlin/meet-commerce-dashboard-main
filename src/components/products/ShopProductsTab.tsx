@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { MoreHorizontal, Pencil, Plus, Search, Store, Trash2 } from "lucide-react"
+import { Link } from "react-router-dom"
+import { MoreHorizontal, Pencil, Plus, Search, Store, Trash2, FileUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +21,7 @@ import {
 import { EmptyState } from "@/components/shared/EmptyState"
 import { ShopProductFormDialog } from "./ShopProductFormDialog"
 import { useShopScope } from "@/context/ShopScopeContext"
+import { useAuth } from "@/context/AuthContext"
 import { useShopProducts, useDeleteShopProduct } from "@/hooks/useShopProductsAdmin"
 import { useDebounce } from "@/hooks/useDebounce"
 import { formatINR } from "@/lib/utils"
@@ -35,6 +37,7 @@ interface ShopProductsTabProps {
 
 export function ShopProductsTab({ shopId: shopIdOverride, shopName: shopNameOverride }: ShopProductsTabProps = {}) {
   const { activeShopId: contextShopId, activeShop } = useShopScope()
+  const { role } = useAuth()
   const activeShopId = shopIdOverride ?? contextShopId
   const activeShopName = shopNameOverride ?? activeShop?.name
   const [search, setSearch] = useState("")
@@ -88,6 +91,7 @@ export function ShopProductsTab({ shopId: shopIdOverride, shopName: shopNameOver
             className="pl-8"
           />
         </div>
+        {role === 'HQ Admin' && <Link to={`/products/bulk-import?shop=${encodeURIComponent(activeShopId)}`}><Button variant="outline" size="sm"><FileUp className="h-4 w-4 mr-1.5" /> Bulk Import</Button></Link>}
         <Button onClick={openCreate} size="sm">
           <Plus className="h-4 w-4 mr-1.5" /> Add Product to Shop
         </Button>
