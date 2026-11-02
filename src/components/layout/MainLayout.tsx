@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PageErrorBoundary } from '../common/PageErrorBoundary';
 import { SidebarNav } from './SidebarNav';
@@ -39,7 +39,9 @@ export const MainLayout: React.FC = () => {
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6">
           <Breadcrumb />
           <PageErrorBoundary key={location.pathname}>
-            <Outlet />
+            <Suspense fallback={<div className="flex h-64 items-center justify-center text-sm text-muted-foreground">Loading…</div>}>
+              <Outlet />
+            </Suspense>
           </PageErrorBoundary>
         </main>
       </div>
