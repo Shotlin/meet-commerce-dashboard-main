@@ -51,7 +51,17 @@ export default function SupplyOrderDetailPage() {
   // sizeable and most supply-order views never open "Confirm Receipt".
   const productsQuery = useQuery({
     queryKey: queryKeys.procurement.products(),
-    queryFn: () => getProducts({ limit: 500 }),
+    queryFn: async () => {
+      // The API caps a page at 100 (asking for more is a 400 and left the
+      // receipt product list empty), so walk every page.
+      const products: Awaited<ReturnType<typeof getProducts>>['products'] = [];
+      for (let page = 1; page <= 50; page += 1) {
+        const res = await getProducts({ limit: 100, page });
+        products.push(...res.products);
+        if (page >= (res.pagination?.totalPages ?? 1) || res.products.length === 0) break;
+      }
+      return { products };
+    },
     enabled: receiveOpen,
     staleTime: 5 * 60 * 1000,
   });
